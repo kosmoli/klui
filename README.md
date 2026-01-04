@@ -2,7 +2,7 @@
 
 > **项目名称**: Letta Agent Management UI
 > **技术栈**: Flutter 3.32+ / Dart 3.6+
-> **创建时间**: 2025-01-05
+> **创建时间**: 2026-01-05
 > **版本**: v1.0.0-alpha
 
 ## 项目概述
@@ -102,5 +102,6 @@ flutter build linux --release
 
 ---
 
-**开发者**: User & Claude Code (Sonnet 4.5)
-**最后更新**: 2025-01-05
+**开发者**: Kosmo & Claude Code (Sonnet 4.5)
+**最后更新**: 2026-01-05
+**项目地址**: https://github.com/kosmoli/klui

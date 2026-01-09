@@ -34,14 +34,19 @@ class ApiClient {
   }
 
   /// GET request
-  Future<http.Response> get(String path) async {
-    final url = Uri.parse('${AppConfig.fullApiBaseUrl}$path');
+  Future<http.Response> get(String path, {Map<String, String>? queryParameters}) async {
+    final uri = Uri.parse('${AppConfig.fullApiBaseUrl}$path');
+    final url = queryParameters != null && queryParameters.isNotEmpty
+        ? uri.replace(queryParameters: queryParameters)
+        : uri;
+    print('[ApiClient] GET: $url');  // Debug log
     return _client.get(url).timeout(AppConfig.requestTimeout);
   }
 
   /// POST request
   Future<http.Response> post(String path, {Object? body}) async {
     final url = Uri.parse('${AppConfig.fullApiBaseUrl}$path');
+    print('[ApiClient] POST: $url');  // Debug log
     return _client
         .post(
           url,

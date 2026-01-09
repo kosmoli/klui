@@ -3,6 +3,7 @@ class Agent {
   final String id;
   final String name;
   final String? description;
+  final String? model;
   final String? agentType;
   final DateTime? createdAt;
   final DateTime? modifiedAt;
@@ -14,6 +15,7 @@ class Agent {
     required this.id,
     required this.name,
     this.description,
+    this.model,
     this.agentType,
     this.createdAt,
     this.modifiedAt,
@@ -28,6 +30,7 @@ class Agent {
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String?,
+      model: json['model'] as String?,
       agentType: json['agent_type'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
@@ -49,6 +52,7 @@ class Agent {
       'id': id,
       'name': name,
       if (description != null) 'description': description,
+      if (model != null) 'model': model,
       if (agentType != null) 'agent_type': agentType,
       if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
       if (modifiedAt != null) 'modified_at': modifiedAt!.toIso8601String(),
@@ -63,6 +67,7 @@ class Agent {
     String? id,
     String? name,
     String? description,
+    String? model,
     String? agentType,
     DateTime? createdAt,
     DateTime? modifiedAt,
@@ -74,6 +79,7 @@ class Agent {
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
+      model: model ?? this.model,
       agentType: agentType ?? this.agentType,
       createdAt: createdAt ?? this.createdAt,
       modifiedAt: modifiedAt ?? this.modifiedAt,

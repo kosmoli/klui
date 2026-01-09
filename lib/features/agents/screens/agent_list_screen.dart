@@ -1,43 +1,64 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/providers/api_providers.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/models/agent.dart';
+import '../../../shared/widgets/agent_card.dart';
 
-/// Screen displaying list of Agents
-class AgentListScreen extends ConsumerWidget {
+/// Screen displaying list of Agents with Neo-Brutalist design
+class AgentListScreen extends ConsumerStatefulWidget {
   const AgentListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AgentListScreen> createState() => _AgentListScreenState();
+}
+
+class _AgentListScreenState extends ConsumerState<AgentListScreen> {
+  @override
+  Widget build(BuildContext context) {
     final agentsAsync = ref.watch(agentListProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Letta Agents'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () => ref.invalidate(agentListProvider),
-          ),
-        ],
+        title: const Text('Agents'),
       ),
       body: agentsAsync.when(
         data: (agents) {
           if (agents.isEmpty) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.smart_toy_outlined, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(AppTheme.spacing24),
+                    decoration: BoxDecoration(
+                      color: AppTheme.surfaceVariantColor,
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(AppTheme.radiusLarge),
+                      ),
+                      border: Border.all(
+                        color: AppTheme.borderColor,
+                        width: 2,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.smart_toy_outlined,
+                      size: 64,
+                      color: AppTheme.textSecondaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spacing24),
                   Text(
                     'No agents found',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                    style: AppTheme.headlineSmall,
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: AppTheme.spacing8),
                   Text(
                     'Create your first agent to get started',
-                    style: TextStyle(color: Colors.grey),
+                    style: AppTheme.bodyMedium.copyWith(
+                      color: AppTheme.textSecondaryColor,
+                    ),
                   ),
                 ],
               ),
@@ -45,73 +66,150 @@ class AgentListScreen extends ConsumerWidget {
           }
 
           return ListView.builder(
+            padding: const EdgeInsets.only(
+              top: AppTheme.spacing16,
+              bottom: AppTheme.spacing80,
+            ),
             itemCount: agents.length,
             itemBuilder: (context, index) {
               final agent = agents[index];
-              return _AgentListTile(agent: agent);
+              return AgentCard(
+                agent: agent,
+                onTap: () => context.go('/agents/${agent.id}'),
+                onEdit: () {
+                  // TODO: Implement edit
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Edit ${agent.name} - Coming soon!'),
+                      backgroundColor: AppTheme.surfaceVariantColor,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+                onDelete: () {
+                  _showDeleteDialog(context, agent, ref);
+                },
+              );
             },
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+          ),
+        ),
         error: (error, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(AppTheme.spacing24),
+                decoration: BoxDecoration(
+                  color: AppTheme.errorColor.withOpacity(0.1),
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(AppTheme.radiusLarge),
+                  ),
+                  border: Border.all(
+                    color: AppTheme.errorColor.withOpacity(0.3),
+                    width: 2,
+                  ),
+                ),
+                child: const Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: AppTheme.errorColor,
+                ),
+              ),
+              const SizedBox(height: AppTheme.spacing24),
               Text(
                 'Error loading agents',
-                style: TextStyle(fontSize: 18, color: Colors.red[700]),
+                style: AppTheme.headlineSmall,
               ),
-              const SizedBox(height: 8),
-              Text(
-                error.toString(),
-                style: const TextStyle(color: Colors.grey),
-                textAlign: TextAlign.center,
+              const SizedBox(height: AppTheme.spacing8),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppTheme.spacing32,
+                ),
+                child: Text(
+                  error.toString(),
+                  style: AppTheme.bodyMedium.copyWith(
+                    color: AppTheme.textSecondaryColor,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: AppTheme.spacing24),
+              ElevatedButton.icon(
+                onPressed: () {
+                  ref.invalidate(agentListProvider);
+                  // Add a small delay to ensure the provider is actually invalidated
+                  Future.delayed(const Duration(milliseconds: 100));
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
               ),
             ],
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Navigate to create agent screen
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Create agent - Coming soon!')),
-          );
-        },
-        child: const Icon(Icons.add),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.go('/agents/create'),
+        icon: const Icon(Icons.add),
+        label: const Text('Create Agent'),
       ),
     );
   }
-}
 
-class _AgentListTile extends StatelessWidget {
-  final Agent agent;
+  void _showDeleteDialog(BuildContext context, Agent agent, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Delete ${agent.name}?'),
+        content: Text(
+          'This action cannot be undone. Are you sure you want to delete this agent?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
 
-  const _AgentListTile({required this.agent});
+              try {
+                await ref.read(deleteAgentProvider(agent.id).future);
 
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ListTile(
-        leading: CircleAvatar(child: Text(agent.name[0].toUpperCase())),
-        title: Text(agent.name),
-        subtitle: agent.description != null
-            ? Text(
-                agent.description!,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              )
-            : const Text('No description'),
-        trailing: const Icon(Icons.chevron_right),
-        onTap: () {
-          // TODO: Navigate to agent detail screen
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Selected: ${agent.name}')));
-        },
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('${agent.name} deleted successfully'),
+                      backgroundColor: AppTheme.primaryColor,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  // Refresh the list
+                  ref.invalidate(agentListProvider);
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Failed to delete ${agent.name}: $e'),
+                      backgroundColor: AppTheme.errorColor,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.errorColor,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
       ),
     );
   }

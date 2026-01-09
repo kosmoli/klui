@@ -574,3 +574,91 @@ final class ByokLLMModelListProvider
 }
 
 String _$byokLLMModelListHash() => r'36f5ca56e5579c157a1920c016d3d390c58c23d0';
+
+/// Provider for creating an Agent
+/// Automatically uses simple format for non-BYOK mode
+/// and full config format for BYOK mode
+
+@ProviderFor(createAgent)
+const createAgentProvider = CreateAgentFamily._();
+
+/// Provider for creating an Agent
+/// Automatically uses simple format for non-BYOK mode
+/// and full config format for BYOK mode
+
+final class CreateAgentProvider
+    extends $FunctionalProvider<AsyncValue<Agent>, Agent, FutureOr<Agent>>
+    with $FutureModifier<Agent>, $FutureProvider<Agent> {
+  /// Provider for creating an Agent
+  /// Automatically uses simple format for non-BYOK mode
+  /// and full config format for BYOK mode
+  const CreateAgentProvider._({
+    required CreateAgentFamily super.from,
+    required CreateAgentRequest super.argument,
+  }) : super(
+         retry: null,
+         name: r'createAgentProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$createAgentHash();
+
+  @override
+  String toString() {
+    return r'createAgentProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<Agent> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Agent> create(Ref ref) {
+    final argument = this.argument as CreateAgentRequest;
+    return createAgent(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CreateAgentProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$createAgentHash() => r'46e8ed963e6243050e52496f75db4f1bfbce4c80';
+
+/// Provider for creating an Agent
+/// Automatically uses simple format for non-BYOK mode
+/// and full config format for BYOK mode
+
+final class CreateAgentFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<Agent>, CreateAgentRequest> {
+  const CreateAgentFamily._()
+    : super(
+        retry: null,
+        name: r'createAgentProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Provider for creating an Agent
+  /// Automatically uses simple format for non-BYOK mode
+  /// and full config format for BYOK mode
+
+  CreateAgentProvider call(CreateAgentRequest request) =>
+      CreateAgentProvider._(argument: request, from: this);
+
+  @override
+  String toString() => r'createAgentProvider';
+}

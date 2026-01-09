@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../utils/api_client.dart';
 import '../models/agent.dart';
+import '../models/create_agent_request.dart';
 import '../models/provider.dart' as models;
 import '../models/llm_model.dart';
 import '../models/embedding_model.dart';
@@ -230,5 +231,45 @@ Future<List<LLMModel>> byokLLMModelList(Ref ref) async {
         .toList();
   } else {
     throw Exception('Failed to load BYOK LLM models: ${response.statusCode}');
+  }
+}
+
+/// Provider for creating an Agent
+/// Automatically uses simple format for non-BYOK mode
+/// and full config format for BYOK mode
+@riverpod
+Future<Agent> createAgent(Ref ref, CreateAgentRequest request) async {
+  final client = ref.watch(apiClientProvider);
+
+  // Convert request to JSON based on BYOK mode
+  final requestBody = request.toJson();
+
+  // Debug logging
+  print('[createAgent] BYOK mode: ${request.isBYOK}');
+  print('[createAgent] Request body: ${jsonEncode(requestBody)}');
+
+  final response = await client.post(
+    '/agents/',
+    body: jsonEncode(requestBody),
+  );
+
+  print('[createAgent] Response status: ${response.statusCode}');
+  print('[createAgent] Response body: ${response.body}');
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    final dynamic decoded = jsonDecode(response.body);
+    return Agent.fromJson(decoded as Map<String, dynamic>);
+  } else {
+    // Parse error response for more details
+    String errorMessage = 'Failed to create agent: ${response.statusCode}';
+    try {
+      final errorData = jsonDecode(response.body);
+      if (errorData is Map && errorData.containsKey('detail')) {
+        errorMessage = 'Error: ${errorData['detail']}';
+      }
+    } catch (_) {
+      // If parsing fails, use default message
+    }
+    throw Exception(errorMessage);
   }
 }

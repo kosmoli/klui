@@ -6,15 +6,14 @@ import '../../../../core/providers/api_providers.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/models/provider.dart' as models;
 import '../../../../core/models/llm_model.dart';
-import '../../../../core/models/embedding_model.dart';
+import '../../../../core/models/create_agent_request.dart';
 
 /// Multi-step Agent Creation Wizard with Neo-Brutalist design
 ///
 /// Steps:
 /// 0. Provider Selection (LLM Provider + Embedding Provider)
 /// 1. Basic Information (name, description, system prompt)
-/// 2. Model Configuration (model, temperature, max tokens)
-/// 3. Review and Confirm
+/// 2. Review and Confirm
 class AgentCreateScreen extends ConsumerStatefulWidget {
   const AgentCreateScreen({super.key});
 
@@ -27,8 +26,6 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _systemPromptController = TextEditingController();
-  final _temperatureController = TextEditingController(text: '0.7');
-  final _maxTokensController = TextEditingController(text: '16384');
 
   // Form key
   final _formKey = GlobalKey<FormState>();
@@ -71,8 +68,6 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
     _nameController.dispose();
     _descriptionController.dispose();
     _systemPromptController.dispose();
-    _temperatureController.dispose();
-    _maxTokensController.dispose();
     super.dispose();
   }
 
@@ -96,9 +91,15 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
         // Non-BYOK mode: load base models directly (no provider selection needed)
         final allModels = await ref.read(baseLLMModelListProvider.future);
 
-        // Filter by model_type field from API
+        // Also load embedding models from /v1/models/embedding
+        final embeddingResponse = await ref.read(apiClientProvider).get('/models/embedding');
+        final List<dynamic> embeddingData = jsonDecode(embeddingResponse.body);
+        final embeddingModels = embeddingData
+            .map((json) => LLMModel.fromJson(json as Map<String, dynamic>))
+            .toList();
+
+        // Filter LLM models by model_type field from API
         final llmModels = allModels.where((m) => m.modelType == 'llm').toList();
-        final embeddingModels = allModels.where((m) => m.modelType == 'embedding').toList();
 
         if (mounted) {
           setState(() {
@@ -216,7 +217,7 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
               ),
             ),
             child: Text(
-              'Step ${_currentStep + 1}/4',
+              'Step ${_currentStep + 1}/3',
               style: AppTheme.labelMedium.copyWith(
                 color: AppTheme.primaryColor,
                 fontWeight: FontWeight.w600,
@@ -253,7 +254,7 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
   Widget _buildProgressBar() {
     return Row(
       children: List.generate(
-        4,
+        3,
         (index) => Expanded(
           child: Container(
             margin: EdgeInsets.only(
@@ -346,22 +347,12 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
           systemPromptController: _systemPromptController,
         );
       case 2:
-        return _ModelConfigStep(
-          selectedLLMModel: _selectedLLMModel,
-          onLLMModelChanged: (model) => setState(() => _selectedLLMModel = model),
-          availableLLMModels: _availableLLMModels,
-          temperatureController: _temperatureController,
-          maxTokensController: _maxTokensController,
-        );
-      case 3:
         return _ReviewStep(
           name: _nameController.text,
           description: _descriptionController.text,
           systemPrompt: _systemPromptController.text,
           llmModel: _selectedLLMModel,
           embeddingModel: _selectedEmbeddingModel,
-          temperature: _temperatureController.text,
-          maxTokens: _maxTokensController.text,
         );
       default:
         return const SizedBox.shrink();
@@ -400,7 +391,7 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
             // Next/Create button
             Expanded(
               flex: _currentStep > 0 ? 1 : 2,
-              child: _currentStep < 3
+              child: _currentStep < 2
                   ? ElevatedButton(
                       onPressed: _handleNext,
                       child: const Text('Next'),
@@ -497,30 +488,6 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
         );
         return;
       }
-    } else if (_currentStep == 2) {
-      // Validate model config
-      final temp = double.tryParse(_temperatureController.text);
-      if (temp == null || temp < 0 || temp > 2) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Temperature must be between 0 and 2'),
-            backgroundColor: AppTheme.errorColor,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        return;
-      }
-      final maxTokens = int.tryParse(_maxTokensController.text);
-      if (maxTokens == null || maxTokens < 1) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Max tokens must be a positive number'),
-            backgroundColor: AppTheme.errorColor,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        return;
-      }
     }
 
     setState(() => _currentStep++);
@@ -530,77 +497,36 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
     setState(() => _isCreating = true);
 
     try {
-      final client = ref.read(apiClientProvider);
-
-      // Build LLM config from selected model
-      final llmConfig = {
-        'model': _selectedLLMModel!.model,
-        'model_endpoint_type': _selectedLLMModel!.modelEndpointType,
-        'model_endpoint': _selectedLLMModel!.modelEndpoint,
-        'provider_name': _selectedLLMModel!.providerName,
-        'provider_category': _selectedLLMModel!.providerCategory,
-        'context_window': _selectedLLMModel!.contextWindow,
-        'put_inner_thoughts_in_kwargs':
-            _selectedLLMModel!.putInnerThoughtsInKwargs,
-        'temperature': double.parse(_temperatureController.text),
-        'max_tokens': int.parse(_maxTokensController.text),
-      };
-
-      // Build embedding config from selected model
-      final embeddingConfig = {
-        'embedding_endpoint_type': _selectedEmbeddingModel!.modelEndpointType,
-        'embedding_endpoint': _selectedEmbeddingModel!.modelEndpoint,
-        'embedding_model': _selectedEmbeddingModel!.model,
-        'embedding_dim': 1536,  // Default embedding dimension for OpenAI models
-        'provider_name': _selectedEmbeddingModel!.providerName,
-      };
-
-      final requestData = {
-        'name': _nameController.text.trim(),
-        if (_descriptionController.text.trim().isNotEmpty)
-          'description': _descriptionController.text.trim(),
-        'system': _systemPromptController.text.trim(),
-        'llm_config': llmConfig,
-        'embedding_config': embeddingConfig,
-      };
-
-      final response = await client.post(
-        '/agents/',
-        body: jsonEncode(requestData),
+      // Create CreateAgentRequest - it will automatically detect BYOK mode
+      // and generate the correct API format
+      final request = CreateAgentRequest(
+        name: _nameController.text.trim(),
+        description: _descriptionController.text.trim().isEmpty
+            ? null
+            : _descriptionController.text.trim(),
+        llmModel: _selectedLLMModel!,
+        embeddingModel: _selectedEmbeddingModel!,
+        systemPrompt: _systemPromptController.text.trim(),
       );
 
-      if (context.mounted) {
-        if (response.statusCode == 200 || response.statusCode == 201) {
-          final responseData = jsonDecode(response.body);
-          final agentName = responseData['name'] ?? 'Agent';
+      // Use the createAgent provider which handles the format automatically
+      final agent = await ref.read(createAgentProvider(request).future);
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('$agentName created successfully'),
-              backgroundColor: AppTheme.primaryColor,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${agent.name} created successfully'),
+            backgroundColor: AppTheme.primaryColor,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
 
-          // Refresh list and navigate back
-          ref.invalidate(agentListProvider);
-          context.go('/agents');
-        } else {
-          // Parse error response for more details
-          String errorMessage = 'Failed to create agent: ${response.statusCode}';
-          try {
-            final errorData = jsonDecode(response.body);
-            if (errorData is Map && errorData.containsKey('detail')) {
-              errorMessage = 'Error: ${errorData['detail']}';
-            }
-          } catch (_) {
-            // If parsing fails, use default message
-          }
-          throw Exception(errorMessage);
-        }
+        // Refresh list and navigate back
+        ref.invalidate(agentListProvider);
+        context.go('/agents');
       }
     } catch (e) {
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('$e'),
@@ -834,58 +760,6 @@ class _BasicInfoStep extends StatelessWidget {
   }
 }
 
-/// Model Configuration Step
-class _ModelConfigStep extends StatelessWidget {
-  final LLMModel? selectedLLMModel;
-  final Function(LLMModel?) onLLMModelChanged;
-  final List<LLMModel> availableLLMModels;
-  final TextEditingController temperatureController;
-  final TextEditingController maxTokensController;
-
-  const _ModelConfigStep({
-    required this.selectedLLMModel,
-    required this.onLLMModelChanged,
-    required this.availableLLMModels,
-    required this.temperatureController,
-    required this.maxTokensController,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Model Configuration',
-          style: AppTheme.headlineSmall,
-        ),
-        const SizedBox(height: AppTheme.spacing8),
-        Text(
-          'Configure the model parameters for your agent',
-          style: AppTheme.bodyMedium.copyWith(
-            color: AppTheme.textSecondaryColor,
-          ),
-        ),
-        const SizedBox(height: AppTheme.spacing24),
-        _NumberField(
-          label: 'Temperature',
-          hint: 'Enter temperature (0.0 - 1.0)',
-          controller: temperatureController,
-          min: 0.0,
-          max: 1.0,
-        ),
-        const SizedBox(height: AppTheme.spacing16),
-        _NumberField(
-          label: 'Max Tokens',
-          hint: 'Enter max tokens',
-          controller: maxTokensController,
-          min: 1,
-        ),
-      ],
-    );
-  }
-}
-
 /// Review Step
 class _ReviewStep extends StatelessWidget {
   final String name;
@@ -893,8 +767,6 @@ class _ReviewStep extends StatelessWidget {
   final String systemPrompt;
   final LLMModel? llmModel;
   final LLMModel? embeddingModel;
-  final String temperature;
-  final String maxTokens;
 
   const _ReviewStep({
     required this.name,
@@ -902,8 +774,6 @@ class _ReviewStep extends StatelessWidget {
     required this.systemPrompt,
     required this.llmModel,
     required this.embeddingModel,
-    required this.temperature,
-    required this.maxTokens,
   });
 
   @override
@@ -928,8 +798,6 @@ class _ReviewStep extends StatelessWidget {
         _ReviewItem(label: 'System Prompt', value: systemPrompt),
         _ReviewItem(label: 'LLM Model', value: llmModel?.displayName ?? 'Not selected'),
         _ReviewItem(label: 'Embedding Model', value: embeddingModel?.displayName ?? 'Not selected'),
-        _ReviewItem(label: 'Temperature', value: temperature),
-        _ReviewItem(label: 'Max Tokens', value: maxTokens),
       ],
     );
   }
@@ -1030,76 +898,6 @@ class _TextField extends StatelessWidget {
               ),
               borderSide: BorderSide(
                 color: AppTheme.errorColor,
-                width: 2,
-              ),
-            ),
-            filled: true,
-            fillColor: AppTheme.surfaceVariantColor,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Number field widget
-class _NumberField extends StatelessWidget {
-  final String label;
-  final String hint;
-  final TextEditingController controller;
-  final double? min;
-  final double? max;
-
-  const _NumberField({
-    required this.label,
-    required this.hint,
-    required this.controller,
-    this.min,
-    this.max,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: AppTheme.labelLarge,
-        ),
-        const SizedBox(height: AppTheme.spacing8),
-        TextFormField(
-          controller: controller,
-          keyboardType: const TextInputType.numberWithOptions(
-            decimal: true,
-            signed: false,
-          ),
-          decoration: InputDecoration(
-            hintText: hint,
-            border: OutlineInputBorder(
-              borderRadius: const BorderRadius.all(
-                Radius.circular(AppTheme.radiusSmall),
-              ),
-              borderSide: BorderSide(
-                color: AppTheme.borderColor,
-                width: 2,
-              ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: const BorderRadius.all(
-                Radius.circular(AppTheme.radiusSmall),
-              ),
-              borderSide: BorderSide(
-                color: AppTheme.borderColor,
-                width: 2,
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: const BorderRadius.all(
-                Radius.circular(AppTheme.radiusSmall),
-              ),
-              borderSide: BorderSide(
-                color: AppTheme.primaryColor,
                 width: 2,
               ),
             ),

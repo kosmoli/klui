@@ -3,7 +3,7 @@
 > **文档说明**: 本文档记录了对 Letta 项目的深度分析和理解，包括 Provider 选择机制、Embedding 配置、API Key 管理、以及图形界面等核心功能。
 >
 > **创建时间**: 2026-01-04
-> **最后更新**: 2026-01-04
+> **最后更新**: 2026-01-09
 
 ## 目录
 
@@ -31,7 +31,8 @@
   - [13.8 为什么废弃详细配置？](#138-为什么废弃详细配置深度解析)
 - [14. 如何创建自定义 Provider](#14-如何创建自定义-provider2026-01-04)
 - [15. Letta UI 创建 Agent 的 Provider 选择问题](#15-letta-ui-创建-agent-的-provider-选择问题2026-01-04)
-- [16. OPENAI_API_HEADERS 环境变量的真相](#16-openai_api_headers-环境变量的真相2026-01-05) ⭐ 新增
+- [16. OPENAI_API_HEADERS 环境变量的真相](#16-openai_api_headers-环境变量的真相2026-01-05)
+- [18. 前端创建 Agent 的 BYOK 模式实现](#18-前端创建-agent-的-byok-模式实现2026-01-09) ⭐ 新增
 
 ## 问题背景
 
@@ -5584,6 +5585,380 @@ class ChatMessages extends _$ChatMessages {
 - `letta/server/rest_api/routers/v1/agents.py` - Agents API
 - `letta/server/rest_api/routers/v1/messages.py` - Messages API
 - `letta/server/ws_api/interface.py` - WebSocket API
+
+---
+
+## 18. 前端创建 Agent 的 BYOK 模式实现（2026-01-09）⭐ 新增
+
+### 18.1 背景：BYOK vs 非 BYOK 模式
+
+Letta 支持两种模式来配置 LLM 和 Embedding 模型：
+
+| 特性 | BYOK 模式 | 非 BYOK 模式 |
+|------|-----------|---------------|
+| **Provider 来源** | 数据库（用户创建） | 环境变量（内存） |
+| **Provider Category** | `byok` | `base` |
+| **API Keys** | 存储在数据库 Provider 中 | 从环境变量读取 |
+| **使用场景** | 需要自定义 API keys、多用户隔离 | 单用户、开发测试 |
+| **配置复杂度** | 需要完整配置 | 简化配置 |
+
+### 18.2 非 BYOK 模式创建 Agent
+
+#### 18.2.1 API 请求格式
+
+非 BYOK 模式使用简化的 JSON 格式：
+
+```json
+{
+  "name": "my-agent",
+  "model": "openai-proxy/claude-sonnet-4-5-20250929",
+  "embedding": "openai-proxy/text-embedding-3-small",
+  "system": "You are a helpful assistant.",
+  "description": "Optional description"
+}
+```
+
+**关键点**：
+- `model` 和 `embedding` 字段使用**模型的 handle**，格式为 `provider_name/model_name`
+- Letta 根据 handle 的前缀（`openai-proxy`）自动查找对应的 base provider
+- Base provider 的配置（API keys、endpoints）来自环境变量
+
+#### 18.2.2 前端实现
+
+**Dart 模型** (`lib/core/models/create_agent_request.dart`):
+
+```dart
+/// Convert to simple format (non-BYOK mode)
+Map<String, dynamic> toSimpleJson() {
+  final json = <String, dynamic>{
+    'name': name,
+    'model': llmModel.handle,  // e.g., "openai-proxy/claude-sonnet-4-5-20250929"
+    'embedding': embeddingModel.handle,  // e.g., "openai-proxy/text-embedding-3-small"
+  };
+
+  if (description != null) {
+    json['description'] = description;
+  }
+  if (systemPrompt != null) {
+    json['system'] = systemPrompt;
+  }
+
+  return json;
+}
+```
+
+**模型加载逻辑** (`lib/features/agents/screens/agent_create_screen.dart`):
+
+```dart
+if (!_byokMode) {
+  // Non-BYOK mode: load base models directly
+  final allModels = await ref.read(baseLLMModelListProvider.future);
+
+  // Load LLM models from /v1/models/?provider_category=base
+  final llmModels = allModels.where((m) => m.modelType == 'llm').toList();
+
+  // Load embedding models from /v1/models/embedding
+  final embeddingResponse = await client.get('/models/embedding');
+  final embeddingModels = // ... parse response
+
+  setState(() {
+    _availableLLMModels = llmModels;
+    _availableEmbeddingModels = embeddingModels;
+  });
+}
+```
+
+**关键点**：
+- LLM 模型从 `/v1/models/?provider_category=base` 获取
+- Embedding 模型从 `/v1/models/embedding` 获取（因为 base 模型列表不包含 embedding）
+- 所有模型的 `provider_category` 默认为 `"base"`
+
+### 18.3 BYOK 模式创建 Agent
+
+#### 18.3.1 API 请求格式
+
+BYOK 模式使用完整的配置格式：
+
+```json
+{
+  "name": "my-agent",
+  "llm_config": {
+    "model": "claude-haiku-4-5-20251001-thinking",
+    "provider_name": "openai-proxy",
+    "provider_category": "byok",
+    "model_endpoint_type": "openai",
+    "context_window": 30000
+  },
+  "embedding_config": {
+    "provider_name": "openai-embedding",
+    "provider_category": "byok",
+    "embedding_endpoint_type": "openai",
+    "embedding_model": "text-embedding-3-small",
+    "embedding_dim": 1536
+  },
+  "system": "You are a helpful assistant."
+}
+```
+
+**关键点**：
+- 必须提供 `provider_name` 和 `provider_category`，Letta 用这两个字段在数据库中查找对应的 Provider
+- 找到 Provider 后，使用其配置（API keys、base URLs 等）来调用 LLM API
+
+#### 18.3.2 Letta 后端的 Provider 查找流程
+
+1. **接收请求**：
+   ```json
+   {
+     "llm_config": {
+       "provider_name": "openai-proxy",
+       "provider_category": "byok"
+     }
+   }
+   ```
+
+2. **数据库查询**：
+   ```python
+   # 伪代码
+   provider = db.query(Provider).filter_by(
+       name="openai-proxy",
+       category="byok"
+   ).first()
+   ```
+
+3. **获取配置**：
+   ```python
+   api_key = provider.api_key  # 从数据库读取
+   base_url = provider.base_url
+   ```
+
+4. **调用 LLM API**：
+   ```python
+   response = openai_client.chat(
+       api_key=api_key,
+       base_url=base_url,
+       model="claude-haiku-4-5-20251001-thinking"
+   )
+   ```
+
+#### 18.3.3 前端实现
+
+**Dart 模型** (`lib/core/models/create_agent_request.dart`):
+
+```dart
+/// Convert to full config format (BYOK mode)
+Map<String, dynamic> toBYOKJson() {
+  final json = <String, dynamic>{
+    'name': name,
+    'llm_config': {
+      'model': llmModel.model,
+      'provider_name': llmModel.providerName,  // 关键字段
+      'provider_category': llmModel.providerCategory,  // 关键字段
+      'model_endpoint_type': llmModel.modelEndpointType,
+      'context_window': llmModel.contextWindow,
+    },
+    'embedding_config': {
+      'provider_name': embeddingModel.providerName,  // 关键字段
+      'provider_category': embeddingModel.providerCategory,  // 关键字段
+      'embedding_endpoint_type': embeddingModel.modelEndpointType,
+      'embedding_model': embeddingModel.model,
+      'embedding_dim': 1536,
+    },
+  };
+
+  if (description != null) {
+    json['description'] = description;
+  }
+  if (systemPrompt != null) {
+    json['system'] = systemPrompt;
+  }
+
+  return json;
+}
+```
+
+**模式检测**：
+
+```dart
+/// Check if this is a BYOK mode request
+bool get isBYOK => llmModel.providerCategory == 'byok';
+
+/// Convert to JSON based on mode
+Map<String, dynamic> toJson() {
+  return isBYOK ? toBYOKJson() : toSimpleJson();
+}
+```
+
+**模型加载逻辑**：
+
+```dart
+if (_byokMode) {
+  // BYOK mode: load providers from database
+  final providers = await ref.read(providerListProvider.future);
+
+  setState(() {
+    _availableProviders = providers;
+    // User selects a provider first, then load models for that provider
+  });
+}
+```
+
+### 18.4 完整创建流程对比
+
+#### 18.4.1 非 BYOK 模式流程
+
+```
+用户选择模型
+    ↓
+使用 handle (openai-proxy/claude-sonnet-4-5-20250929)
+    ↓
+发送简化 JSON: {"model": "openai-proxy/...", "embedding": "openai-proxy/..."}
+    ↓
+Letta 解析 handle，提取 provider_name = "openai-proxy"
+    ↓
+Letta 从环境变量加载 openai-proxy 的配置
+    ↓
+创建 Agent 成功
+```
+
+#### 18.4.2 BYOK 模式流程
+
+```
+用户选择 Provider (openai-proxy, openai-embedding)
+    ↓
+加载该 Provider 下的模型列表
+    ↓
+用户选择具体模型
+    ↓
+发送完整 JSON: {
+  "llm_config": {"provider_name": "openai-proxy", "provider_category": "byok", ...},
+  "embedding_config": {"provider_name": "openai-embedding", "provider_category": "byok", ...}
+}
+    ↓
+Letta 根据 provider_name + provider_category 在数据库中查找 Provider
+    ↓
+Letta 读取 Provider 的 API keys 和配置
+    ↓
+创建 Agent 成功
+```
+
+### 18.5 关键字段说明
+
+#### 18.5.1 模型 (LLMModel) 字段
+
+| 字段 | 类型 | 说明 | 示例 |
+|------|------|------|------|
+| `handle` | String | 唯一标识符，格式 `provider_name/model` | `openai-proxy/claude-sonnet-4-5-20250929` |
+| `model` | String | 模型名称 | `claude-sonnet-4-5-20250929` |
+| `provider_name` | String | Provider 名称 | `openai-proxy` |
+| `provider_category` | String | Provider 类别：`base` 或 `byok` | `base`, `byok` |
+| `model_endpoint_type` | String | 端点类型 | `openai`, `anthropic` |
+| `context_window` | int | 上下文窗口大小 | `30000` |
+
+#### 18.5.2 Embedding 模型字段
+
+| 字段 | 类型 | 说明 | 示例 |
+|------|------|------|------|
+| `handle` | String | 唯一标识符 | `openai-proxy/text-embedding-3-small` |
+| `model` / `embedding_model` | String | 模型名称 | `text-embedding-3-small` |
+| `provider_name` | String | Provider 名称 | `openai-proxy` |
+| `provider_category` | String | Provider 类别 | `base`, `byok` |
+| `model_endpoint_type` / `embedding_endpoint_type` | String | 端点类型 | `openai` |
+| `embedding_dim` | int | Embedding 维度 | `1536` |
+
+**注意**：Embedding 模型可能使用 `embedding_model` 和 `embedding_endpoint_type` 字段名，而不是 `model` 和 `model_endpoint_type`。
+
+### 18.6 常见问题
+
+#### Q1: 为什么 BYOK 模式需要 `provider_name` 和 `provider_category`？
+
+**A**: Letta 需要通过这两个字段在数据库中精确查找对应的 Provider 配置。只有找到正确的 Provider，Letta 才能获取 API keys、base URLs 等配置来调用 LLM API。
+
+#### Q2: 非 BYOK 模式为什么不提供 `provider_name`？
+
+**A**: 非 BYOK 模式使用 handle 格式（`provider_name/model`），Letta 会从 handle 中提取 `provider_name`，然后从**环境变量**加载对应的配置，不需要查询数据库。
+
+#### Q3: 如何判断使用哪种模式？
+
+**A**:
+- **前端**: 检查 `llmModel.providerCategory == 'byok'`
+- **后端**: Letta 检查 `llm_config.provider_category` 或 `embedding_config.provider_category`
+
+#### Q4: 两种模式可以混用吗？
+
+**A**: 不可以。创建 Agent 时，LLM 和 Embedding 必须使用相同的模式：
+- 要么都是 BYOK（`llm_config` + `embedding_config`）
+- 要么都不是 BYOK（`model` + `embedding`）
+
+### 18.7 前端代码实现要点
+
+#### 18.7.1 LLMModel 兼容性处理
+
+由于 `/v1/models/embedding` 返回的模型格式与 LLM 模型不同，需要兼容处理：
+
+```dart
+factory LLMModel.fromJson(Map<String, dynamic> json) {
+  // Embedding 模型没有 provider_category 字段，默认为 'base'
+  final providerCategory = json['provider_category'] as String? ?? 'base';
+
+  return LLMModel(
+    handle: json['handle'] as String,
+    name: json['name'] as String,
+    displayName: json['display_name'] as String,
+    providerType: json['provider_type'] as String?
+                ?? json['embedding_endpoint_type'] as String?
+                ?? 'unknown',
+    providerName: json['provider_name'] as String,
+    // Embedding 模型使用 embedding_model 字段
+    model: json['model'] as String?
+           ?? json['embedding_model'] as String?
+           ?? '',
+    // Embedding 模型使用 embedding_endpoint_type 字段
+    modelEndpointType: json['model_endpoint_type'] as String?
+                      ?? json['embedding_endpoint_type'] as String?
+                      ?? 'unknown',
+    modelEndpoint: json['model_endpoint'] as String?
+                  ?? json['embedding_endpoint'] as String?
+                  ?? '',
+    providerCategory: providerCategory,
+    modelType: json['model_type'] as String?
+               ?? (json.containsKey('embedding_model') ? 'embedding' : 'llm'),
+    contextWindow: json['context_window'] as int? ?? 30000,
+    // ... 其他字段
+  );
+}
+```
+
+#### 18.7.2 模式自动切换
+
+```dart
+class CreateAgentRequest {
+  final LLMModel llmModel;
+  final LLMModel embeddingModel;
+
+  // 自动检测模式
+  bool get isBYOK => llmModel.providerCategory == 'byok';
+
+  // 根据模式生成正确的 JSON
+  Map<String, dynamic> toJson() {
+    return isBYOK ? toBYOKJson() : toSimpleJson();
+  }
+}
+```
+
+### 18.8 总结
+
+| 特性 | 非 BYOK 模式 | BYOK 模式 |
+|------|-------------|-----------|
+| **配置来源** | 环境变量 | 数据库 |
+| **API 格式** | 简化 (`model` + `embedding`) | 完整 (`llm_config` + `embedding_config`) |
+| **模型标识** | handle (`provider/model`) | 完整配置 |
+| **Provider 查找** | 从 handle 提取 provider_name | 使用 `provider_name` + `provider_category` |
+| **API Keys** | 环境变量 | Provider 配置 |
+| **适用场景** | 开发、测试 | 生产、多用户 |
+
+**核心设计理念**：
+- 非 BYOK 模式：简单优先，适合快速开发和测试
+- BYOK 模式：灵活优先，支持多用户、多 Provider、自定义配置
 
 ---
 

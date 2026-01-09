@@ -34,21 +34,25 @@ class LLMModel {
 
   /// Create LLMModel from JSON
   factory LLMModel.fromJson(Map<String, dynamic> json) {
+    // Handle both embedding and LLM model formats
+    // Embedding models from /v1/models/embedding don't have provider_category field
+    final providerCategory = json['provider_category'] as String? ?? 'base';
+
     return LLMModel(
       handle: json['handle'] as String,
       name: json['name'] as String,
       displayName: json['display_name'] as String,
-      providerType: json['provider_type'] as String,
+      providerType: json['provider_type'] as String? ?? json['embedding_endpoint_type'] as String? ?? 'unknown',
       providerName: json['provider_name'] as String,
-      model: json['model'] as String,
-      modelEndpointType: json['model_endpoint_type'] as String,
-      modelEndpoint: json['model_endpoint'] as String,
-      providerCategory: json['provider_category'] as String,
-      modelType: json['model_type'] as String,
-      contextWindow: json['context_window'] as int,
-      putInnerThoughtsInKwargs: json['put_inner_thoughts_in_kwargs'] as bool,
-      temperature: (json['temperature'] as num).toDouble(),
-      maxTokens: json['max_tokens'] as int,
+      model: json['model'] as String? ?? json['embedding_model'] as String? ?? '',
+      modelEndpointType: json['model_endpoint_type'] as String? ?? json['embedding_endpoint_type'] as String? ?? 'unknown',
+      modelEndpoint: json['model_endpoint'] as String? ?? json['embedding_endpoint'] as String? ?? '',
+      providerCategory: providerCategory,
+      modelType: json['model_type'] as String? ?? (json.containsKey('embedding_model') ? 'embedding' : 'llm'),
+      contextWindow: json['context_window'] as int? ?? 30000,
+      putInnerThoughtsInKwargs: json['put_inner_thoughts_in_kwargs'] as bool? ?? false,
+      temperature: (json['temperature'] as num?)?.toDouble() ?? 0.7,
+      maxTokens: json['max_tokens'] as int? ?? 4096,
     );
   }
 

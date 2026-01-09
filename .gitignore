@@ -1,35 +1,23 @@
-# Flutter / Dart
+# Flutter/Dart
 build/
 .dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
 .packages
 .pub-cache/
-.pub/
-pubspec.lock
+.pub-cache/
 
 # IDE
 .idea/
 .vscode/
+*.iml
 *.swp
 *.swo
-*~
+
+# OS
 .DS_Store
+Thumbs.db
 
-# macOS
-.DS_Store
-
-# Generated files
-*.g.dart
-*.freezed.dart
-
-# Logs
-*.log
-
-# Testing
-.test_coverage/
-coverage/
-
-# Temporary files
-*.tmp
-*.bak
+# Build outputs
+*.wasm
+*.js
+*.js.map
+*.dill

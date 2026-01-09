@@ -1,0 +1,576 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'api_providers.dart';
+
+// **************************************************************************
+// RiverpodGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Provider for API Client
+
+@ProviderFor(apiClient)
+const apiClientProvider = ApiClientProvider._();
+
+/// Provider for API Client
+
+final class ApiClientProvider
+    extends $FunctionalProvider<ApiClient, ApiClient, ApiClient>
+    with $Provider<ApiClient> {
+  /// Provider for API Client
+  const ApiClientProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'apiClientProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$apiClientHash();
+
+  @$internal
+  @override
+  $ProviderElement<ApiClient> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ApiClient create(Ref ref) {
+    return apiClient(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ApiClient value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ApiClient>(value),
+    );
+  }
+}
+
+String _$apiClientHash() => r'3551d104159b8ad2d26864a53c9723933ed20798';
+
+/// Provider for Agent List
+
+@ProviderFor(agentList)
+const agentListProvider = AgentListProvider._();
+
+/// Provider for Agent List
+
+final class AgentListProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Agent>>,
+          List<Agent>,
+          FutureOr<List<Agent>>
+        >
+    with $FutureModifier<List<Agent>>, $FutureProvider<List<Agent>> {
+  /// Provider for Agent List
+  const AgentListProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'agentListProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$agentListHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Agent>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Agent>> create(Ref ref) {
+    return agentList(ref);
+  }
+}
+
+String _$agentListHash() => r'529cf9da508f8a414eea61271a315d7850202d2e';
+
+/// Provider for single Agent
+
+@ProviderFor(agent)
+const agentProvider = AgentFamily._();
+
+/// Provider for single Agent
+
+final class AgentProvider
+    extends $FunctionalProvider<AsyncValue<Agent>, Agent, FutureOr<Agent>>
+    with $FutureModifier<Agent>, $FutureProvider<Agent> {
+  /// Provider for single Agent
+  const AgentProvider._({
+    required AgentFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'agentProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$agentHash();
+
+  @override
+  String toString() {
+    return r'agentProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<Agent> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Agent> create(Ref ref) {
+    final argument = this.argument as String;
+    return agent(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is AgentProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$agentHash() => r'03615c190ad7dfcc24441e434b2c0eddd1bb5ab6';
+
+/// Provider for single Agent
+
+final class AgentFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<Agent>, String> {
+  const AgentFamily._()
+    : super(
+        retry: null,
+        name: r'agentProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Provider for single Agent
+
+  AgentProvider call(String id) => AgentProvider._(argument: id, from: this);
+
+  @override
+  String toString() => r'agentProvider';
+}
+
+/// Provider for deleting an Agent
+
+@ProviderFor(deleteAgent)
+const deleteAgentProvider = DeleteAgentFamily._();
+
+/// Provider for deleting an Agent
+
+final class DeleteAgentProvider
+    extends $FunctionalProvider<AsyncValue<void>, void, FutureOr<void>>
+    with $FutureModifier<void>, $FutureProvider<void> {
+  /// Provider for deleting an Agent
+  const DeleteAgentProvider._({
+    required DeleteAgentFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'deleteAgentProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$deleteAgentHash();
+
+  @override
+  String toString() {
+    return r'deleteAgentProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<void> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<void> create(Ref ref) {
+    final argument = this.argument as String;
+    return deleteAgent(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is DeleteAgentProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$deleteAgentHash() => r'23930ead26f6bc98f762018b20ae30072ccaa127';
+
+/// Provider for deleting an Agent
+
+final class DeleteAgentFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<void>, String> {
+  const DeleteAgentFamily._()
+    : super(
+        retry: null,
+        name: r'deleteAgentProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Provider for deleting an Agent
+
+  DeleteAgentProvider call(String id) =>
+      DeleteAgentProvider._(argument: id, from: this);
+
+  @override
+  String toString() => r'deleteAgentProvider';
+}
+
+/// Provider for Provider List
+
+@ProviderFor(providerList)
+const providerListProvider = ProviderListProvider._();
+
+/// Provider for Provider List
+
+final class ProviderListProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<models.ProviderConfig>>,
+          List<models.ProviderConfig>,
+          FutureOr<List<models.ProviderConfig>>
+        >
+    with
+        $FutureModifier<List<models.ProviderConfig>>,
+        $FutureProvider<List<models.ProviderConfig>> {
+  /// Provider for Provider List
+  const ProviderListProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'providerListProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$providerListHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<models.ProviderConfig>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<models.ProviderConfig>> create(Ref ref) {
+    return providerList(ref);
+  }
+}
+
+String _$providerListHash() => r'938dcf28ed80102178de4cbe68cfcc295a72c090';
+
+/// Provider for LLM Models List (all models)
+
+@ProviderFor(llmModelList)
+const llmModelListProvider = LlmModelListProvider._();
+
+/// Provider for LLM Models List (all models)
+
+final class LlmModelListProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<LLMModel>>,
+          List<LLMModel>,
+          FutureOr<List<LLMModel>>
+        >
+    with $FutureModifier<List<LLMModel>>, $FutureProvider<List<LLMModel>> {
+  /// Provider for LLM Models List (all models)
+  const LlmModelListProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'llmModelListProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$llmModelListHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<LLMModel>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<LLMModel>> create(Ref ref) {
+    return llmModelList(ref);
+  }
+}
+
+String _$llmModelListHash() => r'e1ba792a8b9c23e2cff28736bc41dffd450c5872';
+
+/// Provider for LLM Models List filtered by provider name
+/// This provider dynamically loads models for a specific provider
+
+@ProviderFor(llmModelListByProvider)
+const llmModelListByProviderProvider = LlmModelListByProviderFamily._();
+
+/// Provider for LLM Models List filtered by provider name
+/// This provider dynamically loads models for a specific provider
+
+final class LlmModelListByProviderProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<LLMModel>>,
+          List<LLMModel>,
+          FutureOr<List<LLMModel>>
+        >
+    with $FutureModifier<List<LLMModel>>, $FutureProvider<List<LLMModel>> {
+  /// Provider for LLM Models List filtered by provider name
+  /// This provider dynamically loads models for a specific provider
+  const LlmModelListByProviderProvider._({
+    required LlmModelListByProviderFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'llmModelListByProviderProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$llmModelListByProviderHash();
+
+  @override
+  String toString() {
+    return r'llmModelListByProviderProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<LLMModel>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<LLMModel>> create(Ref ref) {
+    final argument = this.argument as String;
+    return llmModelListByProvider(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is LlmModelListByProviderProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$llmModelListByProviderHash() =>
+    r'989e0f45f49739619e41247ebba2f9fa7f55060e';
+
+/// Provider for LLM Models List filtered by provider name
+/// This provider dynamically loads models for a specific provider
+
+final class LlmModelListByProviderFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<LLMModel>>, String> {
+  const LlmModelListByProviderFamily._()
+    : super(
+        retry: null,
+        name: r'llmModelListByProviderProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Provider for LLM Models List filtered by provider name
+  /// This provider dynamically loads models for a specific provider
+
+  LlmModelListByProviderProvider call(String providerName) =>
+      LlmModelListByProviderProvider._(argument: providerName, from: this);
+
+  @override
+  String toString() => r'llmModelListByProviderProvider';
+}
+
+/// Provider for Embedding Models List
+
+@ProviderFor(embeddingModelList)
+const embeddingModelListProvider = EmbeddingModelListProvider._();
+
+/// Provider for Embedding Models List
+
+final class EmbeddingModelListProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<EmbeddingModel>>,
+          List<EmbeddingModel>,
+          FutureOr<List<EmbeddingModel>>
+        >
+    with
+        $FutureModifier<List<EmbeddingModel>>,
+        $FutureProvider<List<EmbeddingModel>> {
+  /// Provider for Embedding Models List
+  const EmbeddingModelListProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'embeddingModelListProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$embeddingModelListHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<EmbeddingModel>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<EmbeddingModel>> create(Ref ref) {
+    return embeddingModelList(ref);
+  }
+}
+
+String _$embeddingModelListHash() =>
+    r'15beba45029166b0f263358263b488f869df224e';
+
+/// Provider for Base Category LLM Models (memory providers, non-BYOK)
+/// These are the default providers created from environment variables
+
+@ProviderFor(baseLLMModelList)
+const baseLLMModelListProvider = BaseLLMModelListProvider._();
+
+/// Provider for Base Category LLM Models (memory providers, non-BYOK)
+/// These are the default providers created from environment variables
+
+final class BaseLLMModelListProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<LLMModel>>,
+          List<LLMModel>,
+          FutureOr<List<LLMModel>>
+        >
+    with $FutureModifier<List<LLMModel>>, $FutureProvider<List<LLMModel>> {
+  /// Provider for Base Category LLM Models (memory providers, non-BYOK)
+  /// These are the default providers created from environment variables
+  const BaseLLMModelListProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'baseLLMModelListProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$baseLLMModelListHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<LLMModel>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<LLMModel>> create(Ref ref) {
+    return baseLLMModelList(ref);
+  }
+}
+
+String _$baseLLMModelListHash() => r'983596dfef059c24af05bdfec340a919774b1b95';
+
+/// Provider for BYOK Category LLM Models (database providers, user-created)
+/// These are custom providers created via API
+
+@ProviderFor(byokLLMModelList)
+const byokLLMModelListProvider = ByokLLMModelListProvider._();
+
+/// Provider for BYOK Category LLM Models (database providers, user-created)
+/// These are custom providers created via API
+
+final class ByokLLMModelListProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<LLMModel>>,
+          List<LLMModel>,
+          FutureOr<List<LLMModel>>
+        >
+    with $FutureModifier<List<LLMModel>>, $FutureProvider<List<LLMModel>> {
+  /// Provider for BYOK Category LLM Models (database providers, user-created)
+  /// These are custom providers created via API
+  const ByokLLMModelListProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'byokLLMModelListProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$byokLLMModelListHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<LLMModel>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<LLMModel>> create(Ref ref) {
+    return byokLLMModelList(ref);
+  }
+}
+
+String _$byokLLMModelListHash() => r'36f5ca56e5579c157a1920c016d3d390c58c23d0';

@@ -1082,7 +1082,7 @@ class _DirectModelSection extends StatelessWidget {
           items: availableModels.map((model) {
             return DropdownMenuItem<LLMModel>(
               value: model,
-              child: Text(model.displayName),
+              child: Text(model.handle), // Use handle to show provider/model format
             );
           }).toList(),
           onChanged: (availableModels.isEmpty || isLoadingModels)

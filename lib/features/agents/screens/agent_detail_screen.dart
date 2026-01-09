@@ -127,12 +127,14 @@ class AgentDetailScreen extends ConsumerWidget {
                 _InfoRow(
                   label: 'Name',
                   value: agent.name,
+                  valueStyle: AppTheme.bodyMedium,
                 ),
                 if (agent.description != null) ...[
                   const SizedBox(height: AppTheme.spacing12),
                   _InfoRow(
                     label: 'Description',
                     value: agent.description!,
+                    valueStyle: AppTheme.bodyMedium,
                     isMultiline: true,
                   ),
                 ],
@@ -141,6 +143,7 @@ class AgentDetailScreen extends ConsumerWidget {
                   _InfoRow(
                     label: 'Agent Type',
                     value: agent.agentType!,
+                    valueStyle: AppTheme.bodyMedium,
                   ),
                 ],
               ],
@@ -148,18 +151,96 @@ class AgentDetailScreen extends ConsumerWidget {
           ),
           const SizedBox(height: AppTheme.spacing24),
 
-          // Model Configuration Section
+          // Model Configuration Section (Base mode)
           if (agent.model != null)
             _SectionCard(
-              title: 'Model Configuration',
+              title: 'Model Configuration (Base Mode)',
               icon: Icons.psychology_outlined,
-              child: _InfoRow(
-                label: 'Model',
-                value: agent.model!,
-                valueStyle: AppTheme.monoSmall,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _InfoRow(
+                    label: 'Model Handle',
+                    value: agent.model!,
+                    valueStyle: AppTheme.monoSmall,
+                  ),
+                ],
               ),
             ),
-          const SizedBox(height: AppTheme.spacing24),
+          if (agent.model != null)
+            const SizedBox(height: AppTheme.spacing24),
+
+          // LLM Configuration Section (BYOK mode)
+          // Note: All agents have llmConfig, but only BYOK mode agents have model == null
+          if (agent.model == null && agent.llmConfig != null)
+            _SectionCard(
+              title: 'LLM Configuration (BYOK Mode)',
+              icon: Icons.psychology_outlined,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _InfoRow(
+                    label: 'Model',
+                    value: agent.llmConfig!['model']?.toString() ?? 'N/A',
+                    valueStyle: AppTheme.monoSmall,
+                  ),
+                  if (agent.llmConfig!['provider_name'] != null) ...[
+                    const SizedBox(height: AppTheme.spacing12),
+                    _InfoRow(
+                      label: 'Provider',
+                      value: agent.llmConfig!['provider_name'].toString(),
+                      valueStyle: AppTheme.monoSmall,
+                    ),
+                  ],
+                  if (agent.llmConfig!['context_window'] != null) ...[
+                    const SizedBox(height: AppTheme.spacing12),
+                    _InfoRow(
+                      label: 'Context Window',
+                      value: '${agent.llmConfig!['context_window']} tokens',
+                      valueStyle: AppTheme.monoSmall,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          if (agent.model == null && agent.llmConfig != null)
+            const SizedBox(height: AppTheme.spacing24),
+
+          // Embedding Configuration Section (all modes)
+          if (agent.embeddingConfig != null)
+            _SectionCard(
+              title: 'Embedding Configuration',
+              icon: Icons.memory_outlined,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (agent.embeddingConfig!['embedding_model'] != null)
+                    _InfoRow(
+                      label: 'Model',
+                      value: agent.embeddingConfig!['embedding_model'].toString(),
+                      valueStyle: AppTheme.monoSmall,
+                    ),
+                  if (agent.embeddingConfig!['provider_name'] != null) ...[
+                    const SizedBox(height: AppTheme.spacing12),
+                    _InfoRow(
+                      label: 'Provider',
+                      value: agent.embeddingConfig!['provider_name'].toString(),
+                      valueStyle: AppTheme.monoSmall,
+                    ),
+                  ],
+                  if (agent.embeddingConfig!['embedding_dim'] != null) ...[
+                    const SizedBox(height: AppTheme.spacing12),
+                    _InfoRow(
+                      label: 'Dimension',
+                      value: agent.embeddingConfig!['embedding_dim'].toString(),
+                      valueStyle: AppTheme.monoSmall,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          if (agent.embeddingConfig != null)
+            const SizedBox(height: AppTheme.spacing24),
 
           // Timestamps Section
           _SectionCard(
@@ -172,6 +253,7 @@ class AgentDetailScreen extends ConsumerWidget {
                   _InfoRow(
                     label: 'Created',
                     value: _formatDateTime(agent.createdAt!),
+                    valueStyle: AppTheme.monoSmall,
                   ),
                 if (agent.createdAt != null && agent.modifiedAt != null)
                   const SizedBox(height: AppTheme.spacing12),
@@ -179,6 +261,7 @@ class AgentDetailScreen extends ConsumerWidget {
                   _InfoRow(
                     label: 'Last Modified',
                     value: _formatDateTime(agent.modifiedAt!),
+                    valueStyle: AppTheme.monoSmall,
                   ),
               ],
             ),
@@ -436,21 +519,30 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: AppTheme.labelSmall.copyWith(
-            color: AppTheme.textSecondaryColor,
+        // Label (left side, fixed width)
+        SizedBox(
+          width: 120,
+          child: Text(
+            label,
+            style: AppTheme.labelMedium.copyWith(
+              color: AppTheme.textSecondaryColor,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-        const SizedBox(height: AppTheme.spacing4),
-        Text(
-          value,
-          style: valueStyle ?? AppTheme.bodyMedium,
-          maxLines: isMultiline ? null : 1,
-          overflow: isMultiline ? null : TextOverflow.ellipsis,
+        // Value (right side, flexible)
+        Expanded(
+          child: Text(
+            value,
+            style: (valueStyle ?? AppTheme.bodyMedium).copyWith(
+              fontWeight: FontWeight.w500,
+            ),
+            maxLines: isMultiline ? null : 3,
+            overflow: isMultiline ? null : TextOverflow.ellipsis,
+          ),
         ),
       ],
     );

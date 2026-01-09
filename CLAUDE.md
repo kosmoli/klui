@@ -70,24 +70,28 @@ git push --force
 **Key**: `modelType` field distinguishes LLM vs embedding models
 
 ### 7. Build & Deploy
+**After code changes, ALWAYS build and deploy**:
 ```bash
-# Build
+cd /root/work/klui
+./deploy.sh
+```
+
+**Deploy script does**:
+- Build Flutter web app
+- Stop old HTTP server
+- Start new HTTP server on port 8080
+- Show verification info
+
+**Manual build** (if script fails):
+```bash
 export PATH="$PATH:/opt/flutter/bin"
-flutter build web --release --wasm --dart-define=API_BASE_URL=http://38.175.200.93:8283
-
-# Regenerate providers (if API changes)
-flutter pub run build_runner build --delete-conflicting-outputs
-
-# Deploy (HTTP server)
-pkill -f "python3.*8080"
-python3 -m http.server 8080 --directory build/web &
-
-# Verify
-ls -lah build/web/main.dart.js  # Check timestamp
-ps aux | grep "python3.*8080"    # Check server PID
+flutter build web --release --dart-define=API_BASE_URL=http://38.175.200.93:8283
+cd build/web && python3 -m http.server 8080
 ```
 
 **Important**: Browser hard refresh required (Ctrl+Shift+R)
+
+**Note**: Keep this file concise. Follow brief style when adding new requirements.
 
 ### 8. Letta Backend Analysis
 **Location**: `/root/work/letta/`
@@ -112,20 +116,26 @@ ps aux | grep "python3.*8080"    # Check server PID
 - FLUTTER_WEB_PITFALLS.md (backup only)
 
 ### 10. Commit & Workflow
-**Commit message format**:
+**Commit message format** (Must use standard English):
 ```
-type(scope): description
+type: description
 
 [optional body]
 
-🤖 Generated with [Claude Code](https://claude.ai/code)
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
 via [Happy](https://happy.engineering)
 
 Co-Authored-By: Claude <noreply@anthropic.com>
 Co-Authored-By: Happy <yesreply@happy.engineering>
 ```
 
-**Types**: feat, fix, docs, refactor, test, chore
+**Types**: feat, fix, docs, style, refactor, test, chore
+**Examples**:
+- `feat: implement BYOK mode agent creation`
+- `fix: handle embedding model display with handle`
+- `docs: update API documentation`
+
+**Important**: Always use English for commits, Chinese for conversation only
 
 **After testing succeeds**:
 ```bash

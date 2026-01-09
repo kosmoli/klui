@@ -8,6 +8,8 @@ class Agent {
   final DateTime? createdAt;
   final DateTime? modifiedAt;
   final Map<String, dynamic>? config;
+  final Map<String, dynamic>? llmConfig;
+  final Map<String, dynamic>? embeddingConfig;
   final List<String>? tools;
   final String? systemPrompt;
 
@@ -20,6 +22,8 @@ class Agent {
     this.createdAt,
     this.modifiedAt,
     this.config,
+    this.llmConfig,
+    this.embeddingConfig,
     this.tools,
     this.systemPrompt,
   });
@@ -39,10 +43,12 @@ class Agent {
           ? DateTime.parse(json['modified_at'] as String)
           : null,
       config: json['config'] as Map<String, dynamic>?,
+      llmConfig: json['llm_config'] as Map<String, dynamic>?,
+      embeddingConfig: json['embedding_config'] as Map<String, dynamic>?,
       tools: json['tools'] != null
           ? List<String>.from(json['tools'] as List)
           : null,
-      systemPrompt: json['system_prompt'] as String?,
+      systemPrompt: json['system'] as String?,
     );
   }
 
@@ -57,6 +63,8 @@ class Agent {
       if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
       if (modifiedAt != null) 'modified_at': modifiedAt!.toIso8601String(),
       if (config != null) 'config': config,
+      if (llmConfig != null) 'llm_config': llmConfig,
+      if (embeddingConfig != null) 'embedding_config': embeddingConfig,
       if (tools != null) 'tools': tools,
       if (systemPrompt != null) 'system_prompt': systemPrompt,
     };
@@ -72,6 +80,8 @@ class Agent {
     DateTime? createdAt,
     DateTime? modifiedAt,
     Map<String, dynamic>? config,
+    Map<String, dynamic>? llmConfig,
+    Map<String, dynamic>? embeddingConfig,
     List<String>? tools,
     String? systemPrompt,
   }) {
@@ -84,6 +94,8 @@ class Agent {
       createdAt: createdAt ?? this.createdAt,
       modifiedAt: modifiedAt ?? this.modifiedAt,
       config: config ?? this.config,
+      llmConfig: llmConfig ?? this.llmConfig,
+      embeddingConfig: embeddingConfig ?? this.embeddingConfig,
       tools: tools ?? this.tools,
       systemPrompt: systemPrompt ?? this.systemPrompt,
     );

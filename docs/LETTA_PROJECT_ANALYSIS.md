@@ -32,7 +32,9 @@
 - [14. 如何创建自定义 Provider](#14-如何创建自定义-provider2026-01-04)
 - [15. Letta UI 创建 Agent 的 Provider 选择问题](#15-letta-ui-创建-agent-的-provider-选择问题2026-01-04)
 - [16. OPENAI_API_HEADERS 环境变量的真相](#16-openai_api_headers-环境变量的真相2026-01-05)
-- [18. 前端创建 Agent 的 BYOK 模式实现](#18-前端创建-agent-的-byok-模式实现2026-01-09) ⭐ 新增
+- [18. 前端创建 Agent 的 BYOK 模式实现](#18-前端创建-agent-的-byok-模式实现2026-01-09)
+- [19. Base LLM 和 Embedding 模型检索流程](#19-base-llm-和-embedding-模型检索流程2026-01-09)
+- [20. Agent 显示和模式判断的关键发现](#20-agent-显示和模式判断的关键发现2026-01-09) ⭐ 新增
 
 ## 问题背景
 
@@ -5965,3 +5967,969 @@ class CreateAgentRequest {
 **文档版本**：v2.6
 **最后更新**：2026-01-07
 **调查者**：Claude Code (Sonnet 4.5)
+
+## 19. Base 模型和 Embedding 模型的获取流程（2026-01-09）
+
+### 19.1 概述
+
+Letta 后端提供了两个主要的 API 端点来获取模型列表：
+
+1. **`GET /v1/models/?provider_category=base`** - 获取 Base LLM 模型列表
+2. **`GET /v1/models/embedding`** - 获取 Base Embedding 模型列表
+
+这两个端点的实现完全不同，本文档详细分析它们的获取流程。
+
+---
+
+### 19.2 Base LLM 模型获取流程
+
+#### 19.2.1 API 端点
+
+```python
+# letta/server/rest_api/routers/v1/llms.py:15
+@router.get("/", response_model=List[Model], operation_id="list_models")
+async def list_llm_models(
+    provider_category: Optional[List[ProviderCategory]] = Query(None),
+    provider_name: Optional[str] = Query(None),
+    provider_type: Optional[ProviderType] = Query(None),
+    server: "SyncServer" = Depends(get_letta_server),
+    headers: HeaderParams = Depends(get_headers),
+):
+    actor = await server.user_manager.get_actor_or_default_async(actor_id=headers.actor_id)
+    
+    models = await server.list_llm_models_async(
+        provider_category=provider_category,
+        provider_name=provider_name,
+        provider_type=provider_type,
+        actor=actor,
+    )
+    
+    return [Model.from_llm_config(model) for model in models]
+```
+
+**请求示例**：
+```bash
+GET /v1/models/?provider_category=base
+```
+
+**响应示例**：
+```json
+[
+  {
+    "handle": "openai-proxy/claude-sonnet-4-5-20250929",
+    "name": "claude-sonnet-4-5-20250929",
+    "display_name": "claude-sonnet-4-5-20250929",
+    "provider_type": "openai",
+    "provider_name": "openai-proxy",
+    "model_type": "llm",
+    "model": "claude-sonnet-4-5-20250929",
+    "model_endpoint_type": "openai",
+    "model_endpoint": "https://lingyunapi.com/v1",
+    "provider_category": "base",
+    "context_window": 30000,
+    ...
+  }
+]
+```
+
+#### 19.2.2 核心实现流程
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  1. REST API 接收请求                                         │
+│     list_llm_models(provider_category=[ProviderCategory.base])│
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│  2. Server 层处理                                            │
+│     server.list_llm_models_async(...)                       │
+│     letta/server/server.py:1047                             │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│  3. 获取启用的 Provider 列表                                 │
+│     providers = await self.get_enabled_providers_async(     │
+│         provider_category=[ProviderCategory.base],          │
+│         actor=actor                                         │
+│     )                                                       │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│  4. get_enabled_providers_async 逻辑                        │
+│     letta/server/server.py:1124                             │
+│                                                              │
+│     providers = []                                          │
+│     if not provider_category or ProviderCategory.base in    │
+│        provider_category:                                   │
+│         # 从环境变量加载的 Provider                          │
+│         providers_from_env = [p for p in                    │
+│             self._enabled_providers]                        │
+│         providers.extend(providers_from_env)                │
+│                                                              │
+│     if not provider_category or ProviderCategory.byok in    │
+│        provider_category:                                   │
+│         # 从数据库加载的 Provider                            │
+│         providers_from_db = await self                      │
+│             .provider_manager.list_providers_async(...)     │
+│         providers.extend(providers_from_db)                 │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│  5. 并发获取所有 Provider 的模型列表                         │
+│     import asyncio                                          │
+│     async def get_provider_models(provider):                │
+│         return await provider.list_llm_models_async()       │
+│                                                              │
+│     provider_results = await asyncio.gather(*[              │
+│         get_provider_models(p) for p in providers           │
+│     ])                                                      │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│  6. Provider.list_llm_models_async() 实现                   │
+│     每个 Provider 子类实现自己的模型列表                     │
+│                                                              │
+│     例如：OpenAIProvider                                    │
+│     - 调用 OpenAI API 的 GET /v1/models 端点                 │
+│     - 解析返回的模型列表                                     │
+│     - 过滤出不支持的模型                                     │
+│     - 构造 LLMConfig 对象                                    │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│  7. 返回合并的模型列表                                       │
+│     all_models = []                                         │
+│     for models in provider_results:                         │
+│         all_models.extend(models)                           │
+│     return all_models                                       │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### 19.2.3 _enabled_providers 初始化
+
+`_enabled_providers` 是在 Server 启动时从**环境变量**初始化的：
+
+```python
+# letta/server/server.py:211
+self._enabled_providers: List[Provider] = [LettaProvider(name="letta")]
+
+# OpenAI Provider
+if model_settings.openai_api_key:
+    self._enabled_providers.append(
+        OpenAIProvider(
+            name="openai",
+            api_key_enc=Secret.from_plaintext(model_settings.openai_api_key),
+            base_url=model_settings.openai_api_base,
+        )
+    )
+
+# Anthropic Provider
+if model_settings.anthropic_api_key:
+    self._enabled_providers.append(
+        AnthropicProvider(
+            name="anthropic",
+            api_key_enc=Secret.from_plaintext(model_settings.anthropic_api_key),
+        )
+    )
+
+# ... 其他 Provider（Ollama, Google, Azure, Groq, etc.）
+```
+
+**关键点**：
+- `_enabled_providers` 是**内存 Provider**（ProviderCategory.base）
+- 这些 Provider 的配置来自**环境变量**
+- Server 启动时一次性加载，运行期间不变
+
+#### 19.2.4 Provider 的 list_llm_models_async() 实现
+
+不同的 Provider 有不同的实现：
+
+**LettaProvider**（硬编码）：
+```python
+# letta/schemas/providers.py:162
+async def list_llm_models_async(self) -> List[LLMConfig]:
+    return [
+        LLMConfig(
+            model="letta-free",
+            model_endpoint_type="openai",
+            model_endpoint=LETTA_MODEL_ENDPOINT,
+            context_window=30000,
+            handle=self.get_handle("letta-free"),
+            provider_name=self.name,
+            provider_category=self.provider_category,
+        )
+    ]
+```
+
+**OpenAIProvider**（调用 API）：
+```python
+# letta/schemas/providers.py:254
+async def list_llm_models_async(self) -> List[LLMConfig]:
+    data = await self._get_models_async()
+    return self._list_llm_models(data)
+
+async def _get_models_async(self) -> List[dict]:
+    from letta.llm_api.openai import openai_get_model_list_async
+    
+    response = await openai_get_model_list_async(
+        self.base_url,
+        api_key=self.api_key,
+        extra_params=extra_params,
+    )
+    
+    if "data" in response:
+        return response["data"]
+    else:
+        return response
+
+def _list_llm_models(self, data) -> List[LLMConfig]:
+    configs = []
+    for model in data:
+        model_name = model["id"]
+        
+        # 过滤不支持的模型
+        if self.base_url == "https://api.openai.com/v1":
+            # 跳过不支持 tool calling 的模型
+            disallowed_types = ["transcribe", "search", "realtime", 
+                                "tts", "audio", "o1-mini", "o1-preview"]
+            if any(keyword in model_name for keyword in disallowed_types):
+                continue
+        
+        # 构造 LLMConfig
+        llm_config = LLMConfig(
+            model=model_name,
+            model_endpoint_type="openai",
+            model_endpoint=self.base_url,
+            context_window=self.get_model_context_window_size(model_name),
+            handle=self.get_handle(model_name),
+            provider_name=self.name,
+            provider_category=self.provider_category,
+        )
+        configs.append(llm_config)
+    
+    return configs
+```
+
+**AnthropicProvider**（调用 API）：
+```python
+# letta/schemas/providers.py:769
+async def list_llm_models_async(self) -> List[LLMConfig]:
+    from letta.llm_api.anthropic import anthropic_get_model_list_async
+    
+    models = await anthropic_get_model_list_async(api_key=self.api_key)
+    return self._list_llm_models(models)
+```
+
+---
+
+### 19.3 Base Embedding 模型获取流程
+
+#### 19.3.1 API 端点
+
+```python
+# letta/server/rest_api/routers/v1/llms.py:42
+@router.get("/embedding", response_model=List[EmbeddingModel], 
+           operation_id="list_embedding_models")
+async def list_embedding_models(
+    server: "SyncServer" = Depends(get_letta_server),
+    headers: HeaderParams = Depends(get_headers),
+):
+    actor = await server.user_manager.get_actor_or_default_async(
+        actor_id=headers.actor_id
+    )
+    models = await server.list_embedding_models_async(actor=actor)
+    
+    return [EmbeddingModel.from_embedding_config(model) 
+            for model in models]
+```
+
+**请求示例**：
+```bash
+GET /v1/models/embedding
+```
+
+**响应示例**：
+```json
+[
+  {
+    "handle": "openai/text-embedding-3-small",
+    "name": "text-embedding-3-small",
+    "display_name": "text-embedding-3-small",
+    "provider_type": "openai",
+    "provider_name": "openai",
+    "model_type": "embedding",
+    "embedding_endpoint_type": "openai",
+    "embedding_endpoint": "https://lingyunapi.com/v1",
+    "embedding_model": "text-embedding-3-small",
+    "embedding_dim": 1536,
+    "embedding_chunk_size": 300,
+    "batch_size": 1024
+  }
+]
+```
+
+**注意**：Embedding 模型的响应**没有** `provider_category` 字段！
+
+#### 19.3.2 核心实现流程
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  1. REST API 接收请求                                         │
+│     list_embedding_models()                                 │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│  2. Server 层处理                                            │
+│     server.list_embedding_models_async(actor)               │
+│     letta/server/server.py:1098                             │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│  3. 获取所有启用的 Provider（包括 base 和 byok）            │
+│     providers = await self.get_enabled_providers_async(     │
+│         actor=actor                                         │
+│     )                                                       │
+│                                                              │
+│     注意：这里不传 provider_category 参数                   │
+│     所以会同时返回 base 和 byok 的 Provider                  │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│  4. 并发获取所有 Provider 的 Embedding 模型列表             │
+│     async def get_provider_embedding_models(provider):      │
+│         try:                                                │
+│             return await provider.list_embedding_models_async()│
+│         except Exception as e:                              │
+│             logger.exception(...)                           │
+│             return []                                        │
+│                                                              │
+│     provider_results = await asyncio.gather(*[              │
+│         get_provider_embedding_models(p)                    │
+│         for p in providers                                  │
+│     ])                                                      │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│  5. Provider.list_embedding_models_async() 实现            │
+│     每个 Provider 子类实现自己的 Embedding 列表              │
+│                                                              │
+│     例如：OpenAIProvider                                    │
+│     - 硬编码支持的 embedding 模型列表                        │
+│     - 构造 EmbeddingConfig 对象                              │
+└───────────────────────┬─────────────────────────────────────┘
+                        │
+                        ▼
+┌─────────────────────────────────────────────────────────────┐
+│  6. 返回合并的 Embedding 模型列表                           │
+│     embedding_models = []                                  │
+│     for models in provider_results:                         │
+│         embedding_models.extend(models)                     │
+│     return embedding_models                                 │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### 19.3.3 Provider 的 list_embedding_models_async() 实现
+
+**LettaProvider**（硬编码）：
+```python
+# letta/schemas/providers.py:175
+def list_embedding_models(self):
+    return [
+        EmbeddingConfig(
+            embedding_model="letta-free",
+            embedding_endpoint_type="hugging-face",
+            embedding_endpoint="https://embeddings.memgpt.ai",
+            embedding_dim=1024,
+            embedding_chunk_size=300,
+            handle=self.get_handle("letta-free", is_embedding=True),
+            batch_size=32,
+        )
+    ]
+```
+
+**OpenAIProvider**（硬编码）：
+```python
+# letta/schemas/providers.py:391
+async def list_embedding_models_async(self) -> List[EmbeddingConfig]:
+    if self.base_url == "https://api.openai.com/v1":
+        # TODO: 实际上应该自动列出 OpenAI 的模型
+        return [
+            EmbeddingConfig(
+                embedding_model="text-embedding-ada-002",
+                embedding_endpoint_type="openai",
+                embedding_endpoint=self.base_url,
+                embedding_dim=1536,
+                embedding_chunk_size=300,
+                handle=self.get_handle("text-embedding-ada-002", 
+                                     is_embedding=True),
+                batch_size=1024,
+            ),
+            EmbeddingConfig(
+                embedding_model="text-embedding-3-small",
+                embedding_endpoint_type="openai",
+                embedding_endpoint=self.base_url,
+                embedding_dim=2000,
+                embedding_chunk_size=300,
+                handle=self.get_handle("text-embedding-3-small", 
+                                     is_embedding=True),
+                batch_size=1024,
+            ),
+            EmbeddingConfig(
+                embedding_model="text-embedding-3-large",
+                embedding_endpoint_type="openai",
+                embedding_endpoint=self.base_url,
+                embedding_dim=2000,
+                embedding_chunk_size=300,
+                handle=self.get_handle("text-embedding-3-large", 
+                                     is_embedding=True),
+                batch_size=1024,
+            ),
+        ]
+    else:
+        # 非 OpenAI 官方端点，从 API 动态获取
+        return self.list_embedding_models()
+```
+
+**AnthropicProvider**（不支持）：
+```python
+# letta/schemas/providers.py:867
+def list_embedding_models(self) -> List[EmbeddingConfig]:
+    # Anthropic 不支持 embedding
+    return []
+```
+
+**GoogleAIProvider**（调用 API）：
+```python
+# letta/schemas/providers.py:1295
+async def list_embedding_models_async(self):
+    from letta.llm_api.google_ai_client import google_ai_get_model_list_async
+    
+    model_options = await google_ai_get_model_list_async(
+        base_url=self.base_url, 
+        api_key=self.api_key
+    )
+    return self._list_embedding_models(model_options)
+
+def _list_embedding_models(self, model_options):
+    # 过滤出支持 'embedContent' 的模型
+    model_options = [mo for mo in model_options 
+                     if "embedContent" in mo["supportedGenerationMethods"]]
+    model_options = [str(m["name"]) for m in model_options]
+    model_options = [mo[len("models/"):] if mo.startswith("models/") 
+                     else mo for mo in model_options]
+    
+    configs = []
+    for model in model_options:
+        configs.append(
+            EmbeddingConfig(
+                embedding_model=model,
+                embedding_endpoint_type="google_ai",
+                embedding_endpoint=self.base_url,
+                embedding_dim=768,
+                embedding_chunk_size=300,
+                handle=self.get_handle(model, is_embedding=True),
+                batch_size=1024,
+            )
+        )
+    return configs
+```
+
+---
+
+### 19.4 关键区别总结
+
+#### 19.4.1 API 端点
+
+| 特性 | LLM 模型 | Embedding 模型 |
+|------|---------|---------------|
+| **端点** | `GET /v1/models/?provider_category=base` | `GET /v1/models/embedding` |
+| **参数** | 支持 `provider_category`, `provider_name`, `provider_type` | 无参数 |
+| **返回格式** | `List[Model]` (extends LLMConfig) | `List[EmbeddingModel]` (extends EmbeddingConfig) |
+| **字段差异** | 有 `provider_category` 字段 | **无** `provider_category` 字段 |
+
+#### 19.4.2 实现差异
+
+| 特性 | LLM 模型 | Embedding 模型 |
+|------|---------|---------------|
+| **Provider 筛选** | 根据 `provider_category` 参数筛选 | 获取所有 Provider 的 Embedding 模型 |
+| **模型来源** | 大部分 Provider 从 API 动态获取 | 大部分 Provider 硬编码模型列表 |
+| **过滤逻辑** | 复杂（过滤不支持 tool calling 的模型） | 简单（通常直接返回固定列表） |
+
+#### 19.4.3 为什么 `/v1/models/?provider_category=base` 不返回 Embedding 模型？
+
+**原因**：
+
+1. **模型类型过滤**：
+   - `Provider.list_llm_models_async()` 只返回 `LLMConfig` 对象
+   - 某些 Provider（如 TogetherAI）会根据 API 返回的 `type` 字段过滤：
+     ```python
+     if "type" in model and model["type"] not in ["chat", "language"]:
+         continue  # 跳过 embedding 模型
+     ```
+
+2. **API 端点设计**：
+   - `/v1/models/` 设计用于列出 **LLM 模型**
+   - `/v1/models/embedding` 专门用于列出 **Embedding 模型**
+   - 两者分离，避免混淆
+
+3. **响应格式差异**：
+   - LLM 模型：`model`, `model_endpoint_type`, `model_endpoint`
+   - Embedding 模型：`embedding_model`, `embedding_endpoint_type`, `embedding_endpoint`
+
+---
+
+### 19.5 前端调用建议
+
+#### 19.5.1 非 BYOK 模式
+
+```dart
+// 1. 加载 LLM 模型
+final allModels = await ref.read(baseLLMModelListProvider.future);
+final llmModels = allModels.where((m) => m.modelType == 'llm').toList();
+
+// 2. 加载 Embedding 模型（需要单独调用）
+final embeddingResponse = await ref.read(apiClientProvider).get('/models/embedding');
+final List<dynamic> embeddingData = jsonDecode(embeddingResponse.body);
+final embeddingModels = embeddingData
+    .map((json) => LLMModel.fromJson(json as Map<String, dynamic>))
+    .toList();
+```
+
+#### 19.5.2 BYOK 模式
+
+```dart
+// 1. 先获取 Provider 列表
+final providers = await ref.read(providerListProvider.future);
+
+// 2. 根据选择的 Provider 动态加载模型
+final provider = providers.firstWhere((p) => p.name == selectedProviderName);
+
+// 3. 加载 LLM 模型
+final llmModels = await ref.read(llmModelListByProviderProvider(provider.name).future);
+
+// 4. 加载 Embedding 模型（从 Provider 的 embedding_models 字段）
+// 或者调用 /v1/models/embedding 并按 provider_name 过滤
+```
+
+---
+
+### 19.6 常见问题
+
+#### Q1: 为什么 `/v1/models/?provider_category=base` 不返回 Embedding 模型？
+
+**A**: 
+- `/v1/models/` 端点设计用于列出 **LLM 模型**（`model_type="llm"`）
+- Embedding 模型需要单独调用 `/v1/models/embedding` 端点
+- 两者返回的数据结构不同（字段名不同）
+
+#### Q2: Embedding 模型为什么没有 `provider_category` 字段？
+
+**A**:
+- `/v1/models/embedding` 端点会返回**所有** Provider 的 Embedding 模型（包括 base 和 byok）
+- 因此不区分 `provider_category`
+- 前端默认将 Embedding 模型视为 `provider_category="base"`
+
+#### Q3: 如何判断一个模型是 LLM 还是 Embedding？
+
+**A**:
+- 检查 `model_type` 字段：
+  - `"llm"` → LLM 模型
+  - `"embedding"` → Embedding 模型
+- 或者检查字段名：
+  - 有 `model` 字段 → LLM 模型
+  - 有 `embedding_model` 字段 → Embedding 模型
+
+#### Q4: BYOK 模式下如何获取 Embedding 模型？
+
+**A**:
+- 方法 1：调用 `/v1/models/embedding`，然后按 `provider_name` 过滤
+- 方法 2：从数据库 Provider 配置中读取 `embedding_models` 字段（如果有的话）
+
+---
+
+### 19.7 总结
+
+#### 19.7.1 流程对比图
+
+```
+LLM 模型获取流程:
+GET /v1/models/?provider_category=base
+  ↓
+server.list_llm_models_async(provider_category=[base])
+  ↓
+get_enabled_providers_async(provider_category=[base])
+  ↓ (只返回 _enabled_providers)
+返回 base Providers (从环境变量)
+  ↓
+provider.list_llm_models_async()
+  ↓ (动态调用 API 或硬编码)
+返回 LLM 模型列表
+
+Embedding 模型获取流程:
+GET /v1/models/embedding
+  ↓
+server.list_embedding_models_async()
+  ↓
+get_enabled_providers_async() (无参数)
+  ↓ (返回所有 Providers)
+返回 base + byok Providers
+  ↓
+provider.list_embedding_models_async()
+  ↓ (通常硬编码)
+返回 Embedding 模型列表
+```
+
+#### 19.7.2 关键要点
+
+1. **两个独立的端点**：
+   - `/v1/models/` → LLM 模型
+   - `/v1/models/embedding` → Embedding 模型
+
+2. **Provider 筛选逻辑不同**：
+   - LLM：根据 `provider_category` 参数筛选
+   - Embedding：获取所有 Provider 的 Embedding 模型
+
+3. **模型来源不同**：
+   - LLM：大部分从 API 动态获取
+   - Embedding：大部分硬编码列表
+
+4. **前端需要分别调用**：
+   - 非 BYOK 模式：先调用 `/v1/models/?provider_category=base`，再调用 `/v1/models/embedding`
+   - BYOK 模式：先选择 Provider，再动态加载对应的模型
+
+---
+
+## 20. Agent 显示和模式判断的关键发现（2026-01-09）
+
+### 20.1 问题背景
+
+在实现前端 Agent 列表和详情页面时，发现了三个关键问题：
+
+1. **Agent 列表显示问题**：有些 Agent 显示模型 handle（如 `openai-proxy/claude-opus-4-1`），有些只显示模型名（如 `claude-opus-4-1`）
+2. **详情页面信息显示不清晰**：键值对的字体大小和间距让人难以区分
+3. **所有 Agent 的 Category 都显示 BYOK**：即使 Base 模式创建的 Agent 也显示为 BYOK
+
+### 20.2 核心发现
+
+#### 20.2.1 Agent API 返回格式的真相
+
+通过测试 `/v1/agents/` API，我们发现了重要的事实：
+
+**测试结果**：
+```bash
+curl -H "Authorization: Bearer $TOKEN" http://38.175.200.93:8283/v1/agents/ | python3 -c "
+import sys, json
+agents = json.load(sys.stdin)
+base_agents = [a for a in agents if a.get('model') is not None]
+byok_agents = [a for a in agents if a.get('model') is None]
+print(f'Total agents: {len(agents)}')
+print(f'Base mode agents: {len(base_agents)}')
+print(f'BYOK mode agents: {len(byok_agents)}')
+"
+```
+
+**输出**：
+```
+Total agents: 13
+Base mode agents: 4
+BYOK mode agents: 13
+```
+
+等等！13 个 BYOK + 4 个 Base = 17，但总共只有 13 个 Agent？
+
+**关键发现**：
+- **所有 Agent 都有 `llm_config` 字段**（包括 Base 模式的）
+- Base 模式 Agent：有 `model` 字段（handle 格式），也有 `llm_config`
+- BYOK 模式 Agent：`model` 字段为 `null`，只有 `llm_config`
+
+#### 20.2.2 Base 模式 Agent 的完整结构示例
+
+```json
+{
+  "id": "agent-2ebdb596-ce9e-4598-b673-c47d4e11e00b",
+  "name": "123",
+  "model": "openai-proxy/claude-opus-4-1-20250805-thinking",  // ← Base 模式标记
+  "embedding": "openai/text-embedding-3-small",               // ← Base 模式标记
+  "llm_config": {
+    "model": "claude-opus-4-1-20250805-thinking",
+    "provider_name": "openai-proxy",
+    "provider_category": "byok",  // ← 注意：这里是 "byok"，但实际是 Base 模式！
+    "handle": "openai-proxy/claude-opus-4-1-20250805-thinking"  // ← Base 模式有 handle
+  },
+  "embedding_config": {
+    "embedding_model": "text-embedding-3-small",
+    "provider_name": "openai",
+    "handle": "openai/text-embedding-3-small"  // ← Base 模式有 handle
+  }
+}
+```
+
+#### 20.2.3 BYOK 模式 Agent 的完整结构示例
+
+```json
+{
+  "id": "agent-81bbe323-aa3c-48c5-8a03-3f8c66350adf",
+  "name": "ggvvygv ygv",
+  "model": null,           // ← BYOK 模式标记
+  "embedding": null,       // ← BYOK 模式标记
+  "llm_config": {
+    "model": "claude-opus-4-1-20250805-thinking",
+    "provider_name": "openai-proxy",
+    "provider_category": "byok",
+    "handle": null  // ← BYOK 模式 handle 为 null
+  },
+  "embedding_config": {
+    "embedding_model": "text-embedding-3-large",
+    "provider_name": "openai-proxy",
+    "handle": null  // ← BYOK 模式 handle 为 null
+  }
+}
+```
+
+### 20.3 关键结论
+
+#### 20.3.1 如何判断 Agent 是 Base 还是 BYOK 模式？
+
+**❌ 错误方法**：
+```dart
+// 不要用 provider_category 字段判断！
+if (agent.llmConfig['provider_category'] == 'base') {
+  // 这个判断不可靠，因为 Base 模式的 agent 也可能显示 "byok"
+}
+```
+
+**✅ 正确方法**：
+```dart
+// 方法 1：检查 model 字段（推荐）
+if (agent.model != null) {
+  // Base 模式
+} else {
+  // BYOK 模式
+}
+
+// 方法 2：检查 llm_config.handle 字段
+if (agent.llmConfig?['handle'] != null) {
+  // Base 模式
+} else {
+  // BYOK 模式
+}
+```
+
+#### 20.3.2 Agent 列表页面显示模型的正确方式
+
+**问题**：
+- Base 模式：`agent.model` = `"openai-proxy/claude-opus-4-1"`（完整 handle）
+- BYOK 模式：`agent.model` = `null`，只有 `agent.llmConfig['model']` = `"claude-opus-4-1"`（只有模型名）
+
+**解决方案**：
+```dart
+String _getModelLabel(Agent agent) {
+  // Base 模式：直接使用 agent.model（已经是 handle 格式）
+  if (agent.model != null) {
+    return agent.model!;
+  }
+
+  // BYOK 模式：组合 provider_name + model
+  if (agent.llmConfig != null) {
+    final provider = agent.llmConfig!['provider_name']?.toString() ?? 'unknown';
+    final model = agent.llmConfig!['model']?.toString() ?? 'unknown';
+    return '$provider/$model';  // 构造 handle 格式
+  }
+
+  return 'Unknown';
+}
+```
+
+#### 20.3.3 详情页面的清晰显示设计
+
+**问题**：原来的 `_InfoRow` 组件使用垂直布局，label 和 value 上下排列，难以区分。
+
+**解决方案**：改用水平布局，label 固定宽度，value 自适应。
+
+```dart
+class _InfoRow extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Label (左对齐，固定宽度 120px)
+        SizedBox(
+          width: 120,
+          child: Text(
+            label,
+            style: AppTheme.labelMedium.copyWith(
+              color: AppTheme.textSecondaryColor,
+              fontWeight: FontWeight.w600,  // 更醒目
+            ),
+          ),
+        ),
+        // Value (右对齐，自适应宽度)
+        Expanded(
+          child: Text(
+            value,
+            style: (valueStyle ?? AppTheme.bodyMedium).copyWith(
+              fontWeight: FontWeight.w500,  // 更清晰
+            ),
+            maxLines: isMultiline ? null : 3,
+            overflow: isMultiline ? null : TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+}
+```
+
+**效果**：
+```
+Agent ID          agent-2ebdb596-ce9e-4598...
+Name              123
+Description       This is a test agent
+```
+
+### 20.4 API 返回格式总结表
+
+| 字段 | Base 模式 | BYOK 模式 | 说明 |
+|------|-----------|-----------|------|
+| `model` | `"openai-proxy/claude-opus-4-1"` | `null` | Base 模式的唯一标识 |
+| `embedding` | `"openai/text-embedding-3-small"` | `null` | Base 模式的 embedding 标识 |
+| `llm_config.model` | `"claude-opus-4-1"` | `"claude-opus-4-1"` | 模型名（不含 provider） |
+| `llm_config.provider_name` | `"openai-proxy"` | `"openai-proxy"` | Provider 名称 |
+| `llm_config.provider_category` | 可能是 `"byok"` ❌ | `"byok"` ✅ | **不可靠！不要用** |
+| `llm_config.handle` | `"openai-proxy/claude-opus-4-1"` | `null` | Base 模式有值 |
+| `embedding_config.embedding_model` | `"text-embedding-3-small"` | `"text-embedding-3-large"` | Embedding 模型名 |
+| `embedding_config.provider_name` | `"openai"` | `"openai-proxy"` | Provider 名称 |
+| `embedding_config.handle` | `"openai/text-embedding-3-small"` | `null` | Base 模式有值 |
+
+### 20.5 前端实现建议
+
+#### 20.5.1 Agent 模型定义
+
+```dart
+class Agent {
+  final String id;
+  final String name;
+  final String? description;
+  final String? model;  // ← Base 模式标记
+  final Map<String, dynamic>? llmConfig;  // ← 所有 Agent 都有
+  final Map<String, dynamic>? embeddingConfig;  // ← 所有 Agent 都有
+
+  // 判断模式的方法
+  bool get isBaseMode => model != null;
+  bool get isBYOKMode => model == null;
+}
+```
+
+#### 20.5.2 Agent 列表卡片显示
+
+```dart
+Widget build(BuildContext context) {
+  return AgentCard(
+    agent: agent,
+    // 显示模型（统一使用 handle 格式）
+    modelLabel: _getModelLabel(agent),
+  );
+}
+
+String _getModelLabel(Agent agent) {
+  if (agent.isBaseMode) {
+    return agent.model!;
+  } else {
+    final provider = agent.llmConfig!['provider_name'];
+    final model = agent.llmConfig!['model'];
+    return '$provider/$model';
+  }
+}
+```
+
+#### 20.5.3 Agent 详情页面显示
+
+```dart
+Widget build(BuildContext context) {
+  return Column(
+    children: [
+      // Base 模式配置
+      if (agent.isBaseMode)
+        _SectionCard(
+          title: 'Model Configuration (Base Mode)',
+          child: _InfoRow(
+            label: 'Model Handle',
+            value: agent.model!,
+          ),
+        ),
+
+      // BYOK 模式配置
+      if (agent.isBYOKMode)
+        _SectionCard(
+          title: 'LLM Configuration (BYOK Mode)',
+          child: Column(
+            children: [
+              _InfoRow(label: 'Model', value: agent.llmConfig!['model']),
+              _InfoRow(label: 'Provider', value: agent.llmConfig!['provider_name']),
+              _InfoRow(label: 'Context Window', value: '${agent.llmConfig!['context_window']} tokens'),
+            ],
+          ),
+        ),
+
+      // Embedding 配置（所有模式）
+      _SectionCard(
+        title: 'Embedding Configuration',
+        child: Column(
+          children: [
+            _InfoRow(label: 'Model', value: agent.embeddingConfig!['embedding_model']),
+            _InfoRow(label: 'Provider', value: agent.embeddingConfig!['provider_name']),
+            _InfoRow(label: 'Dimension', value: agent.embeddingConfig!['embedding_dim'].toString()),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+```
+
+### 20.6 常见问题
+
+#### Q1: 为什么 Base 模式的 Agent 也有 `llm_config`？
+
+**A**: Letta 后端设计决定。即使是 Base 模式，后端也会填充 `llm_config` 和 `embedding_config` 字段，但是额外提供 `model` 和 `embedding` 字段作为简化的 handle 格式。
+
+#### Q2: 为什么 `provider_category` 字段不可靠？
+
+**A**: 实际测试发现，Base 模式的 Agent 的 `llm_config.provider_category` 也可能是 `"byok"`。后端的这个字段似乎不是用来区分 Base/BYOK 模式的，而是有其他用途。
+
+#### Q3: 如何在创建 Agent 时指定模式？
+
+**A**:
+- **Base 模式**：发送 `{"name": "...", "model": "openai-proxy/claude-opus-4", "embedding": "openai/text-embedding-3-small"}`
+- **BYOK 模式**：发送 `{"name": "...", "llm_config": {...}, "embedding_config": {...}}`
+
+前端需要根据用户选择的模式，使用不同的 JSON 格式。
+
+#### Q4: 为什么有些 Agent 列表项显示完整的 handle，有些不显示？
+
+**A**: 因为前端代码之前只检查 `agent.model != null`，导致 BYOK 模式的 Agent 不显示模型信息。修复后，BYOK 模式也会显示组合后的 handle（`provider/model`）。
+
+### 20.7 总结
+
+1. **判断 Agent 模式的唯一可靠方法**：检查 `agent.model` 字段是否为 `null`
+2. **不要信任 `provider_category` 字段**：这个字段在 Base 和 BYOK 模式下都可能显示 `"byok"`
+3. **所有 Agent 都有 `llm_config` 和 `embedding_config`**：这不是 BYOK 模式的专属
+4. **前端需要统一显示格式**：无论哪种模式，都应该显示完整的 handle 格式（`provider/model`）
+5. **详情页面使用水平布局**：label 固定宽度，value 自适应，更清晰易读
+
+---
+
+**文档版本**：v2.8
+**最后更新**：2026-01-09
+**本章作者**：Kosmo + Claude Sonnet 4.5

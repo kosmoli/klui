@@ -148,12 +148,14 @@ class AgentCard extends StatelessWidget {
                   Row(
                     children: [
                       // Model Tag
-                      if (agent.model != null)
+                      // Base mode: agent.model (handle format, e.g., "openai-proxy/claude-sonnet-4")
+                      // BYOK mode: construct from provider_name + model
+                      if (agent.model != null || agent.llmConfig != null)
                         _InfoChip(
                           icon: Icons.psychology_outlined,
-                          label: agent.model!,
+                          label: _getModelLabel(agent),
                         ),
-                      if (agent.model != null) const Spacer(),
+                      if (agent.model != null || agent.llmConfig != null) const Spacer(),
                       // Created Date
                       Text(
                         _formatDate(agent.createdAt),
@@ -194,6 +196,22 @@ class AgentCard extends StatelessWidget {
     } else {
       return 'Just now';
     }
+  }
+
+  String _getModelLabel(Agent agent) {
+    // Base mode: use agent.model (handle format)
+    if (agent.model != null) {
+      return agent.model!;
+    }
+
+    // BYOK mode: construct handle from provider_name + model
+    if (agent.llmConfig != null) {
+      final provider = agent.llmConfig!['provider_name']?.toString() ?? 'unknown';
+      final model = agent.llmConfig!['model']?.toString() ?? 'unknown';
+      return '$provider/$model';
+    }
+
+    return 'Unknown';
   }
 }
 

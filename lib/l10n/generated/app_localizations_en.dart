@@ -358,6 +358,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get agent_detail_section_embedding => 'Embedding Configuration';
 
   @override
+  String get agent_detail_section_model_settings => 'Model Settings';
+
+  @override
+  String get agent_detail_section_tools => 'Tools';
+
+  @override
+  String get agent_detail_section_tags => 'Tags';
+
+  @override
+  String get agent_detail_section_metadata => 'Metadata';
+
+  @override
   String get agent_detail_section_timestamps => 'Timestamps';
 
   @override
@@ -383,6 +395,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agent_detail_field_model => 'Model';
+
+  @override
+  String get agent_detail_field_embedding_handle => 'Embedding Model';
 
   @override
   String get agent_detail_field_provider => 'Provider';
@@ -412,6 +427,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agent_detail_n_a => 'N/A';
+
+  @override
+  String get agent_detail_no_tools => 'No tools';
+
+  @override
+  String get agent_detail_no_tags => 'No tags';
+
+  @override
+  String get agent_detail_no_metadata => 'No metadata';
 
   @override
   String get provider_list_title => 'Providers';

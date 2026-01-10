@@ -250,6 +250,93 @@ class AgentDetailScreen extends ConsumerWidget {
           if (agent.embeddingConfig != null)
             const SizedBox(height: AppTheme.spacing24),
 
+          // Embedding handle (new format)
+          if (agent.embedding != null)
+            _SectionCard(
+              title: context.l10n.agent_detail_section_embedding,
+              icon: Icons.memory_outlined,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _InfoRow(
+                    label: context.l10n.agent_detail_field_embedding_handle,
+                    value: agent.embedding!,
+                    valueStyle: AppTheme.monoSmall,
+                  ),
+                ],
+              ),
+            ),
+          if (agent.embedding != null)
+            const SizedBox(height: AppTheme.spacing24),
+
+          // Model Settings Section
+          if (agent.modelSettings != null && agent.modelSettings!.isNotEmpty)
+            _SectionCard(
+              title: context.l10n.agent_detail_section_model_settings,
+              icon: Icons.tune_outlined,
+              child: _ConfigViewer(config: agent.modelSettings!),
+            ),
+          if (agent.modelSettings != null && agent.modelSettings!.isNotEmpty)
+            const SizedBox(height: AppTheme.spacing24),
+
+          // Tools Section
+          if (agent.tools != null && agent.tools!.isNotEmpty)
+            _SectionCard(
+              title: context.l10n.agent_detail_section_tools,
+              icon: Icons.build_outlined,
+              child: Wrap(
+                spacing: AppTheme.spacing8,
+                runSpacing: AppTheme.spacing8,
+                children: agent.tools!.map((tool) => Chip(
+                  label: Text(
+                    tool,
+                    style: AppTheme.labelSmall,
+                  ),
+                  backgroundColor: AppTheme.primaryColor.withOpacity(0.1),
+                  side: BorderSide(
+                    color: AppTheme.primaryColor.withOpacity(0.3),
+                    width: 1,
+                  ),
+                )).toList(),
+              ),
+            ),
+          if (agent.tools != null && agent.tools!.isNotEmpty)
+            const SizedBox(height: AppTheme.spacing24),
+
+          // Tags Section
+          if (agent.tags != null && agent.tags!.isNotEmpty)
+            _SectionCard(
+              title: context.l10n.agent_detail_section_tags,
+              icon: Icons.label_outlined,
+              child: Wrap(
+                spacing: AppTheme.spacing8,
+                runSpacing: AppTheme.spacing8,
+                children: agent.tags!.map((tag) => Chip(
+                  label: Text(
+                    tag,
+                    style: AppTheme.labelSmall,
+                  ),
+                  backgroundColor: AppTheme.secondaryColor.withOpacity(0.1),
+                  side: BorderSide(
+                    color: AppTheme.secondaryColor.withOpacity(0.3),
+                    width: 1,
+                  ),
+                )).toList(),
+              ),
+            ),
+          if (agent.tags != null && agent.tags!.isNotEmpty)
+            const SizedBox(height: AppTheme.spacing24),
+
+          // Metadata Section
+          if (agent.metadata != null && agent.metadata!.isNotEmpty)
+            _SectionCard(
+              title: context.l10n.agent_detail_section_metadata,
+              icon: Icons.description_outlined,
+              child: _ConfigViewer(config: agent.metadata!),
+            ),
+          if (agent.metadata != null && agent.metadata!.isNotEmpty)
+            const SizedBox(height: AppTheme.spacing24),
+
           // Timestamps Section
           _SectionCard(
             title: context.l10n.agent_detail_section_timestamps,

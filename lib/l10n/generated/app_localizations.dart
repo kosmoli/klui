@@ -698,6 +698,30 @@ abstract class AppLocalizations {
   /// **'Embedding Configuration'**
   String get agent_detail_section_embedding;
 
+  /// No description provided for @agent_detail_section_model_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Model Settings'**
+  String get agent_detail_section_model_settings;
+
+  /// No description provided for @agent_detail_section_tools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get agent_detail_section_tools;
+
+  /// No description provided for @agent_detail_section_tags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get agent_detail_section_tags;
+
+  /// No description provided for @agent_detail_section_metadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Metadata'**
+  String get agent_detail_section_metadata;
+
   /// No description provided for @agent_detail_section_timestamps.
   ///
   /// In en, this message translates to:
@@ -752,6 +776,12 @@ abstract class AppLocalizations {
   /// **'Model'**
   String get agent_detail_field_model;
 
+  /// No description provided for @agent_detail_field_embedding_handle.
+  ///
+  /// In en, this message translates to:
+  /// **'Embedding Model'**
+  String get agent_detail_field_embedding_handle;
+
   /// No description provided for @agent_detail_field_provider.
   ///
   /// In en, this message translates to:
@@ -805,6 +835,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'N/A'**
   String get agent_detail_n_a;
+
+  /// No description provided for @agent_detail_no_tools.
+  ///
+  /// In en, this message translates to:
+  /// **'No tools'**
+  String get agent_detail_no_tools;
+
+  /// No description provided for @agent_detail_no_tags.
+  ///
+  /// In en, this message translates to:
+  /// **'No tags'**
+  String get agent_detail_no_tags;
+
+  /// No description provided for @agent_detail_no_metadata.
+  ///
+  /// In en, this message translates to:
+  /// **'No metadata'**
+  String get agent_detail_no_metadata;
 
   /// No description provided for @provider_list_title.
   ///

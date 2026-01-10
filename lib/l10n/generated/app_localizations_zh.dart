@@ -343,6 +343,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agent_detail_section_embedding => 'Embedding 配置';
 
   @override
+  String get agent_detail_section_model_settings => 'Model 设置';
+
+  @override
+  String get agent_detail_section_tools => '工具';
+
+  @override
+  String get agent_detail_section_tags => '标签';
+
+  @override
+  String get agent_detail_section_metadata => '元数据';
+
+  @override
   String get agent_detail_section_timestamps => '时间戳';
 
   @override
@@ -368,6 +380,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get agent_detail_field_model => 'Model';
+
+  @override
+  String get agent_detail_field_embedding_handle => 'Embedding Model';
 
   @override
   String get agent_detail_field_provider => 'Provider';
@@ -397,6 +412,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get agent_detail_n_a => '不适用';
+
+  @override
+  String get agent_detail_no_tools => '无工具';
+
+  @override
+  String get agent_detail_no_tags => '无标签';
+
+  @override
+  String get agent_detail_no_metadata => '无元数据';
 
   @override
   String get provider_list_title => 'Provider';

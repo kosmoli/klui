@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/extensions/context_extensions.dart';
 import '../../../core/providers/api_providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../widgets/provider_form.dart';
@@ -13,7 +14,7 @@ class ProviderCreateScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Provider'),
+        title: Text(context.l10n.provider_create_title),
       ),
       body: ProviderCreateForm(
         onSubmit: (request) async {
@@ -56,7 +57,7 @@ class ProviderCreateScreen extends ConsumerWidget {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Provider "${request.name}" created successfully'),
+                  content: Text(context.l10n.provider_create_success(request.name)),
                   backgroundColor: AppTheme.primaryColor,
                   behavior: SnackBarBehavior.floating,
                 ),
@@ -75,11 +76,11 @@ class ProviderCreateScreen extends ConsumerWidget {
             if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text('Failed to create provider: $e'),
+                  content: Text(context.l10n.provider_create_failed(e.toString())),
                   backgroundColor: AppTheme.errorColor,
                   behavior: SnackBarBehavior.floating,
                   action: SnackBarAction(
-                    label: 'Dismiss',
+                    label: context.l10n.agent_cancel_button,
                     textColor: Colors.white,
                     onPressed: () {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();

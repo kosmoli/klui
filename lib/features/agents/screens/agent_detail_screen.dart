@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../core/extensions/context_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/providers/api_providers.dart';
@@ -68,9 +69,9 @@ class AgentDetailScreen extends ConsumerWidget {
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () => context.go('/agents'),
-        tooltip: 'Back to Agents',
+        tooltip: context.l10n.agent_detail_back_tooltip,
       ),
-      title: const Text('Agent Details'),
+      title: Text(context.l10n.agent_detail_title),
       actions: [
         Tooltip(
           message: 'Edit',
@@ -92,7 +93,14 @@ class AgentDetailScreen extends ConsumerWidget {
           message: 'Delete',
           child: IconButton(
             icon: const Icon(Icons.delete_outlined),
-            onPressed: () => _showDeleteDialog(context, ref),
+            onPressed: () {
+              final agentAsyncValue = ref.read(agentProvider(agentId));
+              agentAsyncValue.when(
+                data: (agent) => _showDeleteDialog(context, ref, agent),
+                loading: () => {},
+                error: (_, __) => {},
+              );
+            },
             color: AppTheme.errorColor,
           ),
         ),
@@ -113,26 +121,26 @@ class AgentDetailScreen extends ConsumerWidget {
 
           // Basic Info Section
           _SectionCard(
-            title: 'Basic Information',
+            title: context.l10n.agent_detail_section_basic,
             icon: Icons.info_outline,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _InfoRow(
-                  label: 'Agent ID',
+                  label: context.l10n.agent_detail_field_id,
                   value: agent.id,
                   valueStyle: AppTheme.monoSmall,
                 ),
                 const SizedBox(height: AppTheme.spacing12),
                 _InfoRow(
-                  label: 'Name',
+                  label: context.l10n.agent_detail_field_name,
                   value: agent.name,
                   valueStyle: AppTheme.bodyMedium,
                 ),
                 if (agent.description != null) ...[
                   const SizedBox(height: AppTheme.spacing12),
                   _InfoRow(
-                    label: 'Description',
+                    label: context.l10n.agent_detail_field_description,
                     value: agent.description!,
                     valueStyle: AppTheme.bodyMedium,
                     isMultiline: true,
@@ -141,7 +149,7 @@ class AgentDetailScreen extends ConsumerWidget {
                 if (agent.agentType != null) ...[
                   const SizedBox(height: AppTheme.spacing12),
                   _InfoRow(
-                    label: 'Agent Type',
+                    label: context.l10n.agent_detail_field_agent_type,
                     value: agent.agentType!,
                     valueStyle: AppTheme.bodyMedium,
                   ),
@@ -154,13 +162,13 @@ class AgentDetailScreen extends ConsumerWidget {
           // Model Configuration Section (Base mode)
           if (agent.model != null)
             _SectionCard(
-              title: 'Model Configuration (Base Mode)',
+              title: context.l10n.agent_detail_section_model_base,
               icon: Icons.psychology_outlined,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _InfoRow(
-                    label: 'Model Handle',
+                    label: context.l10n.agent_detail_field_model_handle,
                     value: agent.model!,
                     valueStyle: AppTheme.monoSmall,
                   ),
@@ -174,20 +182,20 @@ class AgentDetailScreen extends ConsumerWidget {
           // Note: All agents have llmConfig, but only BYOK mode agents have model == null
           if (agent.model == null && agent.llmConfig != null)
             _SectionCard(
-              title: 'LLM Configuration (BYOK Mode)',
+              title: context.l10n.agent_detail_section_llm_byok,
               icon: Icons.psychology_outlined,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _InfoRow(
-                    label: 'Model',
+                    label: context.l10n.agent_detail_field_model,
                     value: agent.llmConfig!['model']?.toString() ?? 'N/A',
                     valueStyle: AppTheme.monoSmall,
                   ),
                   if (agent.llmConfig!['provider_name'] != null) ...[
                     const SizedBox(height: AppTheme.spacing12),
                     _InfoRow(
-                      label: 'Provider',
+                      label: context.l10n.agent_detail_field_provider,
                       value: agent.llmConfig!['provider_name'].toString(),
                       valueStyle: AppTheme.monoSmall,
                     ),
@@ -195,7 +203,7 @@ class AgentDetailScreen extends ConsumerWidget {
                   if (agent.llmConfig!['context_window'] != null) ...[
                     const SizedBox(height: AppTheme.spacing12),
                     _InfoRow(
-                      label: 'Context Window',
+                      label: context.l10n.agent_detail_field_context_window,
                       value: '${agent.llmConfig!['context_window']} tokens',
                       valueStyle: AppTheme.monoSmall,
                     ),
@@ -209,21 +217,21 @@ class AgentDetailScreen extends ConsumerWidget {
           // Embedding Configuration Section (all modes)
           if (agent.embeddingConfig != null)
             _SectionCard(
-              title: 'Embedding Configuration',
+              title: context.l10n.agent_detail_section_embedding,
               icon: Icons.memory_outlined,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (agent.embeddingConfig!['embedding_model'] != null)
                     _InfoRow(
-                      label: 'Model',
+                      label: context.l10n.agent_detail_field_model,
                       value: agent.embeddingConfig!['embedding_model'].toString(),
                       valueStyle: AppTheme.monoSmall,
                     ),
                   if (agent.embeddingConfig!['provider_name'] != null) ...[
                     const SizedBox(height: AppTheme.spacing12),
                     _InfoRow(
-                      label: 'Provider',
+                      label: context.l10n.agent_detail_field_provider,
                       value: agent.embeddingConfig!['provider_name'].toString(),
                       valueStyle: AppTheme.monoSmall,
                     ),
@@ -231,7 +239,7 @@ class AgentDetailScreen extends ConsumerWidget {
                   if (agent.embeddingConfig!['embedding_dim'] != null) ...[
                     const SizedBox(height: AppTheme.spacing12),
                     _InfoRow(
-                      label: 'Dimension',
+                      label: context.l10n.agent_detail_field_embedding_dim,
                       value: agent.embeddingConfig!['embedding_dim'].toString(),
                       valueStyle: AppTheme.monoSmall,
                     ),
@@ -244,14 +252,14 @@ class AgentDetailScreen extends ConsumerWidget {
 
           // Timestamps Section
           _SectionCard(
-            title: 'Timestamps',
+            title: context.l10n.agent_detail_section_timestamps,
             icon: Icons.schedule_outlined,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (agent.createdAt != null)
                   _InfoRow(
-                    label: 'Created',
+                    label: context.l10n.agent_detail_field_created,
                     value: _formatDateTime(agent.createdAt!),
                     valueStyle: AppTheme.monoSmall,
                   ),
@@ -259,7 +267,7 @@ class AgentDetailScreen extends ConsumerWidget {
                   const SizedBox(height: AppTheme.spacing12),
                 if (agent.modifiedAt != null)
                   _InfoRow(
-                    label: 'Last Modified',
+                    label: context.l10n.agent_detail_field_modified,
                     value: _formatDateTime(agent.modifiedAt!),
                     valueStyle: AppTheme.monoSmall,
                   ),
@@ -271,7 +279,7 @@ class AgentDetailScreen extends ConsumerWidget {
           // System Prompt Section
           if (agent.systemPrompt != null && agent.systemPrompt!.isNotEmpty)
             _SectionCard(
-              title: 'System Prompt',
+              title: context.l10n.agent_detail_section_system_prompt,
               icon: Icons.message_outlined,
               child: Text(
                 agent.systemPrompt!,
@@ -286,7 +294,7 @@ class AgentDetailScreen extends ConsumerWidget {
           // Configuration Section
           if (agent.config != null && agent.config!.isNotEmpty)
             _SectionCard(
-              title: 'Configuration',
+              title: context.l10n.agent_detail_section_config,
               icon: Icons.settings_outlined,
               child: _ConfigViewer(config: agent.config!),
             ),
@@ -303,18 +311,18 @@ class AgentDetailScreen extends ConsumerWidget {
         '${dateTime.minute.toString().padLeft(2, '0')}';
   }
 
-  void _showDeleteDialog(BuildContext context, WidgetRef ref) {
+  void _showDeleteDialog(BuildContext context, WidgetRef ref, Agent agent) {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Agent?'),
-        content: const Text(
-          'This action cannot be undone. Are you sure you want to delete this agent?',
+        title: Text(context.l10n.agent_delete_confirm_title(agent.name)),
+        content: Text(
+          context.l10n.agent_delete_confirm_message,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.agent_cancel_button),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -325,8 +333,8 @@ class AgentDetailScreen extends ConsumerWidget {
 
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Agent deleted successfully'),
+                    SnackBar(
+                      content: Text(context.l10n.agent_delete_success(agent.name ?? 'Agent')),
                       backgroundColor: AppTheme.primaryColor,
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -340,7 +348,7 @@ class AgentDetailScreen extends ConsumerWidget {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Failed to delete agent: $e'),
+                      content: Text(context.l10n.agent_detail_delete_failed(e.toString())),
                       backgroundColor: AppTheme.errorColor,
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -352,7 +360,7 @@ class AgentDetailScreen extends ConsumerWidget {
               backgroundColor: AppTheme.errorColor,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Delete'),
+            child: Text(context.l10n.agent_delete_button),
           ),
         ],
       ),

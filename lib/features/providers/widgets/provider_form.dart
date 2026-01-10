@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/extensions/context_extensions.dart';
 import '../../../core/models/create_provider_request.dart';
 import '../../../core/theme/app_theme.dart';
 
@@ -27,6 +28,7 @@ class ProviderTypeOption {
 }
 
 /// Available provider types
+/// Note: displayName and description are hardcoded here but will be displayed with i18n in UI
 const List<ProviderTypeOption> providerTypes = [
   ProviderTypeOption(
     type: 'openai',
@@ -115,7 +117,7 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
     return Column(
       children: [
         // Step indicator
-        _buildStepIndicator(),
+        _buildStepIndicator(context),
         const SizedBox(height: AppTheme.spacing24),
 
         // Form content
@@ -128,14 +130,14 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
             steps: [
               // Step 1: Select Provider Type
               Step(
-                title: const Text('Provider Type'),
-                content: _buildProviderTypeSelection(),
+                title: Text(context.l10n.provider_create_step_type_title),
+                content: _buildProviderTypeSelection(context),
               ),
 
               // Step 2: Configure Provider
               Step(
-                title: const Text('Configuration'),
-                content: _buildProviderConfiguration(),
+                title: Text(context.l10n.provider_create_step_config_title),
+                content: _buildProviderConfiguration(context),
               ),
             ],
           ),
@@ -144,12 +146,12 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
     );
   }
 
-  Widget _buildStepIndicator() {
+  Widget _buildStepIndicator(BuildContext context) {
     return Row(
       children: [
         _StepIndicator(
           step: 1,
-          label: 'Type',
+          label: context.l10n.provider_create_step_type,
           isActive: _currentStep == 0,
           isCompleted: _currentStep > 0,
         ),
@@ -163,7 +165,7 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
         ),
         _StepIndicator(
           step: 2,
-          label: 'Config',
+          label: context.l10n.provider_create_step_config,
           isActive: _currentStep == 1,
           isCompleted: false,
         ),
@@ -171,7 +173,7 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
     );
   }
 
-  Widget _buildProviderTypeSelection() {
+  Widget _buildProviderTypeSelection(BuildContext context) {
     return GridView.builder(
       shrinkWrap: true,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -185,77 +187,84 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
         final providerType = providerTypes[index];
         final isSelected = _selectedProviderType?.type == providerType.type;
 
-        return Semantics(
-          label: 'Provider type: ${providerType.displayName}, ${providerType.description}',
-          button: true,
-          selected: isSelected,
-          hint: 'Double tap to select ${providerType.displayName} provider',
-          child: InkWell(
-            onTap: () {
-              setState(() {
-                _selectedProviderType = providerType;
-              });
-            },
-            borderRadius: const BorderRadius.all(
-              Radius.circular(AppTheme.radiusMedium),
+        return MergeSemantics(
+          child: Semantics(
+            label: context.l10n.provider_create_select_type_label(
+              providerType.displayName,
+              providerType.description,
             ),
-            child: Container(
-            padding: const EdgeInsets.all(AppTheme.spacing16),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? providerType.color.withOpacity(0.1)
-                  : AppTheme.surfaceColor,
+            button: true,
+            selected: isSelected,
+            hint: context.l10n.provider_create_select_hint(providerType.displayName),
+            child: InkWell(
+              onTap: () {
+                setState(() {
+                  _selectedProviderType = providerType;
+                });
+              },
               borderRadius: const BorderRadius.all(
                 Radius.circular(AppTheme.radiusMedium),
               ),
-              border: Border.all(
-                color: isSelected
-                    ? providerType.color
-                    : AppTheme.borderColor,
-                width: isSelected ? 2 : 1,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+              child: Container(
+                padding: const EdgeInsets.all(AppTheme.spacing16),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? providerType.color.withOpacity(0.1)
+                      : AppTheme.surfaceColor,
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(AppTheme.radiusMedium),
+                  ),
+                  border: Border.all(
+                    color: isSelected
+                        ? providerType.color
+                        : AppTheme.borderColor,
+                    width: isSelected ? 2 : 1,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
-                      providerType.icon,
-                      color: providerType.color,
-                      size: 24,
-                    ),
-                    const SizedBox(width: AppTheme.spacing8),
-                    Expanded(
-                      child: Text(
-                        providerType.displayName,
-                        style: AppTheme.titleSmall.copyWith(
-                          fontWeight: FontWeight.w600,
+                    Row(
+                      children: [
+                        ExcludeSemantics(
+                          child: Icon(
+                            providerType.icon,
+                            color: providerType.color,
+                            size: 24,
+                          ),
                         ),
+                        const SizedBox(width: AppTheme.spacing8),
+                        Expanded(
+                          child: Text(
+                            providerType.displayName,
+                            style: AppTheme.titleSmall.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppTheme.spacing4),
+                    Text(
+                      providerType.description,
+                      style: AppTheme.bodySmall.copyWith(
+                        color: AppTheme.textSecondaryColor,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppTheme.spacing4),
-                Text(
-                  providerType.description,
-                  style: AppTheme.bodySmall.copyWith(
-                    color: AppTheme.textSecondaryColor,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
           ),
         );
       },
     );
   }
 
-  Widget _buildProviderConfiguration() {
+  Widget _buildProviderConfiguration(BuildContext context) {
     if (_selectedProviderType == null) {
-      return const Center(
-        child: Text('Please select a provider type first'),
+      return Center(
+        child: Text(context.l10n.provider_create_select_first),
       );
     }
 
@@ -268,19 +277,19 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
           children: [
             // Provider Name
             Semantics(
-              label: 'Provider name input field',
-              hint: 'Enter a unique name for this provider, e.g., my-openai',
+              label: context.l10n.provider_create_field_name_semantic,
+              hint: context.l10n.provider_create_field_name_hint_semantic,
               textField: true,
               child: TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Provider Name',
-                  hintText: 'e.g., my-openai',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: context.l10n.provider_create_field_name,
+                  hintText: context.l10n.provider_create_field_name_hint,
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter a provider name';
+                    return context.l10n.provider_create_validation_name;
                   }
                   return null;
                 },
@@ -291,21 +300,23 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
             // API Key (if required)
             if (_selectedProviderType!.requiresApiKey)
               Semantics(
-                label: 'API key input field',
-                hint: 'Enter your ${_selectedProviderType!.displayName} API key',
+                label: context.l10n.provider_create_field_api_key_semantic,
+                hint: context.l10n.provider_create_field_api_key_hint_semantic(
+                  _selectedProviderType!.displayName,
+                ),
                 textField: true,
                 child: TextFormField(
                   controller: _apiKeyController,
                   decoration: InputDecoration(
-                    labelText: 'API Key',
-                    hintText: _getApiKeyHint(_selectedProviderType!.type),
+                    labelText: context.l10n.provider_create_field_api_key,
+                    hintText: _getApiKeyHint(context, _selectedProviderType!.type),
                     border: const OutlineInputBorder(),
                   ),
                   obscureText: true,
                   validator: (value) {
                     if (_selectedProviderType!.requiresApiKey &&
                         (value == null || value.isEmpty)) {
-                      return 'Please enter an API key';
+                      return context.l10n.provider_create_validation_api_key;
                     }
                     return null;
                   },
@@ -317,20 +328,20 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
             // Base URL (if required)
             if (_selectedProviderType!.requiresBaseUrl)
               Semantics(
-                label: 'Base URL input field',
-                hint: 'Enter the API endpoint URL, e.g., https://api.openai.com/v1',
+                label: context.l10n.provider_create_field_base_url_semantic,
+                hint: context.l10n.provider_create_field_base_url_hint_semantic,
                 textField: true,
                 child: TextFormField(
                   controller: _baseUrlController,
-                  decoration: const InputDecoration(
-                    labelText: 'Base URL',
-                    hintText: 'e.g., https://api.openai.com/v1',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.provider_create_field_base_url,
+                    hintText: context.l10n.provider_create_field_base_url_hint,
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (_selectedProviderType!.requiresBaseUrl &&
                         (value == null || value.isEmpty)) {
-                      return 'Please enter a base URL';
+                      return context.l10n.provider_create_validation_base_url;
                     }
                     return null;
                   },
@@ -342,20 +353,20 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
             // Project (for Google Vertex)
             if (_selectedProviderType!.requiresProject) ...[
               Semantics(
-                label: 'Google Cloud project ID input field',
-                hint: 'Enter your Google Cloud project ID, e.g., my-project',
+                label: context.l10n.provider_create_field_project_semantic,
+                hint: context.l10n.provider_create_field_project_hint_semantic,
                 textField: true,
                 child: TextFormField(
                   controller: _projectController,
-                  decoration: const InputDecoration(
-                    labelText: 'Google Cloud Project',
-                    hintText: 'e.g., my-project',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.provider_create_field_project,
+                    hintText: context.l10n.provider_create_field_project_hint,
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (_selectedProviderType!.requiresProject &&
                         (value == null || value.isEmpty)) {
-                      return 'Please enter a project ID';
+                      return context.l10n.provider_create_validation_project;
                     }
                     return null;
                   },
@@ -363,20 +374,20 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
               ),
               const SizedBox(height: AppTheme.spacing16),
               Semantics(
-                label: 'Google Cloud location input field',
-                hint: 'Enter the Google Cloud region, e.g., us-central1',
+                label: context.l10n.provider_create_field_location_semantic,
+                hint: context.l10n.provider_create_field_location_hint_semantic,
                 textField: true,
                 child: TextFormField(
                   controller: _locationController,
-                  decoration: const InputDecoration(
-                    labelText: 'Location',
-                    hintText: 'e.g., us-central1',
-                    border: OutlineInputBorder(),
+                  decoration: InputDecoration(
+                    labelText: context.l10n.provider_create_field_location,
+                    hintText: context.l10n.provider_create_field_location_hint,
+                    border: const OutlineInputBorder(),
                   ),
                   validator: (value) {
                     if (_selectedProviderType!.requiresProject &&
                         (value == null || value.isEmpty)) {
-                      return 'Please enter a location';
+                      return context.l10n.provider_create_validation_location;
                     }
                     return null;
                   },
@@ -386,50 +397,56 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
             ],
 
             // Provider info
-            Semantics(
-              label: 'Selected provider: ${_selectedProviderType!.displayName}',
-              value: '${_selectedProviderType!.description}',
-              container: true,
-              child: Container(
-                padding: const EdgeInsets.all(AppTheme.spacing16),
-                decoration: BoxDecoration(
-                color: AppTheme.surfaceVariantColor,
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(AppTheme.radiusMedium),
+            MergeSemantics(
+              child: Semantics(
+                label: context.l10n.provider_create_selected_semantic(
+                  _selectedProviderType!.displayName,
                 ),
-                border: Border.all(
-                  color: AppTheme.borderColor,
-                  width: 1,
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+                value: _selectedProviderType!.description,
+                container: true,
+                child: Container(
+                  padding: const EdgeInsets.all(AppTheme.spacing16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.surfaceVariantColor,
+                    borderRadius: const BorderRadius.all(
+                      Radius.circular(AppTheme.radiusMedium),
+                    ),
+                    border: Border.all(
+                      color: AppTheme.borderColor,
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(
-                        _selectedProviderType!.icon,
-                        color: _selectedProviderType!.color,
-                        size: 20,
+                      Row(
+                        children: [
+                          ExcludeSemantics(
+                            child: Icon(
+                              _selectedProviderType!.icon,
+                              color: _selectedProviderType!.color,
+                              size: 20,
+                            ),
+                          ),
+                          const SizedBox(width: AppTheme.spacing8),
+                          Text(
+                            context.l10n.provider_create_selected(_selectedProviderType!.displayName),
+                            style: AppTheme.labelLarge.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(width: AppTheme.spacing8),
+                      const SizedBox(height: AppTheme.spacing8),
                       Text(
-                        'Selected: ${_selectedProviderType!.displayName}',
-                        style: AppTheme.labelLarge.copyWith(
-                          fontWeight: FontWeight.w600,
+                        _selectedProviderType!.description,
+                        style: AppTheme.bodySmall.copyWith(
+                          color: AppTheme.textSecondaryColor,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppTheme.spacing8),
-                  Text(
-                    _selectedProviderType!.description,
-                    style: AppTheme.bodySmall.copyWith(
-                      color: AppTheme.textSecondaryColor,
-                    ),
-                  ),
-                ],
-              ),
+                ),
               ),
             ),
           ],
@@ -449,18 +466,18 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
           if (_currentStep > 0)
             TextButton(
               onPressed: details.onStepCancel,
-              child: const Text('Back'),
+              child: Text(context.l10n.provider_create_button_back),
             ),
           const Spacer(),
           if (_currentStep == 0)
             ElevatedButton(
               onPressed: _selectedProviderType != null ? details.onStepContinue : null,
-              child: const Text('Next'),
+              child: Text(context.l10n.provider_create_button_next),
             )
           else
             ElevatedButton(
               onPressed: _handleSubmit,
-              child: const Text('Create Provider'),
+              child: Text(context.l10n.provider_create_button_create),
             ),
         ],
       ),
@@ -530,16 +547,16 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
     }
   }
 
-  String _getApiKeyHint(String providerType) {
+  String _getApiKeyHint(BuildContext context, String providerType) {
     switch (providerType) {
       case 'openai':
-        return 'sk-...';
+        return context.l10n.provider_create_field_api_key_hint_openai;
       case 'anthropic':
-        return 'sk-ant-...';
+        return context.l10n.provider_create_field_api_key_hint_anthropic;
       case 'google_ai':
-        return 'AIza...';
+        return context.l10n.provider_create_field_api_key_hint_google_ai;
       default:
-        return 'Enter your API key';
+        return context.l10n.provider_create_field_api_key_hint_default;
     }
   }
 }

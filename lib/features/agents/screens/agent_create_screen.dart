@@ -1,4 +1,5 @@
 import 'dart:convert';
+import '../../../core/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -115,7 +116,7 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
         setState(() => _isLoadingProviders = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to load data: $e'),
+            content: Text(context.l10n.agent_create_error_loading(e.toString())),
             backgroundColor: AppTheme.errorColor,
             behavior: SnackBarBehavior.floating,
           ),
@@ -142,7 +143,7 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
         setState(() => _isLoadingLLMModels = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to load LLM models: $e'),
+            content: Text(context.l10n.agent_create_error_llm_models(e.toString())),
             backgroundColor: AppTheme.errorColor,
             behavior: SnackBarBehavior.floating,
           ),
@@ -171,7 +172,7 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
         setState(() => _isLoadingEmbeddingModels = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to load embedding models: $e'),
+            content: Text(context.l10n.agent_create_error_embedding_models(e.toString())),
             backgroundColor: AppTheme.errorColor,
             behavior: SnackBarBehavior.floating,
           ),
@@ -194,9 +195,9 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () => context.go('/agents'),
-        tooltip: 'Back to Agents',
+        tooltip: context.l10n.agent_create_back_tooltip,
       ),
-      title: const Text('Create Agent'),
+      title: Text(context.l10n.agent_create_title),
       actions: [
         // Step indicator
         Center(
@@ -379,7 +380,7 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => setState(() => _currentStep--),
-                  child: const Text('Back'),
+                  child: Text(context.l10n.agent_create_button_back),
                 ),
               ),
 
@@ -394,7 +395,7 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
               child: _currentStep < 2
                   ? ElevatedButton(
                       onPressed: _handleNext,
-                      child: const Text('Next'),
+                      child: Text(context.l10n.agent_create_button_next),
                     )
                   : ElevatedButton(
                       onPressed: _isCreating ? null : _handleCreate,
@@ -425,8 +426,8 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
         // BYOK mode: validate provider and model selection
         if (_selectedLLMProvider == null || _selectedLLMModel == null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please select an LLM provider and model'),
+            SnackBar(
+              content: Text(context.l10n.agent_create_validation_llm_provider),
               backgroundColor: AppTheme.errorColor,
               behavior: SnackBarBehavior.floating,
             ),
@@ -435,8 +436,8 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
         }
         if (_selectedEmbeddingProvider == null || _selectedEmbeddingModel == null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please select an Embedding provider and model'),
+            SnackBar(
+              content: Text(context.l10n.agent_create_validation_embedding_provider),
               backgroundColor: AppTheme.errorColor,
               behavior: SnackBarBehavior.floating,
             ),
@@ -447,8 +448,8 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
         // Non-BYOK mode: only validate model selection
         if (_selectedLLMModel == null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please select an LLM model'),
+            SnackBar(
+              content: Text(context.l10n.agent_create_validation_llm_model),
               backgroundColor: AppTheme.errorColor,
               behavior: SnackBarBehavior.floating,
             ),
@@ -457,8 +458,8 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
         }
         if (_selectedEmbeddingModel == null) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please select an Embedding model'),
+            SnackBar(
+              content: Text(context.l10n.agent_create_validation_embedding_model),
               backgroundColor: AppTheme.errorColor,
               behavior: SnackBarBehavior.floating,
             ),
@@ -470,8 +471,8 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
       // Validate basic info
       if (_nameController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please enter an agent name'),
+          SnackBar(
+            content: Text(context.l10n.agent_create_validation_name),
             backgroundColor: AppTheme.errorColor,
             behavior: SnackBarBehavior.floating,
           ),
@@ -480,8 +481,8 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
       }
       if (_systemPromptController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please enter a system prompt'),
+          SnackBar(
+            content: Text(context.l10n.agent_create_validation_system_prompt),
             backgroundColor: AppTheme.errorColor,
             behavior: SnackBarBehavior.floating,
           ),
@@ -515,7 +516,7 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${agent.name} created successfully'),
+            content: Text(context.l10n.agent_create_success(agent.name)),
             backgroundColor: AppTheme.primaryColor,
             behavior: SnackBarBehavior.floating,
           ),
@@ -623,7 +624,7 @@ class _ProviderSelectionStep extends StatelessWidget {
               ),
               const SizedBox(height: AppTheme.spacing8),
               Text(
-                'Enable Bring Your Own Key (BYOK) mode to use custom providers',
+                context.l10n.agent_create_byok_desc,
                 style: AppTheme.bodyMedium.copyWith(
                   color: AppTheme.textSecondaryColor,
                 ),
@@ -739,19 +740,19 @@ class _BasicInfoStep extends StatelessWidget {
         const SizedBox(height: AppTheme.spacing24),
         _TextField(
           label: 'Agent Name',
-          hint: 'Enter a name for your agent',
+          hint: context.l10n.agent_create_field_name_hint,
           controller: nameController,
         ),
         const SizedBox(height: AppTheme.spacing16),
         _TextField(
-          label: 'Description',
-          hint: 'Enter a description for your agent',
+          label: context.l10n.agent_create_review_description,
+          hint: context.l10n.agent_create_field_description_hint,
           controller: descriptionController,
         ),
         const SizedBox(height: AppTheme.spacing16),
         _TextField(
-          label: 'System Prompt',
-          hint: 'Enter the system prompt for your agent',
+          label: context.l10n.agent_create_review_system_prompt,
+          hint: context.l10n.agent_create_field_system_prompt_hint,
           controller: systemPromptController,
           maxLines: 5,
         ),
@@ -793,11 +794,11 @@ class _ReviewStep extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppTheme.spacing24),
-        _ReviewItem(label: 'Name', value: name),
-        _ReviewItem(label: 'Description', value: description),
-        _ReviewItem(label: 'System Prompt', value: systemPrompt),
-        _ReviewItem(label: 'LLM Model', value: llmModel?.displayName ?? 'Not selected'),
-        _ReviewItem(label: 'Embedding Model', value: embeddingModel?.displayName ?? 'Not selected'),
+        _ReviewItem(label: context.l10n.agent_create_review_name, value: name),
+        _ReviewItem(label: context.l10n.agent_create_review_description, value: description),
+        _ReviewItem(label: context.l10n.agent_create_review_system_prompt, value: systemPrompt),
+        _ReviewItem(label: context.l10n.agent_create_review_llm_model, value: llmModel?.displayName ?? context.l10n.agent_create_review_not_selected),
+        _ReviewItem(label: context.l10n.agent_create_review_embedding_model, value: embeddingModel?.displayName ?? context.l10n.agent_create_review_not_selected),
       ],
     );
   }
@@ -963,7 +964,7 @@ class _ProviderSection extends StatelessWidget {
             filled: true,
             fillColor: AppTheme.surfaceVariantColor,
           ),
-          hint: const Text('Select a provider'),
+          hint: Text(context.l10n.agent_create_select_provider),
           items: availableProviders.map((provider) {
             return DropdownMenuItem<models.ProviderConfig>(
               value: provider,

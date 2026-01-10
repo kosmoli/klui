@@ -187,7 +187,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agent_create_step_basic_title => '基本信息';
 
   @override
-  String get agent_create_step_basic_desc => '输入您代理的基本信息';
+  String get agent_create_step_basic_desc => '输入您Agent的基本信息';
 
   @override
   String get agent_create_step_review_title => '查看并确认';
@@ -305,10 +305,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get agent_detail_title => '代理详情';
+  String get agent_detail_title => 'Agent详情';
 
   @override
-  String get agent_detail_back_tooltip => '返回代理列表';
+  String get agent_detail_back_tooltip => '返回Agent列表';
 
   @override
   String get agent_detail_tooltip_edit => '编辑';
@@ -320,10 +320,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agent_detail_edit_coming_soon => '编辑功能 - 即将推出！';
 
   @override
-  String get agent_detail_failed_to_load => '加载代理失败';
+  String get agent_detail_failed_to_load => '加载Agent失败';
 
   @override
-  String get agent_detail_deleted_success => '代理删除成功';
+  String get agent_detail_deleted_success => 'Agent删除成功';
 
   @override
   String agent_detail_delete_failed(Object error) {
@@ -352,7 +352,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agent_detail_section_config => '配置';
 
   @override
-  String get agent_detail_field_id => '代理 ID';
+  String get agent_detail_field_id => 'Agent ID';
 
   @override
   String get agent_detail_field_name => '名称';
@@ -361,7 +361,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agent_detail_field_description => '描述';
 
   @override
-  String get agent_detail_field_agent_type => '代理类型';
+  String get agent_detail_field_agent_type => 'Agent类型';
 
   @override
   String get agent_detail_field_model_handle => 'Model句柄';

@@ -167,7 +167,25 @@ git push origin v1.x-working
 - Error handling: try-catch with user-friendly messages
 - Riverpod: Use `@riverpod` annotation with code generation
 
-### 11.1 Semantics & i18n (MANDATORY - Accessibility & Internationalization)
+### 11.1 CRITICAL: Command Retry Rule (MUST FOLLOW)
+
+**STRICT LIMIT**: If a command fails with the same error, retry AT MOST ONCE
+
+**Examples of PROHIBITED behavior**:
+- ❌ Running `grep file.txt` 50+ times when it says "No such file"
+- ❌ Repeating failed `cd` or `ls` commands without changing approach
+- ❌ Ignoring error messages and hoping they'll go away
+
+**Correct behavior**:
+- ✅ Command fails → Check error → Try ONCE with fix → If still fails, STOP and ask user
+- ✅ File not found → Verify path with `pwd`/`find` → Try corrected path → If still fails, STOP
+- ✅ Build error → Read error message → Fix code → Rebuild → If still fails, ask for help
+
+**Emergency stop trigger**: If you notice yourself repeating the same command > 2 times, immediately STOP and ask user for guidance.
+
+**This rule prevents infinite loops and wasted tokens.**
+
+### 11.2 Semantics & i18n (MANDATORY - Accessibility & Internationalization)
 
 **CRITICAL**: Follow these standards for ALL UI code
 

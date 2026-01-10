@@ -9,22 +9,22 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
-  String get app_title => 'Klui - Letta 代理管理';
+  String get app_title => 'Klui - Letta Agent管理';
 
   @override
   String get page_not_found => '页面未找到';
 
   @override
-  String get nav_agents => '代理';
+  String get nav_agents => 'Agent';
 
   @override
-  String get nav_providers => '提供商';
+  String get nav_providers => 'Provider';
 
   @override
-  String get nav_agents_tab => '代理标签页';
+  String get nav_agents_tab => 'Agent标签页';
 
   @override
-  String get nav_providers_tab => '提供商标签页';
+  String get nav_providers_tab => 'Provider标签页';
 
   @override
   String get nav_selected => '已选中';
@@ -35,26 +35,26 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get agent_list_title => '代理';
+  String get agent_list_title => 'Agent';
 
   @override
-  String get agent_list_no_agents => '未找到代理';
+  String get agent_list_no_agents => '未找到Agent';
 
   @override
-  String get agent_list_create_first => '创建您的第一个代理以开始使用';
+  String get agent_list_create_first => '创建您的第一个Agent以开始使用';
 
   @override
-  String get agent_list_error_loading => '加载代理时出错';
+  String get agent_list_error_loading => '加载Agent时出错';
 
   @override
   String get agent_list_retry => '重试';
 
   @override
-  String get agent_list_create_button => '创建代理';
+  String get agent_list_create_button => '创建Agent';
 
   @override
   String agent_card_label(Object model, Object name, Object type) {
-    return '代理卡片：$name，类型：$type，模型：$model';
+    return 'Agent卡片：$name，类型：$type，Model：$model';
   }
 
   @override
@@ -129,7 +129,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get agent_delete_confirm_message => '此操作无法撤销。您确定要删除此代理吗？';
+  String get agent_delete_confirm_message => '此操作无法撤销。您确定要删除此Agent吗？';
 
   @override
   String get agent_delete_button => '删除';
@@ -138,10 +138,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agent_cancel_button => '取消';
 
   @override
-  String get agent_create_title => '创建代理';
+  String get agent_create_title => '创建Agent';
 
   @override
-  String get agent_create_back_tooltip => '返回代理列表';
+  String get agent_create_back_tooltip => '返回Agent列表';
 
   @override
   String agent_create_step_indicator(Object current, Object total) {
@@ -155,7 +155,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agent_create_button_back => '返回';
 
   @override
-  String get agent_create_button_create => '创建代理';
+  String get agent_create_button_create => '创建Agent';
 
   @override
   String get agent_create_creating => '创建中...';
@@ -167,20 +167,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agent_create_failed(Object error) {
-    return '创建代理失败：$error';
+    return '创建Agent失败：$error';
   }
 
   @override
-  String get agent_create_step_provider_title => '选择提供商';
+  String get agent_create_step_provider_title => '选择Provider';
 
   @override
-  String get agent_create_step_model_title => '选择模型';
+  String get agent_create_step_model_title => '选择Model';
 
   @override
-  String get agent_create_step_provider_desc => '为您的代理选择 LLM 和 Embedding 提供商';
+  String get agent_create_step_provider_desc =>
+      '为您的Agent选择 LLM 和 Embedding Provider';
 
   @override
-  String get agent_create_step_model_desc => '为您的代理选择 LLM 和 Embedding 模型';
+  String get agent_create_step_model_desc => '为您的Agent选择 LLM 和 Embedding Model';
 
   @override
   String get agent_create_step_basic_title => '基本信息';
@@ -192,13 +193,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agent_create_step_review_title => '查看并确认';
 
   @override
-  String get agent_create_step_review_desc => '在创建之前查看您的代理配置';
+  String get agent_create_step_review_desc => '在创建之前查看您的Agent配置';
 
   @override
   String get agent_create_byok_mode => 'BYOK 模式';
 
   @override
-  String get agent_create_byok_desc => '启用自备密钥（BYOK）模式以使用自定义提供商';
+  String get agent_create_byok_desc => '启用自备密钥（BYOK）模式以使用自定义Provider';
 
   @override
   String get agent_create_byok_enabled => 'BYOK 已启用';
@@ -207,68 +208,68 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agent_create_byok_disabled => 'BYOK 已禁用';
 
   @override
-  String get agent_create_llm_provider => 'LLM 提供商';
+  String get agent_create_llm_provider => 'LLM Provider';
 
   @override
-  String get agent_create_embedding_provider => 'Embedding 提供商';
+  String get agent_create_embedding_provider => 'Embedding Provider';
 
   @override
-  String get agent_create_llm_model => 'LLM 模型';
+  String get agent_create_llm_model => 'LLM Model';
 
   @override
-  String get agent_create_embedding_model => 'Embedding 模型';
+  String get agent_create_embedding_model => 'Embedding Model';
 
   @override
-  String get agent_create_select_provider => '选择提供商';
+  String get agent_create_select_provider => '选择Provider';
 
   @override
-  String get agent_create_select_model => '选择模型';
+  String get agent_create_select_model => '选择Model';
 
   @override
-  String get agent_create_no_models => '没有可用模型';
+  String get agent_create_no_models => '没有可用Model';
 
   @override
-  String get agent_create_select_provider_first => '请先选择提供商';
+  String get agent_create_select_provider_first => '请先选择Provider';
 
   @override
-  String get agent_create_please_select_model => '请选择模型';
+  String get agent_create_please_select_model => '请选择Model';
 
   @override
-  String get agent_create_field_name => '代理名称';
+  String get agent_create_field_name => 'Agent名称';
 
   @override
-  String get agent_create_field_name_hint => '输入您的代理名称';
+  String get agent_create_field_name_hint => '输入您的Agent名称';
 
   @override
   String get agent_create_field_description => '描述';
 
   @override
-  String get agent_create_field_description_hint => '输入您的代理描述';
+  String get agent_create_field_description_hint => '输入您的Agent描述';
 
   @override
   String get agent_create_field_system_prompt => '系统提示词';
 
   @override
-  String get agent_create_field_system_prompt_hint => '输入您的代理系统提示词';
+  String get agent_create_field_system_prompt_hint => '输入您的Agent系统提示词';
 
   @override
-  String get agent_create_validation_name => '请输入代理名称';
+  String get agent_create_validation_name => '请输入Agent名称';
 
   @override
   String get agent_create_validation_system_prompt => '请输入系统提示词';
 
   @override
-  String get agent_create_validation_llm_provider => '请选择 LLM 提供商和模型';
+  String get agent_create_validation_llm_provider => '请选择 LLM Provider和Model';
 
   @override
-  String get agent_create_validation_llm_model => '请选择 LLM 模型';
+  String get agent_create_validation_llm_model => '请选择 LLM Model';
 
   @override
   String get agent_create_validation_embedding_provider =>
-      '请选择 Embedding 提供商和模型';
+      '请选择 Embedding Provider和Model';
 
   @override
-  String get agent_create_validation_embedding_model => '请选择 Embedding 模型';
+  String get agent_create_validation_embedding_model => '请选择 Embedding Model';
 
   @override
   String get agent_create_review_name => '名称';
@@ -280,10 +281,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agent_create_review_system_prompt => '系统提示词';
 
   @override
-  String get agent_create_review_llm_model => 'LLM 模型';
+  String get agent_create_review_llm_model => 'LLM Model';
 
   @override
-  String get agent_create_review_embedding_model => 'Embedding 模型';
+  String get agent_create_review_embedding_model => 'Embedding Model';
 
   @override
   String get agent_create_review_not_selected => '未选择';
@@ -295,12 +296,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agent_create_error_llm_models(Object error) {
-    return '加载 LLM 模型失败：$error';
+    return '加载 LLM Model失败：$error';
   }
 
   @override
   String agent_create_error_embedding_models(Object error) {
-    return '加载 Embedding 模型失败：$error';
+    return '加载 Embedding Model失败：$error';
   }
 
   @override
@@ -326,14 +327,14 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String agent_detail_delete_failed(Object error) {
-    return '删除代理失败：$error';
+    return '删除Agent失败：$error';
   }
 
   @override
   String get agent_detail_section_basic => '基本信息';
 
   @override
-  String get agent_detail_section_model_base => '模型配置（基础模式）';
+  String get agent_detail_section_model_base => 'Model配置（基础模式）';
 
   @override
   String get agent_detail_section_llm_byok => 'LLM 配置（BYOK 模式）';
@@ -363,22 +364,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agent_detail_field_agent_type => '代理类型';
 
   @override
-  String get agent_detail_field_model_handle => '模型句柄';
+  String get agent_detail_field_model_handle => 'Model句柄';
 
   @override
-  String get agent_detail_field_model => '模型';
+  String get agent_detail_field_model => 'Model';
 
   @override
-  String get agent_detail_field_provider => '提供商';
+  String get agent_detail_field_provider => 'Provider';
 
   @override
   String get agent_detail_field_context_window => '上下文窗口';
 
   @override
-  String get agent_detail_field_embedding_model => '模型';
+  String get agent_detail_field_embedding_model => 'Model';
 
   @override
-  String get agent_detail_field_embedding_provider => '提供商';
+  String get agent_detail_field_embedding_provider => 'Provider';
 
   @override
   String get agent_detail_field_embedding_dim => '维度';
@@ -398,31 +399,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agent_detail_n_a => '不适用';
 
   @override
-  String get provider_list_title => '提供商';
+  String get provider_list_title => 'Provider';
 
   @override
-  String get provider_list_no_providers => '未找到 BYOK 提供商';
+  String get provider_list_no_providers => '未找到 BYOK Provider';
 
   @override
-  String get provider_list_create_first => '创建自定义提供商以使用您自己的 API 密钥';
+  String get provider_list_create_first => '创建自定义Provider以使用您自己的 API 密钥';
 
   @override
-  String get provider_list_error_loading => '加载提供商时出错';
+  String get provider_list_error_loading => '加载Provider时出错';
 
   @override
   String get provider_list_retry => '重试';
 
   @override
-  String get provider_list_create_button => '创建提供商';
+  String get provider_list_create_button => '创建Provider';
 
   @override
   String provider_list_details_coming_soon(Object name) {
-    return '$name 的提供商详情 - 即将推出！';
+    return '$name 的Provider详情 - 即将推出！';
   }
 
   @override
   String provider_card_label(Object category, Object name, Object type) {
-    return '提供商卡片：$name，类型：$type，类别：$category';
+    return 'Provider卡片：$name，类型：$type，类别：$category';
   }
 
   @override
@@ -432,17 +433,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get provider_card_hint_with_delete => '双击查看详情，有删除按钮';
 
   @override
-  String get provider_card_delete_provider => '删除提供商';
+  String get provider_card_delete_provider => '删除Provider';
 
   @override
-  String get provider_card_delete_hint => '双击删除提供商';
+  String get provider_card_delete_hint => '双击删除Provider';
 
   @override
   String get provider_card_destructive => '（危险操作）';
 
   @override
   String provider_card_type_label(Object type) {
-    return '$type 提供商类型';
+    return '$type Provider类型';
   }
 
   @override
@@ -482,19 +483,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get provider_type_letta => 'Letta';
 
   @override
-  String get provider_create_title => '创建提供商';
+  String get provider_create_title => '创建Provider';
 
   @override
-  String get provider_create_creating => '创建提供商中...';
+  String get provider_create_creating => '创建Provider中...';
 
   @override
   String provider_create_success(Object name) {
-    return '提供商 \"$name\" 创建成功';
+    return 'Provider \"$name\" 创建成功';
   }
 
   @override
   String provider_create_failed(Object error) {
-    return '创建提供商失败：$error';
+    return '创建Provider失败：$error';
   }
 
   @override
@@ -504,7 +505,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get provider_create_step_config => '配置';
 
   @override
-  String get provider_create_step_type_title => '提供商类型';
+  String get provider_create_step_type_title => 'Provider类型';
 
   @override
   String get provider_create_step_config_title => '配置';
@@ -516,7 +517,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get provider_create_button_next => '下一步';
 
   @override
-  String get provider_create_button_create => '创建提供商';
+  String get provider_create_button_create => '创建Provider';
 
   @override
   String get provider_create_openai_name => 'OpenAI';
@@ -534,7 +535,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get provider_create_ollama_name => 'Ollama';
 
   @override
-  String get provider_create_ollama_desc => '本地开源模型';
+  String get provider_create_ollama_desc => '本地开源Model';
 
   @override
   String get provider_create_google_ai_name => 'Google AI';
@@ -546,36 +547,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String get provider_create_google_vertex_name => 'Google Vertex AI';
 
   @override
-  String get provider_create_google_vertex_desc => '企业级 AI 模型';
+  String get provider_create_google_vertex_desc => '企业级 AI Model';
 
   @override
   String provider_create_select_type_label(
     Object description,
     Object displayName,
   ) {
-    return '提供商类型：$displayName，$description';
+    return 'Provider类型：$displayName，$description';
   }
 
   @override
   String provider_create_select_hint(Object displayName) {
-    return '双击选择 $displayName 提供商';
+    return '双击选择 $displayName Provider';
   }
 
   @override
-  String get provider_create_field_name => '提供商名称';
+  String get provider_create_field_name => 'Provider名称';
 
   @override
   String get provider_create_field_name_hint => '例如：my-openai';
 
   @override
-  String get provider_create_field_name_semantic => '提供商名称输入框';
+  String get provider_create_field_name_semantic => 'Provider名称输入框';
 
   @override
   String get provider_create_field_name_hint_semantic =>
-      '输入此提供商的唯一名称，例如：my-openai';
+      '输入此Provider的唯一名称，例如：my-openai';
 
   @override
-  String get provider_create_validation_name => '请输入提供商名称';
+  String get provider_create_validation_name => '请输入Provider名称';
 
   @override
   String get provider_create_field_api_key => 'API 密钥';
@@ -653,7 +654,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get provider_create_validation_location => '请输入位置';
 
   @override
-  String get provider_create_select_first => '请先选择提供商类型';
+  String get provider_create_select_first => '请先选择Provider类型';
 
   @override
   String provider_create_selected(Object displayName) {
@@ -662,7 +663,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String provider_create_selected_semantic(Object displayName) {
-    return '已选择的提供商：$displayName';
+    return '已选择的Provider：$displayName';
   }
 
   @override
@@ -671,7 +672,7 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get provider_delete_confirm_message => '此操作无法撤销。您确定要删除此提供商吗？';
+  String get provider_delete_confirm_message => '此操作无法撤销。您确定要删除此Provider吗？';
 
   @override
   String provider_delete_success(Object name) {

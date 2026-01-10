@@ -635,7 +635,7 @@ final class CreateAgentProvider
   }
 }
 
-String _$createAgentHash() => r'46e8ed963e6243050e52496f75db4f1bfbce4c80';
+String _$createAgentHash() => r'71667e4df10b1b7578165a45f2b3d4df7422f634';
 
 /// Provider for creating an Agent
 /// Automatically uses simple format for non-BYOK mode
@@ -661,4 +661,172 @@ final class CreateAgentFamily extends $Family
 
   @override
   String toString() => r'createAgentProvider';
+}
+
+/// Provider for creating a Provider
+
+@ProviderFor(createProvider)
+const createProviderProvider = CreateProviderFamily._();
+
+/// Provider for creating a Provider
+
+final class CreateProviderProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<models.ProviderConfig>,
+          models.ProviderConfig,
+          FutureOr<models.ProviderConfig>
+        >
+    with
+        $FutureModifier<models.ProviderConfig>,
+        $FutureProvider<models.ProviderConfig> {
+  /// Provider for creating a Provider
+  const CreateProviderProvider._({
+    required CreateProviderFamily super.from,
+    required CreateProviderRequest super.argument,
+  }) : super(
+         retry: null,
+         name: r'createProviderProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$createProviderHash();
+
+  @override
+  String toString() {
+    return r'createProviderProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<models.ProviderConfig> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<models.ProviderConfig> create(Ref ref) {
+    final argument = this.argument as CreateProviderRequest;
+    return createProvider(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is CreateProviderProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$createProviderHash() => r'ac7076b535b94c16d59623401c29a7453970c7e1';
+
+/// Provider for creating a Provider
+
+final class CreateProviderFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<models.ProviderConfig>,
+          CreateProviderRequest
+        > {
+  const CreateProviderFamily._()
+    : super(
+        retry: null,
+        name: r'createProviderProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Provider for creating a Provider
+
+  CreateProviderProvider call(CreateProviderRequest request) =>
+      CreateProviderProvider._(argument: request, from: this);
+
+  @override
+  String toString() => r'createProviderProvider';
+}
+
+/// Provider for deleting a Provider
+
+@ProviderFor(deleteProvider)
+const deleteProviderProvider = DeleteProviderFamily._();
+
+/// Provider for deleting a Provider
+
+final class DeleteProviderProvider
+    extends $FunctionalProvider<AsyncValue<void>, void, FutureOr<void>>
+    with $FutureModifier<void>, $FutureProvider<void> {
+  /// Provider for deleting a Provider
+  const DeleteProviderProvider._({
+    required DeleteProviderFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'deleteProviderProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$deleteProviderHash();
+
+  @override
+  String toString() {
+    return r'deleteProviderProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<void> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<void> create(Ref ref) {
+    final argument = this.argument as String;
+    return deleteProvider(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is DeleteProviderProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$deleteProviderHash() => r'b1a8ccc54d093701b1b27327a3e671ed6d0c64e3';
+
+/// Provider for deleting a Provider
+
+final class DeleteProviderFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<void>, String> {
+  const DeleteProviderFamily._()
+    : super(
+        retry: null,
+        name: r'deleteProviderProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Provider for deleting a Provider
+
+  DeleteProviderProvider call(String id) =>
+      DeleteProviderProvider._(argument: id, from: this);
+
+  @override
+  String toString() => r'deleteProviderProvider';
 }

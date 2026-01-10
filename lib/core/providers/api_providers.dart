@@ -5,6 +5,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../utils/api_client.dart';
 import '../models/agent.dart';
 import '../models/create_agent_request.dart';
+import '../models/create_provider_request.dart';
 import '../models/provider.dart' as models;
 import '../models/llm_model.dart';
 import '../models/embedding_model.dart';
@@ -262,6 +263,65 @@ Future<Agent> createAgent(Ref ref, CreateAgentRequest request) async {
   } else {
     // Parse error response for more details
     String errorMessage = 'Failed to create agent: ${response.statusCode}';
+    try {
+      final errorData = jsonDecode(response.body);
+      if (errorData is Map && errorData.containsKey('detail')) {
+        errorMessage = 'Error: ${errorData['detail']}';
+      }
+    } catch (_) {
+      // If parsing fails, use default message
+    }
+    throw Exception(errorMessage);
+  }
+}
+
+/// Provider for creating a Provider
+@riverpod
+Future<models.ProviderConfig> createProvider(
+  Ref ref,
+  CreateProviderRequest request,
+) async {
+  final client = ref.watch(apiClientProvider);
+
+  final requestBody = request.toJson();
+
+  // Debug logging
+  print('[createProvider] Request body: ${jsonEncode(requestBody)}');
+
+  final response = await client.post(
+    '/providers/',
+    body: jsonEncode(requestBody),
+  );
+
+  print('[createProvider] Response status: ${response.statusCode}');
+  print('[createProvider] Response body: ${response.body}');
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    final dynamic decoded = jsonDecode(response.body);
+    return models.ProviderConfig.fromJson(decoded as Map<String, dynamic>);
+  } else {
+    // Parse error response for more details
+    String errorMessage = 'Failed to create provider: ${response.statusCode}';
+    try {
+      final errorData = jsonDecode(response.body);
+      if (errorData is Map && errorData.containsKey('detail')) {
+        errorMessage = 'Error: ${errorData['detail']}';
+      }
+    } catch (_) {
+      // If parsing fails, use default message
+    }
+    throw Exception(errorMessage);
+  }
+}
+
+/// Provider for deleting a Provider
+@riverpod
+Future<void> deleteProvider(Ref ref, String id) async {
+  final client = ref.watch(apiClientProvider);
+  final response = await client.delete('/providers/$id');
+
+  if (response.statusCode != 200 && response.statusCode != 204) {
+    String errorMessage = 'Failed to delete provider: ${response.statusCode}';
     try {
       final errorData = jsonDecode(response.body);
       if (errorData is Map && errorData.containsKey('detail')) {

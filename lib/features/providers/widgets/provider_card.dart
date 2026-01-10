@@ -1,35 +1,33 @@
 import 'package:flutter/material.dart';
-import '../../core/models/agent.dart';
-import '../../core/theme/app_theme.dart';
+import '../../../core/models/provider.dart';
+import '../../../core/theme/app_theme.dart';
 
-/// A Neo-Brutalist card component for displaying Agent information
+/// A Neo-Brutalist card component for displaying Provider information
 ///
 /// Design Features:
 /// - High contrast borders with tech-inspired styling
 /// - Monospace font for technical details (ID, dates)
-/// - Status indicators with neon colors
+/// - Provider type indicators with distinct colors
 /// - Hover effects and subtle animations
-class AgentCard extends StatelessWidget {
-  final Agent agent;
+class ProviderCard extends StatelessWidget {
+  final ProviderConfig provider;
   final VoidCallback? onTap;
-  final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
-  const AgentCard({
+  const ProviderCard({
     super.key,
-    required this.agent,
+    required this.provider,
     this.onTap,
-    this.onEdit,
     this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: 'Agent card: ${agent.name}, type: ${agent.agentType ?? "Not specified"}, model: ${agent.model ?? "Not specified"}',
+      label: 'Provider card: ${provider.name}, type: ${_formatProviderType(provider.providerType)}, category: ${provider.providerCategory.toUpperCase()}',
       button: onTap != null,
       link: onTap != null,
-      hint: 'Double tap to view details${onEdit != null ? ", has edit button" : ""}${onDelete != null ? ", has delete button" : ""}',
+      hint: onDelete != null ? 'Double tap to view details, has delete button' : 'Double tap to view details',
       child: MouseRegion(
         cursor: onTap != null ? SystemMouseCursors.click : MouseCursor.defer,
         child: GestureDetector(
@@ -69,35 +67,35 @@ class AgentCard extends StatelessWidget {
                   // Header: Name + Actions
                   Row(
                     children: [
-                      // Agent Icon
+                      // Provider Icon
                       Container(
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withOpacity(0.1),
+                          color: _getProviderTypeColor().withOpacity(0.1),
                           borderRadius: const BorderRadius.all(
                             Radius.circular(AppTheme.radiusSmall),
                           ),
                           border: Border.all(
-                            color: AppTheme.primaryColor.withOpacity(0.3),
+                            color: _getProviderTypeColor().withOpacity(0.3),
                             width: 1,
                           ),
                         ),
-                        child: const Icon(
-                          Icons.smart_toy_outlined,
-                          color: AppTheme.primaryColor,
+                        child: Icon(
+                          _getProviderTypeIcon(),
+                          color: _getProviderTypeColor(),
                           size: 24,
                         ),
                       ),
                       const SizedBox(width: AppTheme.spacing12),
 
-                      // Agent Name
+                      // Provider Name
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              agent.name,
+                              provider.name,
                               style: AppTheme.titleMedium.copyWith(
                                 fontWeight: FontWeight.w600,
                               ),
@@ -106,7 +104,7 @@ class AgentCard extends StatelessWidget {
                             ),
                             const SizedBox(height: AppTheme.spacing4),
                             Text(
-                              _formatAgentId(agent.id),
+                              _formatProviderId(provider.id),
                               style: AppTheme.monoSmall,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -116,58 +114,64 @@ class AgentCard extends StatelessWidget {
                       ),
 
                       // Action Buttons
-                      if (onEdit != null || onDelete != null) ...[
+                      if (onDelete != null) ...[
                         const SizedBox(width: AppTheme.spacing8),
-                        if (onEdit != null)
-                          _ActionButton(
-                            icon: Icons.edit_outlined,
-                            onPressed: onEdit,
-                            tooltip: 'Edit',
-                          ),
-                        if (onDelete != null)
-                          _ActionButton(
-                            icon: Icons.delete_outlined,
-                            onPressed: onDelete,
-                            tooltip: 'Delete',
-                            isDestructive: true,
-                          ),
+                        _ActionButton(
+                          icon: Icons.delete_outlined,
+                          onPressed: onDelete,
+                          tooltip: 'Delete',
+                          isDestructive: true,
+                        ),
                       ],
                     ],
                   ),
 
-                  // Description
-                  if (agent.description != null && agent.description!.isNotEmpty) ...[
-                    const SizedBox(height: AppTheme.spacing12),
-                    Text(
-                      agent.description!,
-                      style: AppTheme.bodySmall.copyWith(
-                        color: AppTheme.textSecondaryColor,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-
-                  // Footer: Model + Created Date
+                  // Footer: Type + Category + Updated Date
                   const SizedBox(height: AppTheme.spacing12),
                   Row(
                     children: [
-                      // Model Tag
-                      // Base mode: agent.model (handle format, e.g., "openai-proxy/claude-sonnet-4")
-                      // BYOK mode: construct from provider_name + model
-                      if (agent.model != null || agent.llmConfig != null)
-                        _InfoChip(
-                          icon: Icons.psychology_outlined,
-                          label: _getModelLabel(agent),
-                        ),
-                      if (agent.model != null || agent.llmConfig != null) const Spacer(),
-                      // Created Date
-                      Text(
-                        _formatDate(agent.createdAt),
-                        style: AppTheme.monoSmall,
+                      // Provider Type Badge
+                      _InfoChip(
+                        icon: Icons.cloud_outlined,
+                        label: _formatProviderType(provider.providerType),
+                        color: _getProviderTypeColor(),
                       ),
+                      const SizedBox(width: AppTheme.spacing8),
+
+                      // Provider Category Badge
+                      _InfoChip(
+                        icon: provider.providerCategory == 'base'
+                            ? Icons.memory_outlined
+                            : Icons.storage_outlined,
+                        label: provider.providerCategory.toUpperCase(),
+                        color: provider.providerCategory == 'base'
+                            ? AppTheme.primaryColor
+                            : AppTheme.secondaryColor,
+                      ),
+
+                      const Spacer(),
+
+                      // Updated Date
+                      if (provider.updatedAt != null)
+                        Text(
+                          _formatDate(provider.updatedAt!),
+                          style: AppTheme.monoSmall,
+                        ),
                     ],
                   ),
+
+                  // Base URL (if available)
+                  if (provider.baseUrl != null) ...[
+                    const SizedBox(height: AppTheme.spacing12),
+                    Text(
+                      provider.baseUrl!,
+                      style: AppTheme.monoSmall.copyWith(
+                        color: AppTheme.textSecondaryColor,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -178,16 +182,15 @@ class AgentCard extends StatelessWidget {
     );
   }
 
-  String _formatAgentId(String id) {
-    // Shorten ID: agent-4c89dcfa... -> agent-4c89...
+  String _formatProviderId(String id) {
+    // Shorten ID: provider-4c89dcfa... -> provider-4c89...
     if (id.length > 20) {
       return '${id.substring(0, 17)}...';
     }
     return id;
   }
 
-  String _formatDate(DateTime? date) {
-    if (date == null) return 'Unknown';
+  String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
 
@@ -204,20 +207,60 @@ class AgentCard extends StatelessWidget {
     }
   }
 
-  String _getModelLabel(Agent agent) {
-    // Base mode: use agent.model (handle format)
-    if (agent.model != null) {
-      return agent.model!;
+  String _formatProviderType(String type) {
+    // Convert provider_type to display name
+    switch (type.toLowerCase()) {
+      case 'openai':
+        return 'OpenAI';
+      case 'anthropic':
+        return 'Anthropic';
+      case 'ollama':
+        return 'Ollama';
+      case 'google_ai':
+        return 'Google AI';
+      case 'google_vertex':
+        return 'Google Vertex';
+      case 'letta':
+        return 'Letta';
+      default:
+        return type;
     }
+  }
 
-    // BYOK mode: construct handle from provider_name + model
-    if (agent.llmConfig != null) {
-      final provider = agent.llmConfig!['provider_name']?.toString() ?? 'unknown';
-      final model = agent.llmConfig!['model']?.toString() ?? 'unknown';
-      return '$provider/$model';
+  IconData _getProviderTypeIcon() {
+    switch (provider.providerType.toLowerCase()) {
+      case 'openai':
+        return Icons.psychology_outlined;
+      case 'anthropic':
+        return Icons.auto_awesome_outlined;
+      case 'ollama':
+        return Icons.pets_outlined;
+      case 'google_ai':
+      case 'google_vertex':
+        return Icons.search_outlined;
+      case 'letta':
+        return Icons.smart_toy_outlined;
+      default:
+        return Icons.cloud_outlined;
     }
+  }
 
-    return 'Unknown';
+  Color _getProviderTypeColor() {
+    switch (provider.providerType.toLowerCase()) {
+      case 'openai':
+        return const Color(0xFF10A37F); // OpenAI green
+      case 'anthropic':
+        return const Color(0xFFD97757); // Anthropic orange
+      case 'ollama':
+        return const Color(0xFF000000); // Ollama black
+      case 'google_ai':
+      case 'google_vertex':
+        return const Color(0xFF4285F4); // Google blue
+      case 'letta':
+        return AppTheme.primaryColor;
+      default:
+        return AppTheme.textSecondaryColor;
+    }
   }
 }
 
@@ -237,9 +280,9 @@ class _ActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: '$tooltip ${isDestructive ? "(destructive action)" : ""}',
+      label: 'Delete provider',
       button: true,
-      hint: 'Double tap to $tooltip',
+      hint: 'Double tap to delete provider ${isDestructive ? "(destructive action)" : ""}',
       child: Tooltip(
         message: tooltip,
         child: InkWell(
@@ -266,9 +309,7 @@ class _ActionButton extends StatelessWidget {
           child: Icon(
             icon,
             size: 18,
-            color: isDestructive
-                ? AppTheme.errorColor
-                : AppTheme.primaryColor,
+            color: isDestructive ? AppTheme.errorColor : AppTheme.primaryColor,
           ),
         ),
       ),
@@ -280,16 +321,18 @@ class _ActionButton extends StatelessWidget {
 class _InfoChip extends StatelessWidget {
   final IconData icon;
   final String label;
+  final Color color;
 
   const _InfoChip({
     required this.icon,
     required this.label,
+    required this.color,
   });
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
-      label: label,
+      label: '$label provider type',
       container: true,
       child: Container(
         padding: const EdgeInsets.symmetric(
@@ -297,12 +340,12 @@ class _InfoChip extends StatelessWidget {
           vertical: AppTheme.spacing4,
         ),
         decoration: BoxDecoration(
-        color: AppTheme.surfaceVariantColor,
+        color: color.withOpacity(0.1),
         borderRadius: const BorderRadius.all(
           Radius.circular(AppTheme.radiusSmall),
         ),
         border: Border.all(
-          color: AppTheme.borderColor,
+          color: color.withOpacity(0.3),
           width: 1,
         ),
       ),
@@ -312,13 +355,14 @@ class _InfoChip extends StatelessWidget {
           Icon(
             icon,
             size: 14,
-            color: AppTheme.textSecondaryColor,
+            color: color,
           ),
           const SizedBox(width: AppTheme.spacing4),
           Text(
             label,
             style: AppTheme.labelSmall.copyWith(
-              color: AppTheme.textSecondaryColor,
+              color: color,
+              fontWeight: FontWeight.w600,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

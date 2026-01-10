@@ -70,11 +70,26 @@ git push --force
 **Key**: `modelType` field distinguishes LLM vs embedding models
 
 ### 7. Build & Deploy
+**CRITICAL: Always verify working directory before running commands!**
+
+**Working Directory**: `/root/work/klui` (NEVER run from /root/work)
+
 **After code changes, ALWAYS build and deploy**:
 ```bash
-cd /root/work/klui
+cd /root/work/klui  # MUST be in klui directory!
 ./deploy.sh
 ```
+
+**Verify directory before deploy**:
+```bash
+pwd  # Should show: /root/work/klui
+ls deploy.sh  # Should exist
+```
+
+**Full paths** (to avoid directory confusion):
+- Flutter: `/opt/flutter/bin/flutter`
+- Project root: `/root/work/klui`
+- Deploy script: `/root/work/klui/deploy.sh`
 
 **Deploy script does**:
 - Build Flutter web app
@@ -151,6 +166,74 @@ git push origin v1.x-working
 - Error handling: try-catch with user-friendly messages
 - Riverpod: Use `@riverpod` annotation with code generation
 
+### 11.1 Semantics (MANDATORY - Accessibility & Testing)
+**CRITICAL**: ALL interactive components MUST have Semantics annotations
+
+**Why Semantics?**:
+1. **Accessibility**: Enables screen readers for visually impaired users
+2. **Automated Testing**: Playwright/Puppeteer can use semantic selectors
+3. **Code Clarity**: Self-documenting UI structure
+4. **WCAG 2.0 Compliance**: Legal requirement for many applications
+
+**Required Semantics for**:
+
+**Interactive Buttons/Cards**:
+```dart
+Semantics(
+  label: 'Descriptive action or item name',
+  button: true,
+  hint: 'Double tap to [action]',
+  selected: isSelected, // For toggle/select items
+  child: InkWell(...),
+)
+```
+
+**Text Input Fields**:
+```dart
+Semantics(
+  label: 'Field purpose',
+  hint: 'Enter format/example',
+  textField: true,
+  child: TextFormField(...),
+)
+```
+
+**Navigation Items**:
+```dart
+Semantics(
+  label: 'Page name (selected/)',
+  button: true,
+  selected: isSelected,
+  hint: 'Double tap to navigate to [page]',
+  child: InkWell(...),
+)
+```
+
+**Information Containers**:
+```dart
+Semantics(
+  label: 'Container purpose',
+  value: 'Current value',
+  container: true,
+  child: Container(...),
+)
+```
+
+**Examples**:
+- Provider card: `'Provider card: ${provider.name}, type: ${provider.type}'`
+- Agent card: `'Agent card: ${agent.name}, status: ${agent.status}'`
+- Delete button: `'Delete provider (destructive action)'`
+- Form field: `'API key input field', hint: 'Enter your OpenAI API key'`
+
+**Verification**:
+- Check aria-labels in browser DevTools
+- Test with screen reader (VoiceOver/TalkBack)
+- Use semantic selectors in Playwright tests
+
+**References**:
+- [Flutter Web Accessibility](https://blog.flutter.dev/accessibility-in-flutter-on-the-web-51bfc558b7d3)
+- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
+
 ### 12. DO NOT
 - ❌ Modify Letta backend code (unless necessary)
 - ❌ Use Freezed for Web (compilation issues)
@@ -158,6 +241,7 @@ git push origin v1.x-working
 - ❌ Over-engineer simple features
 - ❌ Add comments/docs unless requested
 - ❌ Forget error handling at system boundaries
+- ❌ **Skip Semantics annotations (blocks accessibility & testing)**
 
 ### 13. Project Goals
 **Core定位**: Serve professional users who need full API access

@@ -34,7 +34,8 @@
 - [16. OPENAI_API_HEADERS 环境变量的真相](#16-openai_api_headers-环境变量的真相2026-01-05)
 - [18. 前端创建 Agent 的 BYOK 模式实现](#18-前端创建-agent-的-byok-模式实现2026-01-09)
 - [19. Base LLM 和 Embedding 模型检索流程](#19-base-llm-和-embedding-模型检索流程2026-01-09)
-- [20. Agent 显示和模式判断的关键发现](#20-agent-显示和模式判断的关键发现2026-01-09) ⭐ 新增
+- [20. Agent 显示和模式判断的关键发现](#20-agent-显示和模式判断的关键发现2026-01-09)
+- [21. Letta 后端启动时的默认状态](#21-letta-后端启动时的默认状态2026-01-09) ⭐ 新增
 
 ## 问题背景
 
@@ -6930,6 +6931,366 @@ Widget build(BuildContext context) {
 
 ---
 
-**文档版本**：v2.8
+## 21. Letta 后端启动时的默认状态（2026-01-09）
+
+### 21.1 问题背景
+
+用户问：**如果不提供 .env 文件，Letta 服务器启动后会是什么状态？内存中会有 provider 吗？**
+
+这个问题对于理解前端在不同配置下的行为至关重要。
+
+### 21.2 核心发现
+
+**关键结论**：即使不提供 .env 文件，Letta 服务器启动后**总是有默认的 `letta` provider**。
+
+### 21.3 Letta Provider 的来源
+
+#### 21.3.1 硬编码的默认 Provider
+
+**代码位置**：`/root/work/letta/letta/server/server.py:210-211`
+
+```python
+# collect providers (always has Letta as a default)
+self._enabled_providers: List[Provider] = [LettaProvider(name="letta")]
+```
+
+**关键发现**：
+- ✅ `LettaProvider` 是**硬编码**的，不需要环境变量
+- ✅ 它在服务器初始化时总是被添加到 `_enabled_providers` 列表
+- ✅ 这是 Base Mode 的来源
+
+#### 21.3.2 Letta Provider 的配置
+
+**代码位置**：`/root/work/letta/letta/schemas/providers/letta.py:12-40`
+
+```python
+class LettaProvider(Provider):
+    provider_type: Literal[ProviderType.letta]
+    provider_category: ProviderCategory.base  # ← 固定为 base
+
+    async def list_llm_models_async(self) -> list[LLMConfig]:
+        return [
+            LLMConfig(
+                model="letta-free",
+                model_endpoint_type="openai",
+                model_endpoint="https://inference.letta.com/v1/",  # Letta 官方端点
+                context_window=30000,
+                handle="letta/letta-free",
+                provider_name="letta",
+                provider_category="base",
+            )
+        ]
+
+    async def list_embedding_models_async(self):
+        return [
+            EmbeddingConfig(
+                embedding_model="letta-free",
+                embedding_endpoint_type="openai",
+                embedding_endpoint="https://embeddings.letta.com/",
+                embedding_dim=1536,
+                handle="letta/letta-free",
+            )
+        ]
+```
+
+**配置总结**：
+
+| 配置项 | 值 | 说明 |
+|--------|-----|------|
+| **Provider 名称** | `"letta"` | 固定名称 |
+| **Provider 类型** | `ProviderType.letta` | 固定类型 |
+| **Provider 类别** | `ProviderCategory.base` | 固定为 base |
+| **LLM 模型** | `"letta-free"` | 唯一的 LLM 模型 |
+| **Embedding 模型** | `"letta-free"` | 唯一的 Embedding 模型 |
+| **LLM 端点** | `https://inference.letta.com/v1/` | Letta 官方推理端点 |
+| **Embedding 端点** | `https://embeddings.letta.com/` | Letta 官方 Embedding 端点 |
+| **上下文窗口** | `30000` tokens | 固定大小 |
+| **Embedding 维度** | `1536` | 固定维度 |
+
+### 21.4 其他 Provider 的条件加载
+
+**代码位置**：`/root/work/letta/letta/server/server.py:212-249`
+
+```python
+# 只有设置了相应的环境变量才会添加
+if model_settings.openai_api_key:
+    self._enabled_providers.append(
+        OpenAIProvider(
+            name="openai",
+            api_key_enc=Secret.from_plaintext(model_settings.openai_api_key),
+            base_url=model_settings.openai_api_base,
+        )
+    )
+
+if model_settings.anthropic_api_key:
+    self._enabled_providers.append(
+        AnthropicProvider(
+            name="anthropic",
+            api_key_enc=Secret.from_plaintext(model_settings.anthropic_api_key),
+        )
+    )
+
+if model_settings.ollama_base_url:
+    self._enabled_providers.append(
+        OllamaProvider(
+            name="ollama",
+            base_url=model_settings.ollama_base_url,
+            default_prompt_formatter=model_settings.default_prompt_formatter,
+        )
+    )
+
+if model_settings.gemini_api_key:
+    self._enabled_providers.append(
+        GoogleAIProvider(
+            name="google_ai",
+            api_key_enc=Secret.from_plaintext(model_settings.gemini_api_key),
+        )
+    )
+
+if model_settings.google_cloud_location and model_settings.google_cloud_project:
+    self._enabled_providers.append(
+        GoogleVertexProvider(
+            name="google_vertex",
+            google_cloud_project=model_settings.google_cloud_project,
+            google_cloud_location=model_settings.google_cloud_location,
+        )
+    )
+```
+
+**Provider 加载条件**：
+
+| Provider | 环境变量 | 类别 |
+|----------|---------|------|
+| **letta** | 无需环境变量 | base（总是存在） |
+| **openai** | `OPENAI_API_KEY` | base |
+| **anthropic** | `ANTHROPIC_API_KEY` | base |
+| **ollama** | `OLLAMA_BASE_URL` | base |
+| **google_ai** | `GEMINI_API_KEY` | base |
+| **google_vertex** | `GOOGLE_CLOUD_LOCATION` + `GOOGLE_CLOUD_PROJECT` | base |
+| **用户创建的** | 存储在数据库中 | byok |
+
+### 21.5 默认组织和用户
+
+**代码位置**：`/root/work/letta/letta/constants.py:33-34`
+
+```python
+DEFAULT_ORG_ID = "org-00000000-0000-4000-8000-000000000000"
+DEFAULT_ORG_NAME = "default_org"
+```
+
+**代码位置**：`/root/work/letta/letta/services/user_manager.py:24-25`
+
+```python
+DEFAULT_USER_ID = "user-00000000-0000-4000-8000-000000000000"
+DEFAULT_USER_NAME = "default_user"
+```
+
+**初始化流程**：
+
+```python
+# /root/work/letta/letta/server/server.py:327-332
+async def init_async(self, init_with_default_org_and_user: bool = True):
+    if init_with_default_org_and_user:
+        self.default_org = await self.organization_manager.create_default_organization_async()
+        self.default_user = await self.user_manager.create_default_actor_async()
+        print(f"Default user: {self.default_user} and org: {self.default_org}")
+        await self.tool_manager.upsert_base_tools_async(actor=self.default_user)
+```
+
+**关键发现**：
+- ✅ 默认组织和用户总是被创建
+- ✅ 不需要环境变量
+- ✅ ID 和名称都是硬编码的
+
+### 21.6 启动状态总结表
+
+**无 .env 文件时的状态**：
+
+| 配置项 | 状态 | 来源 |
+|--------|------|------|
+| **数据库** | ✅ SQLite (`~/.letta/`) | 默认配置 |
+| **letta provider** | ✅ 总是存在 | 硬编码 |
+| **openai provider** | ❌ 不存在 | 需要 `OPENAI_API_KEY` |
+| **anthropic provider** | ❌ 不存在 | 需要 `ANTHROPIC_API_KEY` |
+| **ollama provider** | ❌ 不存在 | 需要 `OLLAMA_BASE_URL` |
+| **其他 base provider** | ❌ 不存在 | 需要相应环境变量 |
+| **数据库 provider (BYOK)** | ❌ 空 | 需要用户创建 |
+| **默认组织** | ✅ 总是存在 | 硬编码 |
+| **默认用户** | ✅ 总是存在 | 硬编码 |
+
+### 21.7 对前端的影响
+
+#### 21.7.1 API 端点行为
+
+**1. `/v1/models/?provider_category=base`**
+
+```bash
+# 无 .env 文件时，返回：
+[
+  {
+    "handle": "letta/letta-free",
+    "name": "letta-free",
+    "model": "letta-free",
+    "provider_name": "letta",
+    "provider_category": "base",
+    "model_type": "llm"
+  }
+]
+```
+
+**关键发现**：
+- ✅ 总是至少返回 `letta-free` 模型
+- ✅ 前端可以依赖这个端点，总是有数据可用
+
+**2. `/v1/models/embedding`**
+
+```bash
+# 无 .env 文件时，返回：
+[
+  {
+    "handle": "letta/letta-free",
+    "embedding_model": "letta-free",
+    "provider_name": "letta",
+    "embedding_dim": 1536
+  }
+]
+```
+
+**关键发现**：
+- ✅ 总是至少返回 `letta-free` embedding 模型
+- ✅ 前端可以依赖这个端点，总是有数据可用
+
+**3. `/v1/providers/`**
+
+```bash
+# 无 .env 文件且没有创建 BYOK provider 时，返回：
+[]
+```
+
+**关键发现**：
+- ❌ 这个端点只返回数据库中的 provider（BYOK 模式）
+- ❌ 不包括硬编码的 base provider（如 `letta`）
+- ✅ 前端需要处理空列表的情况
+
+#### 21.7.2 前端实现建议
+
+**1. 非 BYOK 模式创建 Agent**
+
+```dart
+// 总是可用，因为 letta provider 总是存在
+final baseModels = await ref.read(baseLLMModelListProvider.future);
+final baseEmbeddings = await ref.read(baseEmbeddingModelListProvider.future);
+
+// 即使没有 .env，也至少有 letta-free
+if (baseModels.isEmpty) {
+  // 这不应该发生，但需要防御性编程
+  showError('No base models available');
+  return;
+}
+```
+
+**2. BYOK 模式创建 Agent**
+
+```dart
+// 需要用户先创建 provider
+final providers = await ref.read(providerListProvider.future);
+
+if (providers.isEmpty) {
+  // 可能没有创建任何 BYOK provider
+  showInfo('Please create a provider first');
+  return;
+}
+
+// 显示 provider 列表供用户选择
+```
+
+**3. 空状态处理**
+
+```dart
+// Agent 创建页面
+Widget build(BuildContext context) {
+  final providers = ref.watch(providerListProvider);
+
+  // BYOK 模式：检查是否有 provider
+  if (_byokMode && providers.isEmpty) {
+    return _EmptyStateWidget(
+      message: 'No providers found',
+      action: 'Create a provider first',
+      onCreateProvider: () => context.go('/providers/create'),
+    );
+  }
+
+  // Base 模式：总是有模型可用
+  final baseModels = ref.watch(baseLLMModelListProvider);
+  return _ModelSelector(models: baseModels);
+}
+```
+
+### 21.8 验证方法
+
+**验证 1：查看 base 模型**
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  http://38.175.200.93:8283/v1/models/?provider_category=base | jq '.[] | {handle, model, provider_name, provider_category}'
+
+# 预期输出：
+# {
+#   "handle": "letta/letta-free",
+#   "model": "letta-free",
+#   "provider_name": "letta",
+#   "provider_category": "base"
+# }
+```
+
+**验证 2：查看数据库 provider**
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  http://38.175.200.93:8283/v1/providers/ | jq '.[] | {name, provider_category}'
+
+# 预期输出：
+# []（如果没有创建 BYOK provider）
+# 或
+# [
+#   {
+#     "name": "my-openai",
+#     "provider_category": "byok"
+#   }
+# ]
+```
+
+**验证 3：查看 embedding 模型**
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  http://38.175.200.93:8283/v1/models/embedding | jq '.[] | {handle, embedding_model, provider_name}'
+
+# 预期输出：
+# {
+#   "handle": "letta/letta-free",
+#   "embedding_model": "letta-free",
+#   "provider_name": "letta"
+# }
+```
+
+### 21.9 总结
+
+1. **Letta 总是可以启动**：即使没有任何配置，Letta 也能启动并提供基本服务
+2. **letta provider 总是存在**：硬编码的默认 provider，提供 `letta-free` 模型
+3. **Base 模式总是可用**：前端可以依赖 `/v1/models/?provider_category=base`
+4. **BYOK 模式需要用户创建**：`/v1/providers/` 只返回数据库中的 provider
+5. **前端需要处理空列表**：特别是在 BYOK 模式下
+6. **默认组织和用户总是存在**：不需要环境变量
+
+**设计哲学**：
+- ✅ 让ta 设计为"开箱即用"，不需要任何配置就能启动
+- ✅ 提供默认的 `letta-free` 模型，让用户立即开始使用
+- ✅ 支持通过环境变量扩展更多 provider
+- ✅ 支持通过数据库创建自定义 provider（BYOK 模式）
+
+---
+
+**文档版本**：v2.9
 **最后更新**：2026-01-09
 **本章作者**：Kosmo + Claude Sonnet 4.5

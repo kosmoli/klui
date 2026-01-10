@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/agents/screens/agent_list_screen.dart';
 import '../../features/agents/screens/agent_detail_screen.dart';
 import '../../features/agents/screens/agent_create_screen.dart';
+import '../../features/providers/screens/provider_list_screen.dart';
+import '../../features/providers/screens/provider_create_screen.dart';
 
 /// Application router configuration
 final routerProvider = Provider<GoRouter>((ref) {
@@ -31,7 +33,18 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      // TODO: Add more routes
+      GoRoute(
+        path: '/providers',
+        name: 'providers',
+        builder: (context, state) => const ProviderListScreen(),
+        routes: [
+          GoRoute(
+            path: 'create',
+            name: 'provider-create',
+            builder: (context, state) => const ProviderCreateScreen(),
+          ),
+        ],
+      ),
     ],
     errorBuilder: (context, state) =>
         Scaffold(body: Center(child: Text('Page not found: ${state.uri}'))),

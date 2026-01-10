@@ -156,15 +156,6 @@ class ProviderCard extends StatelessWidget {
                           ),
 
                           const Spacer(),
-
-                          // Updated Date
-                          if (provider.updatedAt != null)
-                            ExcludeSemantics(
-                              child: Text(
-                                _formatDate(context, provider.updatedAt!),
-                                style: AppTheme.monoSmall,
-                              ),
-                            ),
                         ],
                       ),
 
@@ -211,26 +202,6 @@ class ProviderCard extends StatelessWidget {
       return '${id.substring(0, 17)}...';
     }
     return id;
-  }
-
-  String _formatDate(BuildContext context, DateTime date) {
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays > 7) {
-      return '${date.day}/${date.month}/${date.year}';
-    } else if (difference.inDays > 0) {
-      final count = difference.inDays.toString();
-      return context.l10n.provider_card_ago_days(count);
-    } else if (difference.inHours > 0) {
-      final count = difference.inHours.toString();
-      return context.l10n.provider_card_ago_hours(count);
-    } else if (difference.inMinutes > 0) {
-      final count = difference.inMinutes.toString();
-      return context.l10n.provider_card_ago_minutes(count);
-    } else {
-      return context.l10n.provider_card_ago_just_now;
-    }
   }
 
   String _formatProviderType(BuildContext context) {

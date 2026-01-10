@@ -16,19 +16,41 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/agents',
         name: 'agents',
-        builder: (context, state) => const AgentListScreen(),
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            child: AgentListScreen(),
+            transitionDuration: Duration.zero,
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return child;
+            },
+          );
+        },
         routes: [
           GoRoute(
             path: 'create',
             name: 'agent-create',
-            builder: (context, state) => const AgentCreateScreen(),
+            pageBuilder: (context, state) {
+              return CustomTransitionPage(
+                child: AgentCreateScreen(),
+                transitionDuration: Duration.zero,
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  return child;
+                },
+              );
+            },
           ),
           GoRoute(
             path: ':id',
             name: 'agent-detail',
-            builder: (context, state) {
+            pageBuilder: (context, state) {
               final id = state.pathParameters['id']!;
-              return AgentDetailScreen(agentId: id);
+              return CustomTransitionPage(
+                child: AgentDetailScreen(agentId: id),
+                transitionDuration: Duration.zero,
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  return child;
+                },
+              );
             },
           ),
         ],
@@ -36,12 +58,28 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/providers',
         name: 'providers',
-        builder: (context, state) => const ProviderListScreen(),
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            child: ProviderListScreen(),
+            transitionDuration: Duration.zero,
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return child;
+            },
+          );
+        },
         routes: [
           GoRoute(
             path: 'create',
             name: 'provider-create',
-            builder: (context, state) => const ProviderCreateScreen(),
+            pageBuilder: (context, state) {
+              return CustomTransitionPage(
+                child: ProviderCreateScreen(),
+                transitionDuration: Duration.zero,
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  return child;
+                },
+              );
+            },
           ),
         ],
       ),

@@ -157,26 +157,13 @@ class AgentCard extends StatelessWidget {
                         ),
                       ],
 
-                      // Footer: Model + Created Date
+                      // Footer: Model
                       const SizedBox(height: AppTheme.spacing12),
-                      Row(
-                        children: [
-                          // Model Tag
-                          if (agent.model != null || agent.llmConfig != null)
-                            _InfoChip(
-                              icon: Icons.psychology_outlined,
-                              label: _getModelLabel(context, agent),
-                            ),
-                          if (agent.model != null || agent.llmConfig != null) const Spacer(),
-                          // Created Date (纯装饰信息)
-                          ExcludeSemantics(
-                            child: Text(
-                              _formatDate(context, agent.createdAt),
-                              style: AppTheme.monoSmall,
-                            ),
-                          ),
-                        ],
-                      ),
+                      if (agent.model != null || agent.llmConfig != null)
+                        _InfoChip(
+                          icon: Icons.psychology_outlined,
+                          label: _getModelLabel(context, agent),
+                        ),
                     ],
                   ),
                 ),
@@ -211,27 +198,6 @@ class AgentCard extends StatelessWidget {
       return '${id.substring(0, 17)}...';
     }
     return id;
-  }
-
-  String _formatDate(BuildContext context, DateTime? date) {
-    if (date == null) return context.l10n.agent_card_model_unknown;
-    final now = DateTime.now();
-    final difference = now.difference(date);
-
-    if (difference.inDays > 7) {
-      return '${date.day}/${date.month}/${date.year}';
-    } else if (difference.inDays > 0) {
-      final count = difference.inDays.toString();
-      return context.l10n.agent_card_ago_days(count);
-    } else if (difference.inHours > 0) {
-      final count = difference.inHours.toString();
-      return context.l10n.agent_card_ago_hours(count);
-    } else if (difference.inMinutes > 0) {
-      final count = difference.inMinutes.toString();
-      return context.l10n.agent_card_ago_minutes(count);
-    } else {
-      return context.l10n.agent_card_ago_just_now;
-    }
   }
 
   String _getModelLabel(BuildContext context, Agent agent) {

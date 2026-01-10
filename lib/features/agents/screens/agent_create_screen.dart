@@ -218,7 +218,7 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
               ),
             ),
             child: Text(
-              'Step ${_currentStep + 1}/3',
+              context.l10n.agent_create_step_indicator(_currentStep + 1, 3),
               style: AppTheme.labelMedium.copyWith(
                 color: AppTheme.primaryColor,
                 fontWeight: FontWeight.w600,
@@ -410,7 +410,7 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
                                 ),
                               ),
                             )
-                          : const Text('Create Agent'),
+                          : Text(context.l10n.agent_create_button_create),
                     ),
             ),
           ],
@@ -588,14 +588,14 @@ class _ProviderSelectionStep extends StatelessWidget {
       children: [
         // Step title
         Text(
-          byokMode ? 'Provider Selection' : 'Model Selection',
+          byokMode ? context.l10n.agent_create_step_provider_title : context.l10n.agent_create_step_model_title,
           style: AppTheme.headlineSmall,
         ),
         const SizedBox(height: AppTheme.spacing8),
         Text(
           byokMode
-              ? 'Select LLM and Embedding providers for your agent'
-              : 'Select LLM and Embedding models for your agent',
+              ? context.l10n.agent_create_step_provider_desc
+              : context.l10n.agent_create_step_model_desc,
           style: AppTheme.bodyMedium.copyWith(
             color: AppTheme.textSecondaryColor,
           ),
@@ -654,7 +654,7 @@ class _ProviderSelectionStep extends StatelessWidget {
 
           // LLM Provider Section
           _ProviderSection(
-            title: 'LLM Provider',
+            title: context.l10n.agent_create_llm_provider,
             selectedProvider: selectedLLMProvider,
             selectedModel: selectedLLMModel,
             availableProviders: availableProviders,
@@ -668,7 +668,7 @@ class _ProviderSelectionStep extends StatelessWidget {
 
           // Embedding Provider Section (only show in BYOK mode)
           _ProviderSection(
-            title: 'Embedding Provider',
+            title: context.l10n.agent_create_embedding_provider,
             selectedProvider: selectedEmbeddingProvider,
             selectedModel: selectedEmbeddingModel,
             availableProviders: availableProviders,
@@ -684,7 +684,7 @@ class _ProviderSelectionStep extends StatelessWidget {
 
           // LLM Model Selection
           _DirectModelSection(
-            title: 'LLM Model',
+            title: context.l10n.agent_create_llm_model,
             selectedModel: selectedLLMModel,
             availableModels: availableLLMModels,
             isLoadingModels: isLoadingLLMModels,
@@ -696,7 +696,7 @@ class _ProviderSelectionStep extends StatelessWidget {
 
           // Embedding Model Selection
           _DirectModelSection(
-            title: 'Embedding Model',
+            title: context.l10n.agent_create_embedding_model,
             selectedModel: selectedEmbeddingModel,
             availableModels: availableEmbeddingModels,
             isLoadingModels: false,
@@ -727,12 +727,12 @@ class _BasicInfoStep extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Basic Information',
+          context.l10n.agent_create_step_basic_title,
           style: AppTheme.headlineSmall,
         ),
         const SizedBox(height: AppTheme.spacing8),
         Text(
-          'Enter the basic information for your agent',
+          context.l10n.agent_create_step_basic_desc,
           style: AppTheme.bodyMedium.copyWith(
             color: AppTheme.textSecondaryColor,
           ),
@@ -783,12 +783,12 @@ class _ReviewStep extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Review and Confirm',
+          context.l10n.agent_create_step_review_title,
           style: AppTheme.headlineSmall,
         ),
         const SizedBox(height: AppTheme.spacing8),
         Text(
-          'Review your agent configuration before creating',
+          context.l10n.agent_create_step_review_desc,
           style: AppTheme.bodyMedium.copyWith(
             color: AppTheme.textSecondaryColor,
           ),
@@ -951,7 +951,7 @@ class _ProviderSection extends StatelessWidget {
         DropdownButtonFormField<models.ProviderConfig>(
           value: selectedProvider,
           decoration: InputDecoration(
-            labelText: 'Provider',
+            labelText: context.l10n.provider_create_field_provider_type,
             border: OutlineInputBorder(
               borderRadius: const BorderRadius.all(
                 Radius.circular(AppTheme.radiusSmall),
@@ -977,7 +977,7 @@ class _ProviderSection extends StatelessWidget {
         DropdownButtonFormField<dynamic>(
           value: selectedModel,
           decoration: InputDecoration(
-            labelText: 'Model',
+            labelText: context.l10n.agent_create_select_model,
             border: OutlineInputBorder(
               borderRadius: const BorderRadius.all(
                 Radius.circular(AppTheme.radiusSmall),
@@ -993,8 +993,8 @@ class _ProviderSection extends StatelessWidget {
           hint: availableModels.isEmpty
               ? Text(
                   selectedProvider == null
-                      ? 'Select a provider first'
-                      : 'No models available',
+                      ? context.l10n.agent_create_select_provider_first
+                      : context.l10n.agent_create_no_models,
                   style: TextStyle(
                     color: selectedProvider == null
                         ? AppTheme.textSecondaryColor
@@ -1002,7 +1002,7 @@ class _ProviderSection extends StatelessWidget {
                     fontSize: 14,
                   ),
                 )
-              : const Text('Select a model'),
+              : Text(context.l10n.agent_create_select_model),
           items: availableModels.map((model) {
             final displayName = (model as LLMModel).displayName;
             return DropdownMenuItem<dynamic>(
@@ -1017,7 +1017,7 @@ class _ProviderSection extends StatelessWidget {
                 },
           validator: (value) {
             if (value == null) {
-              return 'Please select a model';
+              return context.l10n.agent_create_please_select_model;
             }
             return null;
           },
@@ -1058,7 +1058,7 @@ class _DirectModelSection extends StatelessWidget {
         DropdownButtonFormField<LLMModel>(
           value: selectedModel,
           decoration: InputDecoration(
-            labelText: 'Model',
+            labelText: context.l10n.agent_create_select_model,
             border: OutlineInputBorder(
               borderRadius: const BorderRadius.all(
                 Radius.circular(AppTheme.radiusSmall),
@@ -1073,13 +1073,13 @@ class _DirectModelSection extends StatelessWidget {
           ),
           hint: availableModels.isEmpty
               ? Text(
-                  'No models available',
+                  context.l10n.agent_create_no_models,
                   style: TextStyle(
                     color: AppTheme.errorColor,
                     fontSize: 14,
                   ),
                 )
-              : const Text('Select a model'),
+              : Text(context.l10n.agent_create_select_model),
           items: availableModels.map((model) {
             return DropdownMenuItem<LLMModel>(
               value: model,
@@ -1091,7 +1091,7 @@ class _DirectModelSection extends StatelessWidget {
               : onModelChanged,
           validator: (value) {
             if (value == null) {
-              return 'Please select a model';
+              return context.l10n.agent_create_please_select_model;
             }
             return null;
           },

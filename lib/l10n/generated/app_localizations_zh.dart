@@ -563,6 +563,22 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get provider_create_field_provider_type => 'Provider类型';
+
+  @override
+  String get provider_create_field_provider_type_hint => '选择Provider类型';
+
+  @override
+  String get provider_create_field_provider_type_semantic => 'Provider类型下拉框';
+
+  @override
+  String get provider_create_field_provider_type_hint_semantic =>
+      '双击打开Provider类型下拉框';
+
+  @override
+  String get provider_create_validation_provider_type => '请选择Provider类型';
+
+  @override
   String get provider_create_field_name => 'Provider名称';
 
   @override

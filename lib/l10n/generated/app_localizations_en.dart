@@ -581,6 +581,25 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get provider_create_field_provider_type => 'Provider Type';
+
+  @override
+  String get provider_create_field_provider_type_hint =>
+      'Select a provider type';
+
+  @override
+  String get provider_create_field_provider_type_semantic =>
+      'Provider type dropdown';
+
+  @override
+  String get provider_create_field_provider_type_hint_semantic =>
+      'Double tap to open provider type dropdown';
+
+  @override
+  String get provider_create_validation_provider_type =>
+      'Please select a provider type';
+
+  @override
   String get provider_create_field_name => 'Provider Name';
 
   @override

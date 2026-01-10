@@ -77,7 +77,7 @@ const List<ProviderTypeOption> providerTypes = [
   ),
 ];
 
-/// Provider creation form (single-page)
+/// Provider creation form (single-page with dropdown)
 class ProviderCreateForm extends ConsumerStatefulWidget {
   final Function(CreateProviderRequest) onSubmit;
 
@@ -119,24 +119,177 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Provider Type Selection
-            Text(
-              context.l10n.provider_create_step_type_title,
-              style: AppTheme.titleLarge,
+            // Provider Type Selection (Dropdown)
+            MergeSemantics(
+              child: Semantics(
+                label: context.l10n.provider_create_field_provider_type_semantic,
+                hint: context.l10n.provider_create_field_provider_type_hint_semantic,
+                child: DropdownButtonFormField<ProviderTypeOption>(
+                  value: _selectedProviderType,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.provider_create_field_provider_type,
+                    hintText: context.l10n.provider_create_field_provider_type_hint,
+                    border: const OutlineInputBorder(),
+                  ),
+                  items: providerTypes.map((providerType) {
+                    return DropdownMenuItem<ProviderTypeOption>(
+                      value: providerType,
+                      child: Row(
+                        children: [
+                          Icon(
+                            providerType.icon,
+                            color: providerType.color,
+                            size: 20,
+                          ),
+                          const SizedBox(width: AppTheme.spacing8),
+                          Text(providerType.displayName),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedProviderType = value;
+                      // Clear fields when provider type changes
+                      _apiKeyController.clear();
+                      _baseUrlController.clear();
+                      _projectController.clear();
+                      _locationController.clear();
+                    });
+                  },
+                  validator: (value) {
+                    if (value == null) {
+                      return context.l10n.provider_create_validation_provider_type;
+                    }
+                    return null;
+                  },
+                ),
+              ),
             ),
-            const SizedBox(height: AppTheme.spacing16),
-            _buildProviderTypeSelection(context),
-            const SizedBox(height: AppTheme.spacing32),
+            const SizedBox(height: AppTheme.spacing24),
 
             // Configuration fields (shown when type is selected)
             if (_selectedProviderType != null) ...[
-              Text(
-                context.l10n.provider_create_step_config_title,
-                style: AppTheme.titleLarge,
+              // Provider Name
+              Semantics(
+                label: context.l10n.provider_create_field_name_semantic,
+                hint: context.l10n.provider_create_field_name_hint_semantic,
+                textField: true,
+                child: TextFormField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    labelText: context.l10n.provider_create_field_name,
+                    hintText: context.l10n.provider_create_field_name_hint,
+                    border: const OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return context.l10n.provider_create_validation_name;
+                    }
+                    return null;
+                  },
+                ),
               ),
               const SizedBox(height: AppTheme.spacing16),
-              _buildProviderConfiguration(context),
-              const SizedBox(height: AppTheme.spacing32),
+
+              // API Key (if required)
+              if (_selectedProviderType!.requiresApiKey)
+                Semantics(
+                  label: context.l10n.provider_create_field_api_key_semantic,
+                  hint: context.l10n.provider_create_field_api_key_hint_semantic(
+                    _selectedProviderType!.displayName,
+                  ),
+                  textField: true,
+                  child: TextFormField(
+                    controller: _apiKeyController,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.provider_create_field_api_key,
+                      hintText: _getApiKeyHint(context, _selectedProviderType!.type),
+                      border: const OutlineInputBorder(),
+                    ),
+                    obscureText: true,
+                    validator: (value) {
+                      if (_selectedProviderType!.requiresApiKey &&
+                          (value == null || value.isEmpty)) {
+                        return context.l10n.provider_create_validation_api_key;
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+              if (_selectedProviderType!.requiresApiKey)
+                const SizedBox(height: AppTheme.spacing16),
+
+              // Base URL (if required)
+              if (_selectedProviderType!.requiresBaseUrl)
+                Semantics(
+                  label: context.l10n.provider_create_field_base_url_semantic,
+                  hint: context.l10n.provider_create_field_base_url_hint_semantic,
+                  textField: true,
+                  child: TextFormField(
+                    controller: _baseUrlController,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.provider_create_field_base_url,
+                      hintText: context.l10n.provider_create_field_base_url_hint,
+                      border: const OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (_selectedProviderType!.requiresBaseUrl &&
+                          (value == null || value.isEmpty)) {
+                        return context.l10n.provider_create_validation_base_url;
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+              if (_selectedProviderType!.requiresBaseUrl)
+                const SizedBox(height: AppTheme.spacing16),
+
+              // Project (for Google Vertex)
+              if (_selectedProviderType!.requiresProject) ...[
+                Semantics(
+                  label: context.l10n.provider_create_field_project_semantic,
+                  hint: context.l10n.provider_create_field_project_hint_semantic,
+                  textField: true,
+                  child: TextFormField(
+                    controller: _projectController,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.provider_create_field_project,
+                      hintText: context.l10n.provider_create_field_project_hint,
+                      border: const OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (_selectedProviderType!.requiresProject &&
+                          (value == null || value.isEmpty)) {
+                        return context.l10n.provider_create_validation_project;
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                const SizedBox(height: AppTheme.spacing16),
+                Semantics(
+                  label: context.l10n.provider_create_field_location_semantic,
+                  hint: context.l10n.provider_create_field_location_hint_semantic,
+                  textField: true,
+                  child: TextFormField(
+                    controller: _locationController,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.provider_create_field_location,
+                      hintText: context.l10n.provider_create_field_location_hint,
+                      border: const OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (_selectedProviderType!.requiresProject &&
+                          (value == null || value.isEmpty)) {
+                        return context.l10n.provider_create_validation_location;
+                      }
+                      return null;
+                    },
+                  ),
+                ),
+                const SizedBox(height: AppTheme.spacing16),
+              ],
 
               // Selected provider info
               _buildSelectedProviderInfo(context),
@@ -154,229 +307,6 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildProviderTypeSelection(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 2.5,
-        crossAxisSpacing: AppTheme.spacing16,
-        mainAxisSpacing: AppTheme.spacing16,
-      ),
-      itemCount: providerTypes.length,
-      itemBuilder: (context, index) {
-        final providerType = providerTypes[index];
-        final isSelected = _selectedProviderType?.type == providerType.type;
-
-        return MergeSemantics(
-          child: Semantics(
-            label: context.l10n.provider_create_select_type_label(
-              providerType.displayName,
-              providerType.description,
-            ),
-            button: true,
-            selected: isSelected,
-            hint: context.l10n.provider_create_select_hint(providerType.displayName),
-            child: InkWell(
-              onTap: () {
-                setState(() {
-                  _selectedProviderType = providerType;
-                });
-              },
-              borderRadius: const BorderRadius.all(
-                Radius.circular(AppTheme.radiusMedium),
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(AppTheme.spacing16),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? providerType.color.withOpacity(0.1)
-                      : AppTheme.surfaceColor,
-                  borderRadius: const BorderRadius.all(
-                    Radius.circular(AppTheme.radiusMedium),
-                  ),
-                  border: Border.all(
-                    color: isSelected
-                        ? providerType.color
-                        : AppTheme.borderColor,
-                    width: isSelected ? 2 : 1,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        ExcludeSemantics(
-                          child: Icon(
-                            providerType.icon,
-                            color: providerType.color,
-                            size: 24,
-                          ),
-                        ),
-                        const SizedBox(width: AppTheme.spacing8),
-                        Expanded(
-                          child: Text(
-                            providerType.displayName,
-                            style: AppTheme.titleSmall.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: AppTheme.spacing4),
-                    Text(
-                      providerType.description,
-                      style: AppTheme.bodySmall.copyWith(
-                        color: AppTheme.textSecondaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildProviderConfiguration(BuildContext context) {
-    if (_selectedProviderType == null) {
-      return Center(
-        child: Text(context.l10n.provider_create_select_first),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Provider Name
-        Semantics(
-          label: context.l10n.provider_create_field_name_semantic,
-          hint: context.l10n.provider_create_field_name_hint_semantic,
-          textField: true,
-          child: TextFormField(
-            controller: _nameController,
-            decoration: InputDecoration(
-              labelText: context.l10n.provider_create_field_name,
-              hintText: context.l10n.provider_create_field_name_hint,
-              border: const OutlineInputBorder(),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return context.l10n.provider_create_validation_name;
-              }
-              return null;
-            },
-          ),
-        ),
-        const SizedBox(height: AppTheme.spacing16),
-
-        // API Key (if required)
-        if (_selectedProviderType!.requiresApiKey)
-          Semantics(
-            label: context.l10n.provider_create_field_api_key_semantic,
-            hint: context.l10n.provider_create_field_api_key_hint_semantic(
-              _selectedProviderType!.displayName,
-            ),
-            textField: true,
-            child: TextFormField(
-              controller: _apiKeyController,
-              decoration: InputDecoration(
-                labelText: context.l10n.provider_create_field_api_key,
-                hintText: _getApiKeyHint(context, _selectedProviderType!.type),
-                border: const OutlineInputBorder(),
-              ),
-              obscureText: true,
-              validator: (value) {
-                if (_selectedProviderType!.requiresApiKey &&
-                    (value == null || value.isEmpty)) {
-                  return context.l10n.provider_create_validation_api_key;
-                }
-                return null;
-              },
-            ),
-          ),
-        if (_selectedProviderType!.requiresApiKey)
-          const SizedBox(height: AppTheme.spacing16),
-
-        // Base URL (if required)
-        if (_selectedProviderType!.requiresBaseUrl)
-          Semantics(
-            label: context.l10n.provider_create_field_base_url_semantic,
-            hint: context.l10n.provider_create_field_base_url_hint_semantic,
-            textField: true,
-            child: TextFormField(
-              controller: _baseUrlController,
-              decoration: InputDecoration(
-                labelText: context.l10n.provider_create_field_base_url,
-                hintText: context.l10n.provider_create_field_base_url_hint,
-                border: const OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (_selectedProviderType!.requiresBaseUrl &&
-                    (value == null || value.isEmpty)) {
-                  return context.l10n.provider_create_validation_base_url;
-                }
-                return null;
-              },
-            ),
-          ),
-        if (_selectedProviderType!.requiresBaseUrl)
-          const SizedBox(height: AppTheme.spacing16),
-
-        // Project (for Google Vertex)
-        if (_selectedProviderType!.requiresProject) ...[
-          Semantics(
-            label: context.l10n.provider_create_field_project_semantic,
-            hint: context.l10n.provider_create_field_project_hint_semantic,
-            textField: true,
-            child: TextFormField(
-              controller: _projectController,
-              decoration: InputDecoration(
-                labelText: context.l10n.provider_create_field_project,
-                hintText: context.l10n.provider_create_field_project_hint,
-                border: const OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (_selectedProviderType!.requiresProject &&
-                    (value == null || value.isEmpty)) {
-                  return context.l10n.provider_create_validation_project;
-                }
-                return null;
-              },
-            ),
-          ),
-          const SizedBox(height: AppTheme.spacing16),
-          Semantics(
-            label: context.l10n.provider_create_field_location_semantic,
-            hint: context.l10n.provider_create_field_location_hint_semantic,
-            textField: true,
-            child: TextFormField(
-              controller: _locationController,
-              decoration: InputDecoration(
-                labelText: context.l10n.provider_create_field_location,
-                hintText: context.l10n.provider_create_field_location_hint,
-                border: const OutlineInputBorder(),
-              ),
-              validator: (value) {
-                if (_selectedProviderType!.requiresProject &&
-                    (value == null || value.isEmpty)) {
-                  return context.l10n.provider_create_validation_location;
-                }
-                return null;
-              },
-            ),
-          ),
-          const SizedBox(height: AppTheme.spacing16),
-        ],
-      ],
     );
   }
 

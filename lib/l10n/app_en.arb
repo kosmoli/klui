@@ -190,6 +190,12 @@
   "provider_create_select_type_label": "Provider type: {displayName}, {description}",
   "provider_create_select_hint": "Double tap to select {displayName} provider",
 
+  "provider_create_field_provider_type": "Provider Type",
+  "provider_create_field_provider_type_hint": "Select a provider type",
+  "provider_create_field_provider_type_semantic": "Provider type dropdown",
+  "provider_create_field_provider_type_hint_semantic": "Double tap to open provider type dropdown",
+  "provider_create_validation_provider_type": "Please select a provider type",
+
   "provider_create_field_name": "Provider Name",
   "provider_create_field_name_hint": "e.g., my-openai",
   "provider_create_field_name_semantic": "Provider name input field",

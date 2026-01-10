@@ -190,6 +190,12 @@
   "provider_create_select_type_label": "Provider类型：{displayName}，{description}",
   "provider_create_select_hint": "双击选择 {displayName} Provider",
 
+  "provider_create_field_provider_type": "Provider类型",
+  "provider_create_field_provider_type_hint": "选择Provider类型",
+  "provider_create_field_provider_type_semantic": "Provider类型下拉框",
+  "provider_create_field_provider_type_hint_semantic": "双击打开Provider类型下拉框",
+  "provider_create_validation_provider_type": "请选择Provider类型",
+
   "provider_create_field_name": "Provider名称",
   "provider_create_field_name_hint": "例如：my-openai",
   "provider_create_field_name_semantic": "Provider名称输入框",

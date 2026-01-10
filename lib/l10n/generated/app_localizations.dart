@@ -1091,6 +1091,36 @@ abstract class AppLocalizations {
   /// **'Double tap to select {displayName} provider'**
   String provider_create_select_hint(Object displayName);
 
+  /// No description provided for @provider_create_field_provider_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider Type'**
+  String get provider_create_field_provider_type;
+
+  /// No description provided for @provider_create_field_provider_type_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a provider type'**
+  String get provider_create_field_provider_type_hint;
+
+  /// No description provided for @provider_create_field_provider_type_semantic.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider type dropdown'**
+  String get provider_create_field_provider_type_semantic;
+
+  /// No description provided for @provider_create_field_provider_type_hint_semantic.
+  ///
+  /// In en, this message translates to:
+  /// **'Double tap to open provider type dropdown'**
+  String get provider_create_field_provider_type_hint_semantic;
+
+  /// No description provided for @provider_create_validation_provider_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a provider type'**
+  String get provider_create_validation_provider_type;
+
   /// No description provided for @provider_create_field_name.
   ///
   /// In en, this message translates to:

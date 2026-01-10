@@ -619,7 +619,7 @@ class _ProviderSelectionStep extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'BYOK Mode',
+                context.l10n.agent_create_byok_mode,
                 style: AppTheme.titleMedium,
               ),
               const SizedBox(height: AppTheme.spacing8),
@@ -639,7 +639,7 @@ class _ProviderSelectionStep extends StatelessWidget {
                   ),
                   const SizedBox(width: AppTheme.spacing8),
                   Text(
-                    byokMode ? 'BYOK Enabled' : 'BYOK Disabled',
+                    byokMode ? context.l10n.agent_create_byok_enabled : context.l10n.agent_create_byok_disabled,
                     style: AppTheme.bodyMedium,
                   ),
                 ],
@@ -739,19 +739,19 @@ class _BasicInfoStep extends StatelessWidget {
         ),
         const SizedBox(height: AppTheme.spacing24),
         _TextField(
-          label: 'Agent Name',
+          label: context.l10n.agent_create_field_name,
           hint: context.l10n.agent_create_field_name_hint,
           controller: nameController,
         ),
         const SizedBox(height: AppTheme.spacing16),
         _TextField(
-          label: context.l10n.agent_create_review_description,
+          label: context.l10n.agent_create_field_description,
           hint: context.l10n.agent_create_field_description_hint,
           controller: descriptionController,
         ),
         const SizedBox(height: AppTheme.spacing16),
         _TextField(
-          label: context.l10n.agent_create_review_system_prompt,
+          label: context.l10n.agent_create_field_system_prompt,
           hint: context.l10n.agent_create_field_system_prompt_hint,
           controller: systemPromptController,
           maxLines: 5,

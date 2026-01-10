@@ -46,7 +46,7 @@ class AgentDetailScreen extends ConsumerWidget {
               ),
               const SizedBox(height: AppTheme.spacing24),
               Text(
-                'Failed to load agent',
+                context.l10n.agent_detail_failed_to_load,
                 style: AppTheme.headlineSmall,
               ),
               const SizedBox(height: AppTheme.spacing8),
@@ -74,14 +74,14 @@ class AgentDetailScreen extends ConsumerWidget {
       title: Text(context.l10n.agent_detail_title),
       actions: [
         Tooltip(
-          message: 'Edit',
+          message: context.l10n.agent_detail_tooltip_edit,
           child: IconButton(
             icon: const Icon(Icons.edit_outlined),
             onPressed: () {
               // TODO: Implement edit
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Edit feature - Coming soon!'),
+                SnackBar(
+                  content: Text(context.l10n.agent_detail_edit_coming_soon),
                   backgroundColor: AppTheme.surfaceVariantColor,
                   behavior: SnackBarBehavior.floating,
                 ),
@@ -90,7 +90,7 @@ class AgentDetailScreen extends ConsumerWidget {
           ),
         ),
         Tooltip(
-          message: 'Delete',
+          message: context.l10n.agent_detail_tooltip_delete,
           child: IconButton(
             icon: const Icon(Icons.delete_outlined),
             onPressed: () {

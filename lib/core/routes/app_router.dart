@@ -6,6 +6,7 @@ import '../../features/agents/screens/agent_detail_screen.dart';
 import '../../features/agents/screens/agent_create_screen.dart';
 import '../../features/providers/screens/provider_list_screen.dart';
 import '../../features/providers/screens/provider_create_screen.dart';
+import '../extensions/context_extensions.dart';
 
 /// Application router configuration
 final routerProvider = Provider<GoRouter>((ref) {
@@ -85,6 +86,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
     errorBuilder: (context, state) =>
-        Scaffold(body: Center(child: Text('Page not found: ${state.uri}'))),
+        Scaffold(body: Center(child: Text('${context.l10n.page_not_found}: ${state.uri}'))),
   );
 });

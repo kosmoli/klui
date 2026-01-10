@@ -24,7 +24,7 @@ class ProviderCreateScreen extends ConsumerWidget {
               showDialog(
                 context: context,
                 barrierDismissible: false,
-                builder: (dialogContext) => const Center(
+                builder: (dialogContext) => Center(
                   child: Card(
                     child: Padding(
                       padding: EdgeInsets.all(AppTheme.spacing24),
@@ -33,7 +33,7 @@ class ProviderCreateScreen extends ConsumerWidget {
                         children: [
                           CircularProgressIndicator(),
                           SizedBox(height: AppTheme.spacing16),
-                          Text('Creating provider...'),
+                          Text(context.l10n.provider_create_creating),
                         ],
                       ),
                     ),

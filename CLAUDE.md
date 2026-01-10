@@ -3,6 +3,7 @@
 **Project**: Letta Flutter UI (klui)
 **Owner**: Kosmo
 **Repo**: https://github.com/kosmoli/klui
+**Language**: 中文交流（代码注释和commit message用英文）
 
 ## Priority Rules
 

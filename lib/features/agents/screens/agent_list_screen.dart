@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/extensions/context_extensions.dart';
 import '../../../core/providers/api_providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/agent.dart';
@@ -22,7 +23,7 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Agents'),
+        title: Text(context.l10n.agent_list_title),
       ),
       body: agentsAsync.when(
         data: (agents) {
@@ -31,32 +32,34 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(AppTheme.spacing24),
-                    decoration: BoxDecoration(
-                      color: AppTheme.surfaceVariantColor,
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(AppTheme.radiusLarge),
+                  ExcludeSemantics(
+                    child: Container(
+                      padding: const EdgeInsets.all(AppTheme.spacing24),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceVariantColor,
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(AppTheme.radiusLarge),
+                        ),
+                        border: Border.all(
+                          color: AppTheme.borderColor,
+                          width: 2,
+                        ),
                       ),
-                      border: Border.all(
-                        color: AppTheme.borderColor,
-                        width: 2,
+                      child: const Icon(
+                        Icons.smart_toy_outlined,
+                        size: 64,
+                        color: AppTheme.textSecondaryColor,
                       ),
-                    ),
-                    child: const Icon(
-                      Icons.smart_toy_outlined,
-                      size: 64,
-                      color: AppTheme.textSecondaryColor,
                     ),
                   ),
                   const SizedBox(height: AppTheme.spacing24),
                   Text(
-                    'No agents found',
+                    context.l10n.agent_list_no_agents,
                     style: AppTheme.headlineSmall,
                   ),
                   const SizedBox(height: AppTheme.spacing8),
                   Text(
-                    'Create your first agent to get started',
+                    context.l10n.agent_list_create_first,
                     style: AppTheme.bodyMedium.copyWith(
                       color: AppTheme.textSecondaryColor,
                     ),
@@ -78,10 +81,9 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
                 agent: agent,
                 onTap: () => context.go('/agents/${agent.id}'),
                 onEdit: () {
-                  // TODO: Implement edit
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Edit ${agent.name} - Coming soon!'),
+                      content: Text(context.l10n.agent_edit_coming_soon(agent.name)),
                       backgroundColor: AppTheme.surfaceVariantColor,
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -123,7 +125,7 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
               ),
               const SizedBox(height: AppTheme.spacing24),
               Text(
-                'Error loading agents',
+                context.l10n.agent_list_error_loading,
                 style: AppTheme.headlineSmall,
               ),
               const SizedBox(height: AppTheme.spacing8),
@@ -143,20 +145,24 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
               ElevatedButton.icon(
                 onPressed: () {
                   ref.invalidate(agentListProvider);
-                  // Add a small delay to ensure the provider is actually invalidated
                   Future.delayed(const Duration(milliseconds: 100));
                 },
                 icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+                label: Text(context.l10n.agent_list_retry),
               ),
             ],
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/agents/create'),
-        icon: const Icon(Icons.add),
-        label: const Text('Create Agent'),
+      floatingActionButton: Semantics(
+        label: context.l10n.agent_list_create_button,
+        button: true,
+        hint: context.l10n.agent_list_create_button,
+        child: FloatingActionButton.extended(
+          onPressed: () => context.go('/agents/create'),
+          icon: const Icon(Icons.add),
+          label: Text(context.l10n.agent_list_create_button),
+        ),
       ),
       bottomNavigationBar: MainNavigation(currentPath: '/agents'),
     );
@@ -166,14 +172,12 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('Delete ${agent.name}?'),
-        content: Text(
-          'This action cannot be undone. Are you sure you want to delete this agent?',
-        ),
+        title: Text(context.l10n.agent_delete_confirm_title(agent.name)),
+        content: Text(context.l10n.agent_delete_confirm_message),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.agent_cancel_button),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -185,19 +189,18 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('${agent.name} deleted successfully'),
+                      content: Text(context.l10n.agent_delete_success(agent.name)),
                       backgroundColor: AppTheme.primaryColor,
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
-                  // Refresh the list
                   ref.invalidate(agentListProvider);
                 }
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Failed to delete ${agent.name}: $e'),
+                      content: Text(context.l10n.agent_delete_failed(agent.name, e.toString())),
                       backgroundColor: AppTheme.errorColor,
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -209,7 +212,7 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
               backgroundColor: AppTheme.errorColor,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Delete'),
+            child: Text(context.l10n.agent_delete_button),
           ),
         ],
       ),

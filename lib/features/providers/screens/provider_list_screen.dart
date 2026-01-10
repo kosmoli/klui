@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/extensions/context_extensions.dart';
 import '../../../core/providers/api_providers.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../shared/widgets/main_navigation.dart';
@@ -21,7 +22,7 @@ class _ProviderListScreenState extends ConsumerState<ProviderListScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Providers'),
+        title: Text(context.l10n.provider_list_title),
       ),
       body: providersAsync.when(
         data: (providers) {
@@ -35,32 +36,34 @@ class _ProviderListScreenState extends ConsumerState<ProviderListScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(AppTheme.spacing24),
-                    decoration: BoxDecoration(
-                      color: AppTheme.surfaceVariantColor,
-                      borderRadius: const BorderRadius.all(
-                        Radius.circular(AppTheme.radiusLarge),
+                  ExcludeSemantics(
+                    child: Container(
+                      padding: const EdgeInsets.all(AppTheme.spacing24),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceVariantColor,
+                        borderRadius: const BorderRadius.all(
+                          Radius.circular(AppTheme.radiusLarge),
+                        ),
+                        border: Border.all(
+                          color: AppTheme.borderColor,
+                          width: 2,
+                        ),
                       ),
-                      border: Border.all(
-                        color: AppTheme.borderColor,
-                        width: 2,
+                      child: const Icon(
+                        Icons.cloud_off_outlined,
+                        size: 64,
+                        color: AppTheme.textSecondaryColor,
                       ),
-                    ),
-                    child: const Icon(
-                      Icons.cloud_off_outlined,
-                      size: 64,
-                      color: AppTheme.textSecondaryColor,
                     ),
                   ),
                   const SizedBox(height: AppTheme.spacing24),
                   Text(
-                    'No BYOK providers found',
+                    context.l10n.provider_list_no_providers,
                     style: AppTheme.headlineSmall,
                   ),
                   const SizedBox(height: AppTheme.spacing8),
                   Text(
-                    'Create a custom provider to use your own API keys',
+                    context.l10n.provider_list_create_first,
                     style: AppTheme.bodyMedium.copyWith(
                       color: AppTheme.textSecondaryColor,
                     ),
@@ -81,10 +84,9 @@ class _ProviderListScreenState extends ConsumerState<ProviderListScreen> {
               return ProviderCard(
                 provider: provider,
                 onTap: () {
-                  // TODO: Navigate to provider detail
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Provider details for ${provider.name} - Coming soon!'),
+                      content: Text(context.l10n.provider_list_details_coming_soon(provider.name)),
                       backgroundColor: AppTheme.surfaceVariantColor,
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -126,7 +128,7 @@ class _ProviderListScreenState extends ConsumerState<ProviderListScreen> {
               ),
               const SizedBox(height: AppTheme.spacing24),
               Text(
-                'Error loading providers',
+                context.l10n.provider_list_error_loading,
                 style: AppTheme.headlineSmall,
               ),
               const SizedBox(height: AppTheme.spacing8),
@@ -148,16 +150,21 @@ class _ProviderListScreenState extends ConsumerState<ProviderListScreen> {
                   ref.invalidate(providerListProvider);
                 },
                 icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+                label: Text(context.l10n.provider_list_retry),
               ),
             ],
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/providers/create'),
-        icon: const Icon(Icons.add),
-        label: const Text('Create Provider'),
+      floatingActionButton: Semantics(
+        label: context.l10n.provider_list_create_button,
+        button: true,
+        hint: context.l10n.provider_list_create_button,
+        child: FloatingActionButton.extended(
+          onPressed: () => context.go('/providers/create'),
+          icon: const Icon(Icons.add),
+          label: Text(context.l10n.provider_list_create_button),
+        ),
       ),
       bottomNavigationBar: MainNavigation(currentPath: '/providers'),
     );
@@ -171,14 +178,12 @@ class _ProviderListScreenState extends ConsumerState<ProviderListScreen> {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: Text('Delete ${provider.name}?'),
-        content: Text(
-          'This action cannot be undone. Are you sure you want to delete this provider?',
-        ),
+        title: Text(context.l10n.provider_delete_confirm_title(provider.name)),
+        content: Text(context.l10n.provider_delete_confirm_message),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
+            child: Text(context.l10n.provider_cancel_button),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -190,19 +195,18 @@ class _ProviderListScreenState extends ConsumerState<ProviderListScreen> {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('${provider.name} deleted successfully'),
+                      content: Text(context.l10n.provider_delete_success(provider.name)),
                       backgroundColor: AppTheme.primaryColor,
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
-                  // Refresh the list
                   ref.invalidate(providerListProvider);
                 }
               } catch (e) {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Failed to delete ${provider.name}: $e'),
+                      content: Text(context.l10n.provider_delete_failed(provider.name, e.toString())),
                       backgroundColor: AppTheme.errorColor,
                       behavior: SnackBarBehavior.floating,
                     ),
@@ -214,7 +218,7 @@ class _ProviderListScreenState extends ConsumerState<ProviderListScreen> {
               backgroundColor: AppTheme.errorColor,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Delete'),
+            child: Text(context.l10n.provider_delete_button),
           ),
         ],
       ),

@@ -166,73 +166,74 @@ git push origin v1.x-working
 - Error handling: try-catch with user-friendly messages
 - Riverpod: Use `@riverpod` annotation with code generation
 
-### 11.1 Semantics (MANDATORY - Accessibility & Testing)
-**CRITICAL**: ALL interactive components MUST have Semantics annotations
+### 11.1 Semantics & i18n (MANDATORY - Accessibility & Internationalization)
 
-**Why Semantics?**:
-1. **Accessibility**: Enables screen readers for visually impaired users
-2. **Automated Testing**: Playwright/Puppeteer can use semantic selectors
-3. **Code Clarity**: Self-documenting UI structure
-4. **WCAG 2.0 Compliance**: Legal requirement for many applications
+**CRITICAL**: Follow these standards for ALL UI code
 
-**Required Semantics for**:
+#### Semantics Standards
 
-**Interactive Buttons/Cards**:
+**Priority 1: Use Standard Widgets** - They already have Semantics
+- IconButton, TextButton, ElevatedButton, TextField, Checkbox, etc.
+- NO extra Semantics wrapper needed for standard widgets
+
+**Priority 2: Add Custom Semantics When**:
+1. **Decorative icons** (Icon widgets without text): `label + button: true`
+2. **Images**: `label: 'Descriptive alt text'` (avoid "image")
+3. **Custom controls** (GestureDetector, InkWell, Stack): `button: true + label + hint`
+4. **Pure decoration**: `excludeSemantics: true` or `ExcludeSemantics` wrapper
+5. **Icon+Text combos**: `MergeSemantics` to combine into one label
+6. **Textless clickables**: Add `hint` (e.g., "Double tap to zoom")
+
+**Label Rules**:
+- Concise, descriptive
+- Start with widget type if not obvious: "Agent card: ..."
+- Include state: "(selected)", "(destructive action)"
+- Use i18n strings via `context.l10n.key_name`
+
+**i18n Standards**:
+- ALL user-visible strings → use `context.l10n.string_key`
+- Setup: Flutter's official `flutter_localizations` + `intl` package
+- ARB files: `lib/l10n/app_en.arb` (template), `lib/l10n/app_zh.arb` (Chinese)
+- Generated code: `lib/l10n/generated/app_localizations.dart`
+- Access: Import `context_extensions.dart`, use `context.l10n.key_name`
+
+**Example Implementation**:
 ```dart
+// Standard widget - NO custom Semantics needed
+TextButton(onPressed: () {}, child: Text('Save'))
+
+// Decorative icon - NEEDS Semantics
 Semantics(
-  label: 'Descriptive action or item name',
+  label: context.l10n.agent_action_delete,
   button: true,
-  hint: 'Double tap to [action]',
-  selected: isSelected, // For toggle/select items
-  child: InkWell(...),
+  hint: context.l10n.agent_action_delete_hint,
+  child: Icon(Icons.delete),
 )
-```
 
-**Text Input Fields**:
-```dart
-Semantics(
-  label: 'Field purpose',
-  hint: 'Enter format/example',
-  textField: true,
-  child: TextFormField(...),
+// Icon+Text combo - USE MergeSemantics
+MergeSemantics(
+  child: Row(children: [
+    Icon(Icons.delete),
+    Text(context.l10n.agent_action_delete),
+  ]),
 )
-```
 
-**Navigation Items**:
-```dart
+// Custom clickable - NEEDS Semantics
 Semantics(
-  label: 'Page name (selected/)',
+  label: context.l10n.agent_card_label(
+    agent.name,
+    agent.agentType ?? context.l10n.agent_card_not_specified,
+    agent.model ?? context.l10n.agent_card_not_specified,
+  ),
   button: true,
-  selected: isSelected,
-  hint: 'Double tap to navigate to [page]',
-  child: InkWell(...),
+  hint: context.l10n.agent_card_hint_view_details,
+  child: InkWell(onTap: () {}, child: Card(...)),
 )
 ```
 
-**Information Containers**:
-```dart
-Semantics(
-  label: 'Container purpose',
-  value: 'Current value',
-  container: true,
-  child: Container(...),
-)
-```
-
-**Examples**:
-- Provider card: `'Provider card: ${provider.name}, type: ${provider.type}'`
-- Agent card: `'Agent card: ${agent.name}, status: ${agent.status}'`
-- Delete button: `'Delete provider (destructive action)'`
-- Form field: `'API key input field', hint: 'Enter your OpenAI API key'`
-
-**Verification**:
-- Check aria-labels in browser DevTools
-- Test with screen reader (VoiceOver/TalkBack)
-- Use semantic selectors in Playwright tests
-
-**References**:
-- [Flutter Web Accessibility](https://blog.flutter.dev/accessibility-in-flutter-on-the-web-51bfc558b7d3)
-- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
+**Build Commands**:
+- Setup: `flutter gen-l10n` (generates from ARB files)
+- Rebuild: `flutter build web` (auto-generates l10n + riverpod)
 
 ### 12. DO NOT
 - ❌ Modify Letta backend code (unless necessary)

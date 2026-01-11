@@ -28,9 +28,10 @@ git push --force
 
 ### 2. Problem Solving Priority
 1. **Check docs first**: `klui/docs/` (DEPLOYMENT_TEST_STEPS.md, FLUTTER_WEB_PITFALLS.md, LETTA_PROJECT_ANALYSIS.md)
-2. **Try standard solutions**: Check code, logs, debug tools
-3. **Search internet**: Use WebSearch tool for errors/best practices
-4. **Update docs**: Record findings in relevant docs
+2. **Reference implementations**: Letta Code (terminal UI), Happy (mobile/web UI)
+3. **Try standard solutions**: Check code, logs, debug tools
+4. **Search internet**: Use WebSearch tool for errors/best practices
+5. **Update docs**: Record findings in relevant docs
 
 **Search examples**: "Flutter Web CORS error", "Letta API provider configuration"
 
@@ -122,13 +123,51 @@ cd build/web && python3 -m http.server 8080
 2. Update `docs/LETTA_PROJECT_ANALYSIS.md` with findings
 3. Include code evidence and examples
 
+### 8.1 Letta Code Analysis (Terminal UI Reference)
+**Location**: `/root/work/letta-code/`
+**Analysis**: `docs/LETTA_CODE_ANALYSIS.md`
+**Purpose**: Reference for terminal-based coding agent UI
+**Key learnings**:
+- Message display patterns (Ink/React for CLI)
+- Tool call presentation (expandable cards)
+- Approval workflow UX (inline approvals)
+- Streaming implementation (SSE handling)
+- Error handling patterns
+
+**When investigating Letta Code**:
+1. Focus on `src/cli/App.tsx` (main app, 270KB)
+2. Check `src/cli/components/` for UI patterns
+3. Review `src/tools/manager.ts` for tool execution
+4. Update `docs/LETTA_CODE_ANALYSIS.md` with findings
+
+### 8.2 Happy Analysis (Mobile/Web UI Reference)
+**Location**: `/root/work/happy/`
+**Analysis**: `docs/HAPPY_ANALYSIS.md`
+**Purpose**: Reference for cross-platform (React Native + Expo) agent UI
+**Key learnings**:
+- Mobile UI patterns for agent chat
+- Real-time message streaming (LiveKit/WebRTC)
+- Responsive design strategies
+- Code display on mobile
+- Performance optimizations (FlashList)
+- Touch interactions and gestures
+
+**When investigating Happy**:
+1. Focus on `sources/components/AgentInput.tsx` (45KB input component)
+2. Check `sources/app/` for routing/navigation
+3. Review `sources/components/` for UI patterns
+4. Update `docs/HAPPY_ANALYSIS.md` with findings
+
 ### 9. Documentation Structure
 `klui/docs/`:
 - DEPLOYMENT_TEST_STEPS.md (11,883 bytes)
 - FLUTTER_PLAN_2026.md (19,795 bytes)
 - LETTA_API_OVERVIEW.md (15,987 bytes)
 - LETTA_PROJECT_ANALYSIS.md (166,733 bytes)
-- GIT_WORKFLOW_GOLDEN_RULES.md (new)
+- LETTA_CODE_ANALYSIS.md (NEW) - Terminal UI reference
+- HAPPY_ANALYSIS.md (NEW) - Mobile/Web UI reference
+- CHAT_FEATURE_PLAN.md (NEW) - Chat implementation plan
+- GIT_WORKFLOW_GOLDEN_RULES.md
 - FLUTTER_WEB_PITFALLS.md (backup only)
 
 ### 10. Commit & Workflow
@@ -273,6 +312,6 @@ Semantics(
 
 ---
 
-**Last Updated**: 2026-01-09
+**Last Updated**: 2026-01-11
 **Claude Version**: Sonnet 4.5
 **Mode**: Frontend Development 🚀

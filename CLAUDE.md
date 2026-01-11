@@ -134,7 +134,9 @@ ls deploy.sh  # Should exist
 ```
 
 **Full paths** (to avoid directory confusion):
-- Flutter: `/opt/flutter/bin/flutter`
+- Flutter SDK: `/opt/flutter/bin`
+- Flutter executable: `/opt/flutter/bin/flutter`
+- Dart executable: `/opt/flutter/bin/dart`
 - Project root: `/root/work/klui`
 - Deploy script: `/root/work/klui/deploy.sh`
 

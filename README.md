@@ -70,6 +70,10 @@
 - **[Letta 后端分析](docs/LETTA_BACKEND_ANALYSIS.md)** 🖥️ - 后端工具执行能力
 - **[远程开发方案对比](docs/REMOTE_DEV_COMPARISON.md)** 🎯 - Happy 模式 vs Letta 后端
 
+### 项目愿景
+- **[项目愿景与规划](docs/PROJECT_VISION.md)** 🌟 - 项目起源、动机和长期愿景
+- **[Freezed 迁移指南](docs/FREEZED_MIGRATION_GUIDE.md)** 🔧 - Freezed 3.0.0 使用和迁移
+
 ### 相关项目
 - **Letta Backend**: `../letta/` - AI Agent 后端服务器
 - **Letta Code**: `../letta-code/` - CLI 参考实现

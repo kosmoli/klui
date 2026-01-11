@@ -41,6 +41,51 @@ git push --force
 - go_router 16.x for routing
 - flutter_http_sse for streaming (planned)
 
+### 3.1 Architecture (MANDATORY - Follow Strictly)
+
+**Three-Layer Architecture**:
+```
+UI Layer (features/)
+  ↓ only uses providers
+Provider Layer (core/providers/api_providers.dart)
+  ↓ only uses ApiHelper + ApiClient
+API Layer (core/utils/api_client.dart, api_helper.dart)
+  ↓ HTTP requests
+Letta Backend
+```
+
+**Rules**:
+1. ✅ UI MUST access data via `ref.watch(provider)` or `ref.read(provider.future)`
+2. ✅ Providers MUST use `ApiHelper.parseList/parseSingle/parseEmpty`
+3. ✅ Providers MUST handle errors via `ApiException`
+4. ❌ UI MUST NOT import `api_client.dart` directly
+5. ❌ Providers MUST NOT contain UI logic (navigation, formatting, etc.)
+
+**Example**:
+```dart
+// ✅ CORRECT
+@riverpod
+Future<List<Agent>> agentList(Ref ref) async {
+  final client = ref.watch(apiClientProvider);
+  final response = await client.get('/agents/');
+  return ApiHelper.parseList(response, Agent.fromJson);
+}
+
+// ❌ WRONG
+class MyWidget extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final client = ref.watch(apiClientProvider);  // ❌ Don't do this
+    ...
+  }
+}
+```
+
+**SDK Separation Readiness**:
+- Current: API layer embedded in klui (~430 lines)
+- When to separate: API code > 2000 lines OR multiple consumer projects
+- See: `docs/API_LAYER_OPTIMIZATION.md`
+
 ### 4. API Integration
 **API Base**: http://38.175.200.93:8283/v1
 **All requests need**: Bearer Token authentication
@@ -224,7 +269,22 @@ git push origin v1.x-working
 
 **This rule prevents infinite loops and wasted tokens.**
 
-### 11.2 Semantics & i18n (MANDATORY - Accessibility & Internationalization)
+### 11.2 Code Architecture Rules (MANDATORY)
+**Follow three-layer architecture strictly**:
+
+**DO**:
+- ✅ UI → Provider → ApiHelper → ApiClient → HTTP
+- ✅ Use `ref.watch(provider)` in widgets
+- ✅ Use `ApiHelper.parseList/parseSingle/parseEmpty` in providers
+- ✅ Handle errors with `ApiException`
+
+**DON'T**:
+- ❌ Import `api_client.dart` in UI code
+- ❌ Put UI logic (navigation, formatting) in providers
+- ❌ Scatter JSON parsing (use ApiHelper)
+- ❌ Mix concerns across layers
+
+### 11.3 Semantics & i18n (MANDATORY - Accessibility & Internationalization)
 
 **CRITICAL**: Follow these standards for ALL UI code
 
@@ -301,6 +361,7 @@ Semantics(
 - ❌ Add comments/docs unless requested
 - ❌ Forget error handling at system boundaries
 - ❌ **Skip Semantics annotations (blocks accessibility & testing)**
+- ❌ **Violate three-layer architecture (see 11.2)**
 
 ### 13. Project Goals
 **Core定位**: Serve professional users who need full API access

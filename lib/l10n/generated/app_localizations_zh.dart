@@ -731,6 +731,78 @@ class AppLocalizationsZh extends AppLocalizations {
   String get provider_cancel_button => '取消';
 
   @override
+  String get provider_detail_title => 'Provider详情';
+
+  @override
+  String get provider_detail_back_tooltip => '返回Provider列表';
+
+  @override
+  String get provider_detail_failed_to_load => '加载Provider失败';
+
+  @override
+  String get provider_detail_tooltip_edit => '编辑';
+
+  @override
+  String get provider_detail_tooltip_delete => '删除';
+
+  @override
+  String get provider_detail_edit_coming_soon => '编辑功能 - 即将推出！';
+
+  @override
+  String get provider_detail_section_basic => '基本信息';
+
+  @override
+  String get provider_detail_section_config => '配置';
+
+  @override
+  String get provider_detail_section_credentials => '凭证';
+
+  @override
+  String get provider_detail_section_tags => '标签';
+
+  @override
+  String get provider_detail_field_id => 'Provider ID';
+
+  @override
+  String get provider_detail_field_name => '名称';
+
+  @override
+  String get provider_detail_field_type => '类型';
+
+  @override
+  String get provider_detail_field_category => '分类';
+
+  @override
+  String get provider_detail_field_base_url => 'Base URL';
+
+  @override
+  String get provider_detail_field_region => '区域';
+
+  @override
+  String get provider_detail_field_project => '项目';
+
+  @override
+  String get provider_detail_field_api_key => 'API密钥';
+
+  @override
+  String get provider_detail_field_access_key => 'Access Key';
+
+  @override
+  String get provider_detail_field_organization_id => '组织ID';
+
+  @override
+  String get provider_detail_field_updated_at => '最后更新';
+
+  @override
+  String get provider_detail_no_tags => '无标签';
+
+  @override
+  String get provider_detail_category_base => '基础（默认）';
+
+  @override
+  String get provider_detail_category_byok => 'BYOK（自定义）';
+
+  @override
   String get common_button_cancel => '取消';
 
   @override

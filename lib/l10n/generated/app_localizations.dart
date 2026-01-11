@@ -1391,6 +1391,150 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get provider_cancel_button;
 
+  /// No description provided for @provider_detail_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider Details'**
+  String get provider_detail_title;
+
+  /// No description provided for @provider_detail_back_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Providers'**
+  String get provider_detail_back_tooltip;
+
+  /// No description provided for @provider_detail_failed_to_load.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load provider'**
+  String get provider_detail_failed_to_load;
+
+  /// No description provided for @provider_detail_tooltip_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get provider_detail_tooltip_edit;
+
+  /// No description provided for @provider_detail_tooltip_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get provider_detail_tooltip_delete;
+
+  /// No description provided for @provider_detail_edit_coming_soon.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit feature - Coming soon!'**
+  String get provider_detail_edit_coming_soon;
+
+  /// No description provided for @provider_detail_section_basic.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Information'**
+  String get provider_detail_section_basic;
+
+  /// No description provided for @provider_detail_section_config.
+  ///
+  /// In en, this message translates to:
+  /// **'Configuration'**
+  String get provider_detail_section_config;
+
+  /// No description provided for @provider_detail_section_credentials.
+  ///
+  /// In en, this message translates to:
+  /// **'Credentials'**
+  String get provider_detail_section_credentials;
+
+  /// No description provided for @provider_detail_section_tags.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags'**
+  String get provider_detail_section_tags;
+
+  /// No description provided for @provider_detail_field_id.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider ID'**
+  String get provider_detail_field_id;
+
+  /// No description provided for @provider_detail_field_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get provider_detail_field_name;
+
+  /// No description provided for @provider_detail_field_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get provider_detail_field_type;
+
+  /// No description provided for @provider_detail_field_category.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get provider_detail_field_category;
+
+  /// No description provided for @provider_detail_field_base_url.
+  ///
+  /// In en, this message translates to:
+  /// **'Base URL'**
+  String get provider_detail_field_base_url;
+
+  /// No description provided for @provider_detail_field_region.
+  ///
+  /// In en, this message translates to:
+  /// **'Region'**
+  String get provider_detail_field_region;
+
+  /// No description provided for @provider_detail_field_project.
+  ///
+  /// In en, this message translates to:
+  /// **'Project'**
+  String get provider_detail_field_project;
+
+  /// No description provided for @provider_detail_field_api_key.
+  ///
+  /// In en, this message translates to:
+  /// **'API Key'**
+  String get provider_detail_field_api_key;
+
+  /// No description provided for @provider_detail_field_access_key.
+  ///
+  /// In en, this message translates to:
+  /// **'Access Key'**
+  String get provider_detail_field_access_key;
+
+  /// No description provided for @provider_detail_field_organization_id.
+  ///
+  /// In en, this message translates to:
+  /// **'Organization ID'**
+  String get provider_detail_field_organization_id;
+
+  /// No description provided for @provider_detail_field_updated_at.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Updated'**
+  String get provider_detail_field_updated_at;
+
+  /// No description provided for @provider_detail_no_tags.
+  ///
+  /// In en, this message translates to:
+  /// **'No tags'**
+  String get provider_detail_no_tags;
+
+  /// No description provided for @provider_detail_category_base.
+  ///
+  /// In en, this message translates to:
+  /// **'Base (Default)'**
+  String get provider_detail_category_base;
+
+  /// No description provided for @provider_detail_category_byok.
+  ///
+  /// In en, this message translates to:
+  /// **'BYOK (Custom)'**
+  String get provider_detail_category_byok;
+
   /// No description provided for @common_button_cancel.
   ///
   /// In en, this message translates to:

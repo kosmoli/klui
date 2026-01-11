@@ -756,6 +756,78 @@ class AppLocalizationsEn extends AppLocalizations {
   String get provider_cancel_button => 'Cancel';
 
   @override
+  String get provider_detail_title => 'Provider Details';
+
+  @override
+  String get provider_detail_back_tooltip => 'Back to Providers';
+
+  @override
+  String get provider_detail_failed_to_load => 'Failed to load provider';
+
+  @override
+  String get provider_detail_tooltip_edit => 'Edit';
+
+  @override
+  String get provider_detail_tooltip_delete => 'Delete';
+
+  @override
+  String get provider_detail_edit_coming_soon => 'Edit feature - Coming soon!';
+
+  @override
+  String get provider_detail_section_basic => 'Basic Information';
+
+  @override
+  String get provider_detail_section_config => 'Configuration';
+
+  @override
+  String get provider_detail_section_credentials => 'Credentials';
+
+  @override
+  String get provider_detail_section_tags => 'Tags';
+
+  @override
+  String get provider_detail_field_id => 'Provider ID';
+
+  @override
+  String get provider_detail_field_name => 'Name';
+
+  @override
+  String get provider_detail_field_type => 'Type';
+
+  @override
+  String get provider_detail_field_category => 'Category';
+
+  @override
+  String get provider_detail_field_base_url => 'Base URL';
+
+  @override
+  String get provider_detail_field_region => 'Region';
+
+  @override
+  String get provider_detail_field_project => 'Project';
+
+  @override
+  String get provider_detail_field_api_key => 'API Key';
+
+  @override
+  String get provider_detail_field_access_key => 'Access Key';
+
+  @override
+  String get provider_detail_field_organization_id => 'Organization ID';
+
+  @override
+  String get provider_detail_field_updated_at => 'Last Updated';
+
+  @override
+  String get provider_detail_no_tags => 'No tags';
+
+  @override
+  String get provider_detail_category_base => 'Base (Default)';
+
+  @override
+  String get provider_detail_category_byok => 'BYOK (Custom)';
+
+  @override
   String get common_button_cancel => 'Cancel';
 
   @override

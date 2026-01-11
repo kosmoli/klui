@@ -6,6 +6,7 @@ import '../../features/agents/screens/agent_detail_screen.dart';
 import '../../features/agents/screens/agent_create_screen.dart';
 import '../../features/providers/screens/provider_list_screen.dart';
 import '../../features/providers/screens/provider_create_screen.dart';
+import '../../features/providers/screens/provider_detail_screen.dart';
 import '../extensions/context_extensions.dart';
 
 /// Application router configuration
@@ -75,6 +76,20 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) {
               return CustomTransitionPage(
                 child: ProviderCreateScreen(),
+                transitionDuration: Duration.zero,
+                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                  return child;
+                },
+              );
+            },
+          ),
+          GoRoute(
+            path: ':id',
+            name: 'provider-detail',
+            pageBuilder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return CustomTransitionPage(
+                child: ProviderDetailScreen(providerId: id),
                 transitionDuration: Duration.zero,
                 transitionsBuilder: (context, animation, secondaryAnimation, child) {
                   return child;

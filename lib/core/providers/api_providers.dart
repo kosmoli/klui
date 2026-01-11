@@ -98,6 +98,20 @@ Future<List<models.ProviderConfig>> providerList(Ref ref) async {
   }
 }
 
+/// Provider for single Provider
+@riverpod
+Future<models.ProviderConfig> provider(Ref ref, String id) async {
+  final client = ref.watch(apiClientProvider);
+  final response = await client.get('/providers/$id');
+
+  if (response.statusCode == 200) {
+    final dynamic decoded = jsonDecode(response.body);
+    return models.ProviderConfig.fromJson(decoded as Map<String, dynamic>);
+  } else {
+    throw Exception('Failed to load provider: ${response.statusCode}');
+  }
+}
+
 /// Provider for LLM Models List (all models)
 @riverpod
 Future<List<LLMModel>> llmModelList(Ref ref) async {

@@ -84,13 +84,7 @@ class _ProviderListScreenState extends ConsumerState<ProviderListScreen> {
               return ProviderCard(
                 provider: provider,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(context.l10n.provider_list_details_coming_soon(provider.name)),
-                      backgroundColor: AppTheme.surfaceVariantColor,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
+                  context.push('/providers/${provider.id}');
                 },
                 onDelete: () {
                   _showDeleteDialog(context, provider, ref);

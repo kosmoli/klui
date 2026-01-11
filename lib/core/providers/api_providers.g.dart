@@ -299,6 +299,92 @@ final class ProviderListProvider
 
 String _$providerListHash() => r'938dcf28ed80102178de4cbe68cfcc295a72c090';
 
+/// Provider for single Provider
+
+@ProviderFor(provider)
+const providerProvider = ProviderFamily._();
+
+/// Provider for single Provider
+
+final class ProviderProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<models.ProviderConfig>,
+          models.ProviderConfig,
+          FutureOr<models.ProviderConfig>
+        >
+    with
+        $FutureModifier<models.ProviderConfig>,
+        $FutureProvider<models.ProviderConfig> {
+  /// Provider for single Provider
+  const ProviderProvider._({
+    required ProviderFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'providerProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$providerHash();
+
+  @override
+  String toString() {
+    return r'providerProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<models.ProviderConfig> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<models.ProviderConfig> create(Ref ref) {
+    final argument = this.argument as String;
+    return provider(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is ProviderProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$providerHash() => r'37853e15d270d218489a529c8cd7813e513ba213';
+
+/// Provider for single Provider
+
+final class ProviderFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<models.ProviderConfig>, String> {
+  const ProviderFamily._()
+    : super(
+        retry: null,
+        name: r'providerProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Provider for single Provider
+
+  ProviderProvider call(String id) =>
+      ProviderProvider._(argument: id, from: this);
+
+  @override
+  String toString() => r'providerProvider';
+}
+
 /// Provider for LLM Models List (all models)
 
 @ProviderFor(llmModelList)

@@ -83,4 +83,23 @@ class CreateAgentRequest {
   Map<String, dynamic> toJson() {
     return isBYOK ? toBYOKJson() : toSimpleJson();
   }
+
+  /// Copy with method
+  CreateAgentRequest copyWith({
+    String? name,
+    String? description,
+    LLMModel? llmModel,
+    LLMModel? embeddingModel,
+    List<String>? tools,
+    String? systemPrompt,
+  }) {
+    return CreateAgentRequest(
+      name: name ?? this.name,
+      description: description ?? this.description,
+      llmModel: llmModel ?? this.llmModel,
+      embeddingModel: embeddingModel ?? this.embeddingModel,
+      tools: tools ?? this.tools,
+      systemPrompt: systemPrompt ?? this.systemPrompt,
+    );
+  }
 }

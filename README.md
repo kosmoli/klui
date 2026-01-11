@@ -69,9 +69,6 @@
 - **[Letta Code 功能分析](docs/LETTA_CODE_FEATURES.md)** 📊 - Letta Code 的 7 大核心能力
 - **[Letta 后端分析](docs/LETTA_BACKEND_ANALYSIS.md)** 🖥️ - 后端工具执行能力
 - **[远程开发方案对比](docs/REMOTE_DEV_COMPARISON.md)** 🎯 - Happy 模式 vs Letta 后端
-
-### 项目愿景
-- **[项目愿景与规划](docs/PROJECT_VISION.md)** 🌟 - 项目起源、动机和长期愿景
 - **[Freezed 迁移指南](docs/FREEZED_MIGRATION_GUIDE.md)** 🔧 - Freezed 3.0.0 使用和迁移
 
 ### 相关项目

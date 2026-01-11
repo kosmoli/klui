@@ -394,21 +394,261 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
 ---
 
+---
+
+## 🧠 5. 记忆系统 (Memory System) - Backend-Managed
+
+### ⚠️ 重要纠正
+
+**之前的误解**：我以为 Letta Code 的记忆系统是在客户端实现的。
+
+**正确理解**：
+- ✅ 记忆系统是 **Letta 后端实现** 的
+- ✅ Letta Code 通过 **Letta API SDK** 与后端记忆系统交互
+- ✅ "本地工具" 指的是运行在 **Letta 服务器端** 的工具（不是 Flutter app 设备）
+- ✅ 我们的 Flutter 需要通过 API 管理/控制这些服务端工具
+
+### 5.1 记忆系统架构
+
+**Letta 后端提供的 API**（来自 `@letta-ai/letta-client`）:
+
+```typescript
+// 获取 Agent 的所有记忆块
+await client.agents.blocks.list(agentId);
+
+// 获取单个记忆块
+await client.blocks.retrieve(blockId);
+
+// 创建记忆块
+await client.blocks.create({
+  label: "project",
+  value: "Project description...",
+  description: "Project information",
+  limit: 1000
+});
+
+// 更新记忆块
+await client.blocks.update(blockId, {
+  value: "Updated content..."
+});
+
+// 删除记忆块
+await client.blocks.delete(blockId);
+
+// 将记忆块附加到 Agent
+await client.agents.blocks.attach(blockId, { agent_id: agentId });
+
+// 从 Agent 分离记忆块
+await client.agents.blocks.detach(blockId, { agent_id: agentId });
+```
+
+**Agent 检索时会包含记忆**:
+```typescript
+const agent = await client.agents.retrieve(agentId);
+// agent.memory.blocks 包含所有记忆块
+```
+
+### 5.2 Letta Code 的记忆命令
+
+**`/init` 命令**（`src/agent/prompts/init_memory.md`）:
+- 不是直接操作 API
+- 是一个 **系统提示**，告诉 Agent 如何初始化自己的记忆
+- Agent 会调用 **backend 的 memory tools**（core_memory, archival_memory）
+- Agent 通过工具创建/更新记忆块
+
+**`/remember` 命令**（`src/agent/prompts/remember.md`）:
+- 同样是 **系统提示**，告诉 Agent 记住某些信息
+- Agent 通过 **backend 的 memory tools** 存储信息
+
+**`/memory` 命令**（显示记忆）:
+- Letta Code 调用 `client.agents.retrieve()` 获取 Agent 数据
+- 从 `agent.memory.blocks` 读取记忆块
+- 使用 `MemoryViewer` 组件展示（`src/cli/components/MemoryViewer.tsx`）
+
+### 5.3 记忆块类型
+
+**全局记忆块**（Global blocks，跨项目共享）:
+```typescript
+- persona      // Agent 行为指导
+- human        // 用户偏好
+```
+
+**项目记忆块**（Project blocks，项目特定）:
+```typescript
+- project           // 项目信息
+- skills            // 已加载的技能列表（read-only）
+- loaded_skills     // 技能描述（read-only）
+```
+
+**自定义块**（Agent 可创建任意数量的自定义块）:
+```typescript
+- ticket      // 当前工单上下文
+- context     // 调试笔记
+- decisions   // 架构决策记录
+```
+
+### 5.4 Letta Code 的 MemoryViewer UI
+
+**展示内容**:
+```typescript
+interface Block {
+  id: string;
+  label: string;          // 块名称
+  value: string;          // 块内容
+  description?: string;   // 描述（重要！）
+  limit?: number;         // 字符限制
+  count?: number;         // 当前字符数
+  read_only?: boolean;    // 是否只读
+}
+```
+
+**UI 功能**:
+- 📄 分页显示（每页 3 个块）
+- 🔍 搜索/过滤
+- 📖 详细视图（显示完整内容，可滚动）
+- 🔗 跳转到 Letta Cloud Web UI（`app.letta.com/agents/{id}?view=memory`）
+
+**代码示例**（`src/cli/App.tsx:7091`）:
+```typescript
+<MemoryViewer
+  blocks={agentState?.memory?.blocks || []}
+  agentId={agentId}
+  agentName={agentName}
+  onClose={closeOverlay}
+/>
+```
+
+### 5.5 对我们的 Flutter 实现的意义
+
+**我们需要实现**:
+
+1. **获取 Agent 记忆**:
+```dart
+// lib/core/providers/memory_providers.dart (新建)
+@riverpod
+Future<List<Block>> agentBlocks(Ref ref, String agentId) async {
+  final client = ref.watch(apiClientProvider);
+  final response = await client.get('/agents/$agentId/blocks');
+  return ApiHelper.parseList(response, Block.fromJson);
+}
+
+@riverpod
+Future<AgentWithBlocks> agentWithMemory(Ref ref, String agentId) async {
+  final client = ref.watch(apiClientProvider);
+  final response = await client.get('/agents/$agentId');
+  return ApiHelper.parseSingle(response, AgentWithBlocks.fromJson);
+}
+```
+
+2. **记忆管理 UI**（后期功能）:
+   - 记忆列表页面（类似 Provider 列表）
+   - 记忆详情页面（显示 label, description, value, limit）
+   - 创建/编辑/删除记忆块的表单
+
+3. **API 端点**（需要在 Letta 后端确认）:
+```
+GET    /agents/{agent_id}/blocks          # 获取所有块
+GET    /blocks/{block_id}                 # 获取单个块
+POST   /agents/{agent_id}/blocks          # 创建块（attach）
+PUT    /blocks/{block_id}                 # 更新块内容
+DELETE /agents/{agent_id}/blocks/{block_id} # 分离块
+```
+
+**当前优先级**:
+- ⏸️ **Phase 1**: 不实现记忆管理 UI（先做聊天功能）
+- ✅ **Phase 2**: 只读显示记忆块（在 Agent 详情页）
+- ⏸️ **Phase 3**: 完整的记忆管理功能（创建/编辑/删除）
+
+**为什么不是优先级**:
+- 聊天功能是核心
+- 记忆管理是高级功能
+- 可以在 Letta Cloud Web UI 上管理记忆（通过链接跳转）
+
+---
+
+## 🧩 6. 工具系统 (Tool System) - Server-Side Execution
+
+### 6.1 "本地工具" 的含义
+
+**之前误解**：以为 "local tools" 指在 Flutter app 设备上执行的工具。
+
+**正确理解**：
+- "本地工具" = 在 **Letta 服务器端** 执行的工具
+- 服务器可能在云端（Letta Cloud）或用户自托管
+- Flutter app **不执行工具代码**
+- Flutter app **控制工具执行权限**（approve/reject）
+
+### 6.2 Letta Code 的工具执行流程
+
+**Letta Code 作为客户端**:
+```
+1. 用户输入消息
+2. 发送到 Letta 后端
+3. 后端 Agent 决定调用工具（如 Bash）
+4. 后端返回 tool_call_message
+5. Letta Code 分析工具安全性
+6. 用户批准/拒绝
+7. 批准后，后端在服务器端执行工具
+8. 后端返回 tool_return_message
+9. Letta Code 显示结果
+```
+
+**关键点**：
+- ⚠️ Bash 工具在 **Letta 服务器端** 执行（不是 Letta Code 客户端）
+- ⚠️ 文件读写工具操作的是 **服务器端的文件**（不是客户端）
+- ⚠️ 客户端只负责 **UI 显示** 和 **权限控制**
+
+### 6.3 我们的场景
+
+**Letta Cloud 托管**:
+- 工具在云端执行
+- 我们的 Flutter Web app 无法访问用户本地文件
+- 适用场景：代码分析、API 调用、数据处理
+
+**自托管 Letta 服务器**:
+- 工具在服务器端执行
+- 服务器可能访问特定资源（数据库、文件系统）
+- Flutter app 控制权限
+
+**我们的 Flutter 实现重点**:
+1. ✅ 显示工具调用消息（tool_call_message）
+2. ✅ 显示工具返回结果（tool_return_message）
+3. ✅ 批准/拒绝工作流（UI + API）
+4. ❌ 不需要实现工具执行逻辑（由后端负责）
+
+---
+
 ## 🚀 总结：Letta Code = CLI + Headless + Tools + Permissions + Memory + LSP
 
 **核心价值**:
 1. ✅ **CLI UI** - 参考其消息展示和工具调用 UI
 2. ✅ **Headless** - 我们不需要（Web 应用）
-3. ⚠️ **本地工具** - 不适用，但理解工具调用流程很重要
+3. ⚠️ **工具系统** - 理解服务端工具执行流程，我们只做 UI + 权限控制
 4. ✅ **权限系统** - 理解批准工作流
-5. ⏸️ **记忆/技能** - 后期再说
+5. ⏸️ **记忆系统** - 后端管理，后期实现 UI（先只读显示）
 6. ❌ **LSP** - 不需要
 
 **最重要的学习资源**:
 1. `src/cli/App.tsx` - 完整的聊天 UI 实现
 2. `src/cli/components/Inline*Approval.tsx` - 批准 UI 组件
-3. `src/agents/message.ts` - SSE 流式处理逻辑
+3. `src/agent/message.ts` - SSE 流式处理逻辑
 4. `src/permissions/` - 权限分析和检查逻辑
+5. `src/cli/components/MemoryViewer.tsx` - 记忆查看器 UI（后期参考）
+
+**关键 API 调用**（来自 `@letta-ai/letta-client`）:
+```typescript
+// Agent 管理
+client.agents.retrieve(agentId)          // 获取 Agent（包含 memory.blocks）
+client.agents.blocks.list(agentId)        // 获取记忆块列表
+client.blocks.retrieve(blockId)           // 获取单个记忆块
+
+// 消息和工具调用
+client.agents.messages.create(agentId, {...})  // 发送消息
+client.agents.messages.stream(agentId, {...})  // SSE 流式响应
+
+// 工具批准
+client.agents.runs.submitToolOutputs(runId, {...})  // 提交工具批准
+```
 
 ---
 

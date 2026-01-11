@@ -8,9 +8,16 @@
 
 ## 项目概述
 
-基于 Flutter 开发的跨平台 Letta Agent 管理界面，支持 Web、iOS、Android、macOS、Windows、Linux 六大平台。
+基于 Flutter 开发的**移动优先** Letta Agent 管理界面，专注于在移动端（iOS/Android）实现远程软件开发功能。
 
-## 技术栈
+**核心特性**：
+- 📱 **移动优先设计** - 针对触摸交互优化
+- 💬 **实时聊天** - SSE 流式响应，支持工具调用批准
+- 🔧 **远程开发** - 通过 Letta 后端执行代码和文件操作
+- 🧠 **记忆管理** - 查看 Agent 的记忆块
+- 🤖 **Agent 管理** - 创建、配置、监控 AI Agent
+
+**技术栈**：
 
 | 技术 | 版本 | 用途 |
 |------|------|------|
@@ -19,17 +26,54 @@
 | Riverpod | 3.0.3 | 状态管理 |
 | go_router | 16.3.0 | 路由管理 |
 | http | 1.6.0 | HTTP 客户端 |
+| Letta Backend | - | AI Agent 后端 |
 
-## 核心功能
+## 当前进度
 
-- [x] 基础架构搭建
-- [x] Agent 管理界面（列表页）
-- [x] Agent 详情页 ✨ (2026-01-09)
-- [x] Agent 创建向导（BYOK + Base 模式）✨ (2026-01-09)
-- [ ] 实时聊天（流式响应）
-- [ ] 记忆管理（核心记忆、档案记忆）
-- [ ] 工具管理
-- [ ] Provider 管理
+### ✅ 已完成 (Phase 0)
+
+- [x] 项目初始化和架构搭建
+- [x] Riverpod 状态管理 + go_router 路由
+- [x] API 封装（ApiClient, ApiHelper）
+- [x] 数据模型（Agent, Provider, LLMModel, EmbeddingModel）
+- [x] Agent CRUD 功能（列表、详情、创建、删除）
+- [x] Provider CRUD 功能（列表、详情、创建）
+- [x] LLMModel 列表和过滤
+- [x] 三层架构（UI → Provider → API）
+
+### 🚧 进行中 (Phase 1)
+
+- [ ] 聊天功能（SSE 流式响应）
+- [ ] 消息模型和 UI
+- [ ] 工具批准系统
+
+### ⏸️ 计划中 (Phase 2+)
+
+- [ ] 远程开发能力（代码执行、文件操作）
+- [ ] 记忆管理 UI
+- [ ] 桌面端适配
+
+**详见**: [docs/IMPLEMENTATION_ROADMAP.md](docs/IMPLEMENTATION_ROADMAP.md)
+
+## 📚 文档索引
+
+### 核心文档
+- **[实施路线图](docs/IMPLEMENTATION_ROADMAP.md)** 📋 - 总体规划和进度跟踪
+- **[CLAUDE.md](CLAUDE.md)** 📖 - 开发指南和架构规则（必读！）
+
+### 功能规划
+- **[聊天功能规划](docs/CHAT_FEATURE_PLAN.md)** 💬 - 13 种消息类型、SSE 流式响应、工具批准
+- **[API 层优化](docs/API_LAYER_OPTIMIZATION.md)** 🔧 - API 封装、错误处理、SDK 分离标准
+
+### 参考分析
+- **[Letta Code 功能分析](docs/LETTA_CODE_FEATURES.md)** 📊 - Letta Code 的 7 大核心能力
+- **[Letta 后端分析](docs/LETTA_BACKEND_ANALYSIS.md)** 🖥️ - 后端工具执行能力
+- **[远程开发方案对比](docs/REMOTE_DEV_COMPARISON.md)** 🎯 - Happy 模式 vs Letta 后端
+
+### 相关项目
+- **Letta Backend**: `../letta/` - AI Agent 后端服务器
+- **Letta Code**: `../letta-code/` - CLI 参考实现
+- **Happy**: `../happy/` - 移动端参考实现
 
 ## 项目结构
 

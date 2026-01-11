@@ -56,7 +56,16 @@ class Agent {
       embeddingConfig: json['embedding_config'] as Map<String, dynamic>?,
       modelSettings: json['model_settings'] as Map<String, dynamic>?,
       tools: json['tools'] != null
-          ? (json['tools'] as List).map((e) => e.toString()).toList()
+          ? (json['tools'] as List).map((e) {
+              // If tool is a string, use it directly
+              if (e is String) return e;
+              // If tool is an object, extract the name field
+              if (e is Map) {
+                return (e as Map)['name']?.toString() ?? e.toString();
+              }
+              // Fallback to toString
+              return e.toString();
+            }).toList()
           : null,
       tags: json['tags'] != null
           ? List<String>.from(json['tags'] as List)

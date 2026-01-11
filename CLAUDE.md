@@ -117,7 +117,7 @@ class MyWidget extends ConsumerWidget {
 **Key**: `modelType` field distinguishes LLM vs embedding models
 
 ### 7. Build & Deploy
-**CRITICAL: Always verify working directory before running commands!**
+**🚨 CRITICAL: ALWAYS use deploy.sh script - NEVER manual build commands!**
 
 **Working Directory**: `/root/work/klui` (NEVER run from /root/work)
 
@@ -126,6 +126,19 @@ class MyWidget extends ConsumerWidget {
 cd /root/work/klui  # MUST be in klui directory!
 ./deploy.sh
 ```
+
+**⛔ DO NOT use manual commands like**:
+- ❌ `flutter build web` (WRONG - use deploy.sh instead)
+- ❌ `dart run build_runner` (WRONG - deploy.sh handles this)
+- ❌ Direct python server start (WRONG - deploy.sh manages this)
+
+**✅ ALWAYS use deploy.sh because it**:
+- ✅ Verifies correct directory
+- ✅ Sets correct Flutter PATH
+- ✅ Builds with correct API_BASE_URL
+- ✅ Stops old HTTP server
+- ✅ Starts new HTTP server
+- ✅ Shows verification info
 
 **Verify directory before deploy**:
 ```bash
@@ -145,13 +158,6 @@ ls deploy.sh  # Should exist
 - Stop old HTTP server
 - Start new HTTP server on port 8080
 - Show verification info
-
-**Manual build** (if script fails):
-```bash
-export PATH="$PATH:/opt/flutter/bin"
-flutter build web --release --dart-define=API_BASE_URL=http://38.175.200.93:8283
-cd build/web && python3 -m http.server 8080
-```
 
 **Important**: Browser hard refresh required (Ctrl+Shift+R)
 

@@ -758,9 +758,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get provider_detail_section_credentials => '凭证';
 
   @override
-  String get provider_detail_section_tags => '标签';
-
-  @override
   String get provider_detail_field_id => 'Provider ID';
 
   @override
@@ -779,9 +776,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get provider_detail_field_region => '区域';
 
   @override
-  String get provider_detail_field_project => '项目';
-
-  @override
   String get provider_detail_field_api_key => 'API密钥';
 
   @override
@@ -792,9 +786,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get provider_detail_field_updated_at => '最后更新';
-
-  @override
-  String get provider_detail_no_tags => '无标签';
 
   @override
   String get provider_detail_category_base => '基础（默认）';

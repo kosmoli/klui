@@ -1445,12 +1445,6 @@ abstract class AppLocalizations {
   /// **'Credentials'**
   String get provider_detail_section_credentials;
 
-  /// No description provided for @provider_detail_section_tags.
-  ///
-  /// In en, this message translates to:
-  /// **'Tags'**
-  String get provider_detail_section_tags;
-
   /// No description provided for @provider_detail_field_id.
   ///
   /// In en, this message translates to:
@@ -1487,12 +1481,6 @@ abstract class AppLocalizations {
   /// **'Region'**
   String get provider_detail_field_region;
 
-  /// No description provided for @provider_detail_field_project.
-  ///
-  /// In en, this message translates to:
-  /// **'Project'**
-  String get provider_detail_field_project;
-
   /// No description provided for @provider_detail_field_api_key.
   ///
   /// In en, this message translates to:
@@ -1516,12 +1504,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Last Updated'**
   String get provider_detail_field_updated_at;
-
-  /// No description provided for @provider_detail_no_tags.
-  ///
-  /// In en, this message translates to:
-  /// **'No tags'**
-  String get provider_detail_no_tags;
 
   /// No description provided for @provider_detail_category_base.
   ///

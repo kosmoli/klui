@@ -258,7 +258,6 @@
   "provider_detail_section_basic": "Basic Information",
   "provider_detail_section_config": "Configuration",
   "provider_detail_section_credentials": "Credentials",
-  "provider_detail_section_tags": "Tags",
 
   "provider_detail_field_id": "Provider ID",
   "provider_detail_field_name": "Name",
@@ -266,12 +265,10 @@
   "provider_detail_field_category": "Category",
   "provider_detail_field_base_url": "Base URL",
   "provider_detail_field_region": "Region",
-  "provider_detail_field_project": "Project",
   "provider_detail_field_api_key": "API Key",
   "provider_detail_field_access_key": "Access Key",
   "provider_detail_field_organization_id": "Organization ID",
   "provider_detail_field_updated_at": "Last Updated",
-  "provider_detail_no_tags": "No tags",
   "provider_detail_category_base": "Base (Default)",
   "provider_detail_category_byok": "BYOK (Custom)",
 

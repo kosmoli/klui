@@ -8,10 +8,10 @@ class ProviderConfig {
   final String? apiKey;
   final String? accessKey;
   final String? region;
-  final String? project;
   final DateTime? updatedAt;
   final String? organizationId;
-  final Map<String, dynamic>? tags;
+  final String? apiKeyEnc;
+  final String? accessKeyEnc;
 
   const ProviderConfig({
     required this.id,
@@ -22,10 +22,10 @@ class ProviderConfig {
     this.apiKey,
     this.accessKey,
     this.region,
-    this.project,
     this.updatedAt,
     this.organizationId,
-    this.tags,
+    this.apiKeyEnc,
+    this.accessKeyEnc,
   });
 
   /// Create ProviderConfig from JSON
@@ -39,12 +39,12 @@ class ProviderConfig {
       apiKey: json['api_key'] as String?,
       accessKey: json['access_key'] as String?,
       region: json['region'] as String?,
-      project: json['project'] as String?,
       updatedAt: json['updated_at'] != null
           ? DateTime.parse(json['updated_at'] as String)
           : null,
       organizationId: json['organization_id'] as String?,
-      tags: json['tags'] as Map<String, dynamic>?,
+      apiKeyEnc: json['api_key_enc'] as String?,
+      accessKeyEnc: json['access_key_enc'] as String?,
     );
   }
 
@@ -59,19 +59,30 @@ class ProviderConfig {
       if (apiKey != null) 'api_key': apiKey,
       if (accessKey != null) 'access_key': accessKey,
       if (region != null) 'region': region,
-      if (project != null) 'project': project,
       if (updatedAt != null) 'updated_at': updatedAt!.toIso8601String(),
       if (organizationId != null) 'organization_id': organizationId,
-      if (tags != null) 'tags': tags,
+      if (apiKeyEnc != null) 'api_key_enc': apiKeyEnc,
+      if (accessKeyEnc != null) 'access_key_enc': accessKeyEnc,
     };
   }
 
-  /// Get masked API key for display (show only first 8 chars)
-  String get maskedApiKey {
+  /// Get displayable API key (prefer encrypted, fallback to plain with masking)
+  String get displayApiKey {
+    // Prefer encrypted version if available
+    if (apiKeyEnc != null && apiKeyEnc!.isNotEmpty) {
+      return apiKeyEnc!.length <= 8 ? '********' : '${apiKeyEnc!.substring(0, 8)}...';
+    }
+    // Fallback to plain API key with masking
     if (apiKey == null || apiKey!.isEmpty) return '';
     if (apiKey!.length <= 8) return '********';
     return '${apiKey!.substring(0, 8)}...';
   }
+
+  /// Check if provider has any API key configured
+  bool get hasApiKey => (apiKeyEnc != null && apiKeyEnc!.isNotEmpty) || (apiKey != null && apiKey!.isNotEmpty);
+
+  /// Check if provider has access key configured
+  bool get hasAccessKey => (accessKeyEnc != null && accessKeyEnc!.isNotEmpty) || (accessKey != null && accessKey!.isNotEmpty);
 
   @override
   String toString() {

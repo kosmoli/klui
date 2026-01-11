@@ -783,9 +783,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get provider_detail_section_credentials => 'Credentials';
 
   @override
-  String get provider_detail_section_tags => 'Tags';
-
-  @override
   String get provider_detail_field_id => 'Provider ID';
 
   @override
@@ -804,9 +801,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get provider_detail_field_region => 'Region';
 
   @override
-  String get provider_detail_field_project => 'Project';
-
-  @override
   String get provider_detail_field_api_key => 'API Key';
 
   @override
@@ -817,9 +811,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get provider_detail_field_updated_at => 'Last Updated';
-
-  @override
-  String get provider_detail_no_tags => 'No tags';
 
   @override
   String get provider_detail_category_base => 'Base (Default)';

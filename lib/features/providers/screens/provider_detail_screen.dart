@@ -149,7 +149,7 @@ class ProviderDetailScreen extends ConsumerWidget {
           const SizedBox(height: AppTheme.spacing24),
 
           // Configuration Section
-          if (provider.baseUrl != null || provider.region != null || provider.project != null)
+          if (provider.baseUrl != null || provider.region != null)
             _SectionCard(
               title: context.l10n.provider_detail_section_config,
               icon: Icons.settings_outlined,
@@ -163,7 +163,7 @@ class ProviderDetailScreen extends ConsumerWidget {
                       valueStyle: AppTheme.monoSmall,
                       isMultiline: true,
                     ),
-                  if (provider.baseUrl != null && (provider.region != null || provider.project != null))
+                  if (provider.baseUrl != null && provider.region != null)
                     const SizedBox(height: AppTheme.spacing12),
                   if (provider.region != null)
                     _InfoRow(
@@ -171,60 +171,10 @@ class ProviderDetailScreen extends ConsumerWidget {
                       value: provider.region!,
                       valueStyle: AppTheme.bodyMedium,
                     ),
-                  if (provider.region != null && provider.project != null)
-                    const SizedBox(height: AppTheme.spacing12),
-                  if (provider.project != null)
-                    _InfoRow(
-                      label: context.l10n.provider_detail_field_project,
-                      value: provider.project!,
-                      valueStyle: AppTheme.bodyMedium,
-                    ),
                 ],
               ),
             ),
-          if (provider.baseUrl != null || provider.region != null || provider.project != null)
-            const SizedBox(height: AppTheme.spacing24),
-
-          // Credentials Section
-          if (provider.apiKey != null || provider.accessKey != null)
-            _SectionCard(
-              title: context.l10n.provider_detail_section_credentials,
-              icon: Icons.key_outlined,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (provider.apiKey != null)
-                    _InfoRow(
-                      label: context.l10n.provider_detail_field_api_key,
-                      value: provider.maskedApiKey,
-                      valueStyle: AppTheme.monoSmall.copyWith(
-                        fontFamily: 'Courier',
-                      ),
-                    ),
-                  if (provider.apiKey != null && provider.accessKey != null)
-                    const SizedBox(height: AppTheme.spacing12),
-                  if (provider.accessKey != null)
-                    _InfoRow(
-                      label: context.l10n.provider_detail_field_access_key,
-                      value: '********',
-                      valueStyle: AppTheme.monoSmall.copyWith(
-                        fontFamily: 'Courier',
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          if (provider.apiKey != null || provider.accessKey != null)
-            const SizedBox(height: AppTheme.spacing24),
-
-          // Tags Section
-          if (provider.tags != null && provider.tags!.isNotEmpty)
-            _SectionCard(
-              title: context.l10n.provider_detail_section_tags,
-              icon: Icons.label_outlined,
-              child: _ConfigViewer(config: provider.tags!),
-            ),
-          if (provider.tags != null && provider.tags!.isNotEmpty)
+          if (provider.baseUrl != null || provider.region != null)
             const SizedBox(height: AppTheme.spacing24),
 
           // Timestamp Section

@@ -49,11 +49,11 @@ class CreateAgentRequest {
   String _getCorrectEmbeddingHandle() {
     // OpenAI-compatible API with custom base URL
     if (embeddingModel.providerType == 'openai' &&
-        embeddingModel.embeddingEndpoint != 'https://api.openai.com/v1') {
+        embeddingModel.modelEndpoint != 'https://api.openai.com/v1') {
       // Extract model name from handle
       final modelName = embeddingModel.handle.contains('/')
           ? embeddingModel.handle.split('/').last
-          : embeddingModel.embeddingModel;
+          : embeddingModel.model;
       return 'openai-proxy/$modelName';
     }
 

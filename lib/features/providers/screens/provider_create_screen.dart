@@ -77,13 +77,35 @@ class ProviderCreateScreen extends ConsumerWidget {
               Navigator.of(context).pop();
             }
 
+            // Parse error message to provide user-friendly feedback
+            String errorMessage;
+            final errorString = e.toString();
+
+            if (errorString.contains('unique constraint') ||
+                errorString.contains('UniqueViolationError') ||
+                errorString.contains('duplicate key')) {
+              // Extract provider name from error if possible
+              final nameMatch = RegExp(r'\(name, organization_id\)=\(([^,]+)').firstMatch(errorString);
+              final duplicateName = nameMatch?.group(1) ?? request.name;
+              errorMessage = 'Provider "$duplicateName" already exists. Please use a different name or delete the existing provider first.';
+            } else if (errorString.contains('Exception:')) {
+              // Clean up backend error messages
+              errorMessage = errorString.replaceAll('Exception: ', '');
+              // Truncate very long error messages
+              if (errorMessage.length > 200) {
+                errorMessage = '${errorMessage.substring(0, 200)}...';
+              }
+            } else {
+              errorMessage = errorString;
+            }
+
             // Show error message
             if (context.mounted) {
               final colors = Theme.of(context).extension<KluiCustomColors>()!;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    context.l10n.provider_create_failed(e.toString()),
+                    errorMessage,
                     style: TextStyle(color: colors.userText),
                   ),
                   backgroundColor: colors.error,

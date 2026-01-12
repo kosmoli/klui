@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../utils/api_client.dart';
 import '../models/chat_message.dart';
 import 'api_providers.dart';
+
+part 'chat_providers.g.dart';
 
 /// Chat state for a specific agent
 class ChatState {
@@ -39,22 +41,17 @@ class ChatState {
   }
 }
 
-/// Chat controller for managing chat state
-class ChatController {
-  final ApiClient _client;
-  final String agentId;
-  ChatState _state = const ChatState();
+/// Chat state holder using Notifier for Riverpod 3.x
+@riverpod
+class ChatStateHolder extends _$ChatStateHolder {
+  late ApiClient _client;
+  late String _agentId;
 
-  ChatController(this._client, this.agentId);
-
-  ChatState get state => _state;
-  final _stateController = StreamController<ChatState>.broadcast();
-
-  Stream<ChatState> get stateStream => _stateController.stream;
-
-  void _updateState(ChatState newState) {
-    _state = newState;
-    _stateController.add(_state);
+  @override
+  ChatState build(String agentId) {
+    _client = ref.watch(apiClientProvider);
+    _agentId = agentId;
+    return const ChatState();
   }
 
   /// Send a message and stream the response
@@ -66,11 +63,11 @@ class ChatController {
       content: content,
     );
 
-    _updateState(_state.copyWith(
-      messages: [..._state.messages, userMessage],
+    state = state.copyWith(
+      messages: [...state.messages, userMessage],
       isStreaming: true,
       error: null,
-    ));
+    );
 
     try {
       // Prepare request
@@ -83,12 +80,12 @@ class ChatController {
         'max_steps': 10,
       };
 
-      print('[ChatController] Sending message to agent $agentId');
+      print('[ChatController] Sending message to agent $_agentId');
       print('[ChatController] Request: ${jsonEncode(requestBody)}');
 
       // Start streaming
       final stream = _client.streamPost(
-        '/agents/$agentId/messages',
+        '/agents/$_agentId/messages',
         body: requestBody,
       );
 
@@ -112,13 +109,13 @@ class ChatController {
       }
 
       // Stream completed
-      _updateState(_state.copyWith(isStreaming: false));
+      state = state.copyWith(isStreaming: false);
     } catch (e) {
       print('[ChatController] Error sending message: $e');
-      _updateState(_state.copyWith(
+      state = state.copyWith(
         isStreaming: false,
         error: e.toString(),
-      ));
+      );
     }
   }
 
@@ -187,7 +184,7 @@ class ChatController {
     );
 
     // Add or update message
-    final messages = [..._state.messages];
+    final messages = [...state.messages];
     final existingIndex = messages.indexWhere((m) => m.id == message.id);
 
     if (existingIndex >= 0) {
@@ -198,7 +195,7 @@ class ChatController {
       messages.add(message);
     }
 
-    _updateState(_state.copyWith(messages: messages));
+    state = state.copyWith(messages: messages);
   }
 
   void _handleReasoningMessage(Map<String, dynamic> json) {
@@ -209,7 +206,7 @@ class ChatController {
       metadata: {'source': json['source']},
     );
 
-    _updateState(_state.copyWith(messages: [..._state.messages, message]));
+    state = state.copyWith(messages: [...state.messages, message]);
   }
 
   void _handleToolCallMessage(Map<String, dynamic> json) {
@@ -226,7 +223,7 @@ class ChatController {
       metadata: {'phase': 'ready'},
     );
 
-    _updateState(_state.copyWith(messages: [..._state.messages, message]));
+    state = state.copyWith(messages: [...state.messages, message]);
   }
 
   void _handleToolReturnMessage(Map<String, dynamic> json) {
@@ -241,7 +238,7 @@ class ChatController {
       },
     );
 
-    _updateState(_state.copyWith(messages: [..._state.messages, message]));
+    state = state.copyWith(messages: [...state.messages, message]);
   }
 
   void _handleApprovalRequestMessage(Map<String, dynamic> json) {
@@ -258,11 +255,11 @@ class ChatController {
       metadata: {'phase': 'ready'},
     );
 
-    _updateState(_state.copyWith(messages: [..._state.messages, message]));
+    state = state.copyWith(messages: [...state.messages, message]);
   }
 
   void _handleUsageStatistics(Map<String, dynamic> json) {
-    _updateState(_state.copyWith(usage: json['usage']));
+    state = state.copyWith(usage: json['usage']);
   }
 
   void _handleErrorMessage(Map<String, dynamic> json) {
@@ -277,58 +274,14 @@ class ChatController {
       content: errorMessage,
     );
 
-    _updateState(_state.copyWith(
-      messages: [..._state.messages, message],
+    state = state.copyWith(
+      messages: [...state.messages, message],
       error: errorMessage,
-    ));
+    );
   }
 
   /// Clear all messages
   void clearMessages() {
-    _updateState(const ChatState());
-  }
-
-  void dispose() {
-    _stateController.close();
+    state = const ChatState();
   }
 }
-
-/// Provider for chat controller
-final chatControllerProvider = Provider.family<ChatController, String>(
-  (ref, agentId) {
-    final client = ref.watch(apiClientProvider);
-    final controller = ChatController(client, agentId);
-    ref.onDispose(() {
-      controller.dispose();
-    });
-    return controller;
-  },
-);
-
-/// Provider for chat state (convenience)
-final chatStateProvider = Provider.family<ChatState, String>(
-  (ref, agentId) {
-    return ref.watch(chatControllerProvider(agentId)).state;
-  },
-);
-
-/// Provider for messages list (convenience)
-final chatMessagesProvider = Provider.family<List<ChatMessage>, String>(
-  (ref, agentId) {
-    return ref.watch(chatStateProvider(agentId)).messages;
-  },
-);
-
-/// Provider for loading state
-final chatIsLoadingProvider = Provider.family<bool, String>(
-  (ref, agentId) {
-    return ref.watch(chatStateProvider(agentId)).isLoading;
-  },
-);
-
-/// Provider for streaming state
-final chatIsStreamingProvider = Provider.family<bool, String>(
-  (ref, agentId) {
-    return ref.watch(chatStateProvider(agentId)).isStreaming;
-  },
-);

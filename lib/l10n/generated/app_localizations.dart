@@ -1618,6 +1618,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Send message'**
   String get chat_send_tooltip;
+
+  /// No description provided for @agent_selector_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Current agent: {name}'**
+  String agent_selector_label(Object name);
+
+  /// No description provided for @agent_selector_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Double tap to select an agent'**
+  String get agent_selector_hint;
+
+  /// No description provided for @agent_selector_item_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent: {name}'**
+  String agent_selector_item_label(Object name);
+
+  /// No description provided for @agent_selector_select_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Double tap to select this agent'**
+  String get agent_selector_select_hint;
 }
 
 class _AppLocalizationsDelegate

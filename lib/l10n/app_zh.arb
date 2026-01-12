@@ -290,5 +290,10 @@
   "chat_empty_title": "开始对话",
   "chat_empty_subtitle": "发送消息开始与您的 Agent 聊天",
   "chat_input_hint": "输入您的消息...",
-  "chat_send_tooltip": "发送消息"
+  "chat_send_tooltip": "发送消息",
+
+  "agent_selector_label": "当前 Agent：{name}",
+  "agent_selector_hint": "双击选择 Agent",
+  "agent_selector_item_label": "Agent：{name}",
+  "agent_selector_select_hint": "双击选择此 Agent"
 }

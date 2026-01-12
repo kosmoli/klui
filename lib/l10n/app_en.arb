@@ -290,5 +290,10 @@
   "chat_empty_title": "Start a conversation",
   "chat_empty_subtitle": "Send a message to begin chatting with your agent",
   "chat_input_hint": "Type your message...",
-  "chat_send_tooltip": "Send message"
+  "chat_send_tooltip": "Send message",
+
+  "agent_selector_label": "Current agent: {name}",
+  "agent_selector_hint": "Double tap to select an agent",
+  "agent_selector_item_label": "Agent: {name}",
+  "agent_selector_select_hint": "Double tap to select this agent"
 }

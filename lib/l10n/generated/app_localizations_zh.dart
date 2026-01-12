@@ -843,4 +843,20 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get chat_send_tooltip => '发送消息';
+
+  @override
+  String agent_selector_label(Object name) {
+    return '当前 Agent：$name';
+  }
+
+  @override
+  String get agent_selector_hint => '双击选择 Agent';
+
+  @override
+  String agent_selector_item_label(Object name) {
+    return 'Agent：$name';
+  }
+
+  @override
+  String get agent_selector_select_hint => '双击选择此 Agent';
 }

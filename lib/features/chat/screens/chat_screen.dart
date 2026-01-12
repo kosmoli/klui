@@ -7,6 +7,7 @@ import '../../../../core/theme/klui_theme_extension.dart';
 import '../../../../core/providers/chat_providers.dart';
 import '../../../../core/providers/api_providers.dart';
 import '../../../../core/models/chat_message.dart';
+import '../../../../core/models/agent.dart';
 import '../../../shared/widgets/retro_drawer.dart';
 import '../../../shared/widgets/retro_menu_button.dart';
 import '../widgets/bubbles/user_message_bubble.dart';
@@ -59,7 +60,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
-    ref.read(chatControllerProvider(widget.agentId)).sendMessage(text);
+    ref.read(chatStateHolderProvider(widget.agentId).notifier).sendMessage(text);
     _controller.clear();
     _focusNode.unfocus();
     _scrollToBottom();
@@ -68,7 +69,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<KluiCustomColors>()!;
-    final chatState = ref.watch(chatStateProvider(widget.agentId));
+    final chatState = ref.watch(chatStateHolderProvider(widget.agentId));
     final messages = chatState.messages;
     final isStreaming = chatState.isStreaming;
 
@@ -119,7 +120,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
           IconButton(
             onPressed: () {
-              ref.read(chatControllerProvider(widget.agentId)).clearMessages();
+              ref.read(chatStateHolderProvider(widget.agentId).notifier).clearMessages();
             },
             icon: const Icon(Icons.clear_all),
             tooltip: 'Clear chat',
@@ -329,7 +330,7 @@ class _ChatInputArea extends StatelessWidget {
 
 /// Agent Selector Widget - Shows current agent and allows switching
 class _AgentSelector extends ConsumerWidget {
-  final AsyncValue<List<dynamic>> agentsAsync;
+  final AsyncValue<List<Agent>> agentsAsync;
   final String currentAgentId;
 
   const _AgentSelector({
@@ -344,52 +345,59 @@ class _AgentSelector extends ConsumerWidget {
     return agentsAsync.when(
       data: (agents) {
         // Find current agent in the list
-        final currentAgent = agents.firstWhere(
-          (a) => a.id == currentAgentId,
-          orElse: () => null,
-        );
+        Agent? currentAgent;
+        try {
+          currentAgent = agents.firstWhere((a) => a.id == currentAgentId);
+        } catch (e) {
+          currentAgent = null;
+        }
 
         final currentAgentName = currentAgent?.name ?? 'Select Agent';
 
         return Padding(
           padding: const EdgeInsets.only(right: 8),
-          child: InkWell(
-            onTap: agents.isEmpty
-                ? null
-                : () => _showAgentMenu(context, agents, ref),
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                border: Border.all(color: colors.border),
-                borderRadius: BorderRadius.circular(8),
-                color: colors.surfaceVariant.withOpacity(0.5),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.smart_toy_outlined,
-                    size: 18,
-                    color: colors.userBubble,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    currentAgentName,
-                    style: KluiTextStyles.labelMedium.copyWith(
-                      color: colors.textPrimary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  if (agents.isNotEmpty) ...[
-                    const SizedBox(width: 4),
+          child: Semantics(
+            label: context.l10n.agent_selector_label(currentAgentName),
+            button: true,
+            hint: context.l10n.agent_selector_hint,
+            child: InkWell(
+              onTap: agents.isEmpty
+                  ? null
+                  : () => _showAgentMenu(context, agents),
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  border: Border.all(color: colors.border),
+                  borderRadius: BorderRadius.circular(8),
+                  color: colors.surfaceVariant.withOpacity(0.5),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     Icon(
-                      Icons.arrow_drop_down,
-                      size: 20,
-                      color: colors.textSecondary,
+                      Icons.smart_toy_outlined,
+                      size: 18,
+                      color: colors.userBubble,
                     ),
+                    const SizedBox(width: 8),
+                    Text(
+                      currentAgentName,
+                      style: KluiTextStyles.labelMedium.copyWith(
+                        color: colors.textPrimary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (agents.isNotEmpty) ...[
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.arrow_drop_down,
+                        size: 20,
+                        color: colors.textSecondary,
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
@@ -412,8 +420,7 @@ class _AgentSelector extends ConsumerWidget {
 
   void _showAgentMenu(
     BuildContext context,
-    List<dynamic> agents,
-    WidgetRef ref,
+    List<Agent> agents,
   ) {
     final colors = Theme.of(context).extension<KluiCustomColors>()!;
 
@@ -424,37 +431,44 @@ class _AgentSelector extends ConsumerWidget {
         final isSelected = agent.id == currentAgentId;
         return PopupMenuItem<String>(
           value: agent.id,
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.smart_toy_outlined,
-                  size: 18,
-                  color: isSelected
-                      ? colors.userBubble
-                      : colors.textSecondary,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    agent.name ?? 'Unnamed Agent',
-                    style: KluiTextStyles.bodyMedium.copyWith(
-                      color: isSelected
-                          ? colors.userBubble
-                          : colors.textPrimary,
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.normal,
+          child: Semantics(
+            selected: isSelected,
+            button: true,
+            label: context.l10n.agent_selector_item_label(
+              agent.name ?? 'Unnamed Agent',
+            ),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.smart_toy_outlined,
+                    size: 18,
+                    color: isSelected
+                        ? colors.userBubble
+                        : colors.textSecondary,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      agent.name ?? 'Unnamed Agent',
+                      style: KluiTextStyles.bodyMedium.copyWith(
+                        color: isSelected
+                            ? colors.userBubble
+                            : colors.textPrimary,
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.normal,
+                      ),
                     ),
                   ),
-                ),
-                if (isSelected)
-                  Icon(
-                    Icons.check,
-                    size: 18,
-                    color: colors.userBubble,
-                  ),
-              ],
+                  if (isSelected)
+                    Icon(
+                      Icons.check,
+                      size: 18,
+                      color: colors.userBubble,
+                    ),
+                ],
+              ),
             ),
           ),
         );

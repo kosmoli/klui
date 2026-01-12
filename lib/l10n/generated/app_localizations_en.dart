@@ -869,4 +869,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chat_send_tooltip => 'Send message';
+
+  @override
+  String agent_selector_label(Object name) {
+    return 'Current agent: $name';
+  }
+
+  @override
+  String get agent_selector_hint => 'Double tap to select an agent';
+
+  @override
+  String agent_selector_item_label(Object name) {
+    return 'Agent: $name';
+  }
+
+  @override
+  String get agent_selector_select_hint => 'Double tap to select this agent';
 }

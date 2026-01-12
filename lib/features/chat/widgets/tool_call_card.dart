@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:klui/core/theme/klui_theme_extension.dart';
 import 'package:klui/core/theme/klui_text_styles.dart';
 import 'package:klui/core/models/chat_message.dart';
+import 'diff_viewer.dart';
 
 /// Tool call card with status indicator and approval buttons
 class ToolCallCard extends StatefulWidget {
@@ -44,6 +45,13 @@ class _ToolCallCardState extends State<ToolCallCard> {
     final toolName = widget.message.toolName ?? 'Unknown Tool';
     final toolInput = widget.message.toolInput ?? {};
     final phase = widget.message.metadata?['phase'] ?? 'ready';
+
+    // Check if this is a file edit tool with diff information
+    final isFileEdit = _isFileEditTool(toolName);
+    final shouldShowDiff = isFileEdit &&
+        phase == 'finished' &&
+        toolInput['old_content'] != null &&
+        toolInput['new_content'] != null;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -120,13 +128,96 @@ class _ToolCallCardState extends State<ToolCallCard> {
 
           // Result (if finished)
           if (phase == 'finished' && widget.message.content.isNotEmpty)
-            _ToolCallResult(
-              result: widget.message.content,
-              isSuccess: widget.message.metadata?['isOk'] == true,
-            ),
+            shouldShowDiff
+                ? DiffViewer(
+                    oldContent: toolInput['old_content']?.toString() ?? '',
+                    newContent: toolInput['new_content']?.toString() ?? '',
+                    language: _detectLanguage(toolInput['file_path']?.toString()),
+                    filePath: toolInput['file_path']?.toString() ?? '',
+                  )
+                : _ToolCallResult(
+                    result: widget.message.content,
+                    isSuccess: widget.message.metadata?['isOk'] == true,
+                  ),
         ],
       ),
     );
+  }
+
+  /// Check if the tool is a file edit operation
+  bool _isFileEditTool(String? toolName) {
+    if (toolName == null) return false;
+    final lowerName = toolName.toLowerCase();
+    return lowerName.contains('file_edit') ||
+        lowerName.contains('file_write') ||
+        lowerName.contains('str_replace') ||
+        lowerName.contains('archive_insert') ||
+        lowerName.contains('archive_replace');
+  }
+
+  /// Detect programming language from file path
+  String _detectLanguage(String? filePath) {
+    if (filePath == null) return 'text';
+
+    final extension = filePath.split('.').last.toLowerCase();
+    switch (extension) {
+      case 'py':
+        return 'python';
+      case 'js':
+        return 'javascript';
+      case 'ts':
+        return 'typescript';
+      case 'dart':
+        return 'dart';
+      case 'java':
+        return 'java';
+      case 'cpp':
+      case 'cc':
+      case 'cxx':
+        return 'cpp';
+      case 'c':
+        return 'c';
+      case 'cs':
+        return 'csharp';
+      case 'go':
+        return 'go';
+      case 'rs':
+        return 'rust';
+      case 'rb':
+        return 'ruby';
+      case 'php':
+        return 'php';
+      case 'swift':
+        return 'swift';
+      case 'kt':
+        return 'kotlin';
+      case 'sh':
+      case 'bash':
+        return 'bash';
+      case 'sql':
+        return 'sql';
+      case 'html':
+      case 'htm':
+        return 'html';
+      case 'css':
+        return 'css';
+      case 'scss':
+        return 'scss';
+      case 'json':
+        return 'json';
+      case 'yaml':
+      case 'yml':
+        return 'yaml';
+      case 'xml':
+        return 'xml';
+      case 'md':
+        return 'markdown';
+      case 'tsx':
+      case 'jsx':
+        return 'jsx';
+      default:
+        return 'text';
+    }
   }
 }
 

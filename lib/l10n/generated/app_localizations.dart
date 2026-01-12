@@ -1702,6 +1702,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retrying... (Attempt {current}/{total})'**
   String chat_retrying_message(Object current, Object total);
+
+  /// No description provided for @chat_diff_no_changes.
+  ///
+  /// In en, this message translates to:
+  /// **'No changes detected'**
+  String get chat_diff_no_changes;
+
+  /// No description provided for @chat_diff_file_path.
+  ///
+  /// In en, this message translates to:
+  /// **'File: {path}'**
+  String chat_diff_file_path(Object path);
+
+  /// No description provided for @chat_context_size_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Context'**
+  String get chat_context_size_label;
+
+  /// No description provided for @chat_context_size_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Tokens used in conversation context'**
+  String get chat_context_size_tooltip;
+
+  /// No description provided for @chat_context_size_warning.
+  ///
+  /// In en, this message translates to:
+  /// **'Context window almost full'**
+  String get chat_context_size_warning;
+
+  /// No description provided for @chat_context_size_critical.
+  ///
+  /// In en, this message translates to:
+  /// **'Context window nearly full, consider clearing history'**
+  String get chat_context_size_critical;
 }
 
 class _AppLocalizationsDelegate

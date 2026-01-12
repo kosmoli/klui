@@ -16,6 +16,7 @@ import '../widgets/bubbles/assistant_message_bubble.dart';
 import '../widgets/bubbles/error_bubble.dart';
 import '../widgets/bubbles/reasoning_bubble.dart';
 import '../widgets/tool_call_card.dart';
+import '../widgets/context_size_indicator.dart';
 
 /// Chat Screen - Real-time chat with Agent
 class ChatScreen extends ConsumerStatefulWidget {
@@ -148,6 +149,17 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               agentsAsync: agentsAsync,
             currentAgentId: widget.agentId,
           ),
+          // Context Size Indicator
+          if (chatState.usage != null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              child: Tooltip(
+                message: context.l10n.chat_context_size_tooltip,
+                child: ContextSizeIndicator(
+                  usage: chatState.usage,
+                ),
+              ),
+            ),
           if (canAbort)
             Semantics(
               label: context.l10n.chat_abort_button,

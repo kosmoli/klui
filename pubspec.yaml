@@ -56,6 +56,9 @@ dependencies:
   flutter_markdown: ^0.7.4
   flutter_highlight: ^0.7.0
 
+  # 📝 Diff visualization
+  diff_match_patch: ^0.4.0
+
   # 💾 Storage
   shared_preferences: ^2.2.2
 

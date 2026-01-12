@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/providers/api_providers.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/klui_theme_extension.dart';
 import '../widgets/provider_form.dart';
 
 /// Screen for creating a new Provider with multi-step wizard
@@ -55,10 +56,11 @@ class ProviderCreateScreen extends ConsumerWidget {
 
             // Show success message
             if (context.mounted) {
+              final colors = Theme.of(context).extension<KluiCustomColors>()!;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(context.l10n.provider_create_success(request.name)),
-                  backgroundColor: AppTheme.primaryColor,
+                  backgroundColor: colors.success,
                   behavior: SnackBarBehavior.floating,
                 ),
               );

@@ -306,5 +306,11 @@
   "chat_abort_failed": "Failed to stop operation",
   "chat_clear_button_tooltip": "Clear chat history",
   "chat_operation_stopped": "Operation stopped",
-  "chat_retrying_message": "Retrying... (Attempt {current}/{total})"
+  "chat_retrying_message": "Retrying... (Attempt {current}/{total})",
+  "chat_diff_no_changes": "No changes detected",
+  "chat_diff_file_path": "File: {path}",
+  "chat_context_size_label": "Context",
+  "chat_context_size_tooltip": "Tokens used in conversation context",
+  "chat_context_size_warning": "Context window almost full",
+  "chat_context_size_critical": "Context window nearly full, consider clearing history"
 }

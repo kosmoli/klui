@@ -919,4 +919,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String chat_retrying_message(Object current, Object total) {
     return 'Retrying... (Attempt $current/$total)';
   }
+
+  @override
+  String get chat_diff_no_changes => 'No changes detected';
+
+  @override
+  String chat_diff_file_path(Object path) {
+    return 'File: $path';
+  }
+
+  @override
+  String get chat_context_size_label => 'Context';
+
+  @override
+  String get chat_context_size_tooltip => 'Tokens used in conversation context';
+
+  @override
+  String get chat_context_size_warning => 'Context window almost full';
+
+  @override
+  String get chat_context_size_critical =>
+      'Context window nearly full, consider clearing history';
 }

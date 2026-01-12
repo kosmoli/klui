@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/providers/api_providers.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/klui_theme_extension.dart';
 import '../../../../core/models/provider.dart' as models;
 import '../../../../core/models/llm_model.dart';
 import '../../../../core/models/create_agent_request.dart';
@@ -514,10 +515,11 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
       final agent = await ref.read(createAgentProvider(request).future);
 
       if (mounted) {
+        final colors = Theme.of(context).extension<KluiCustomColors>()!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(context.l10n.agent_create_success(agent.name)),
-            backgroundColor: AppTheme.primaryColor,
+            backgroundColor: colors.success,
             behavior: SnackBarBehavior.floating,
           ),
         );

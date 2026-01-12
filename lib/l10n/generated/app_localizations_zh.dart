@@ -845,6 +845,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get chat_send_tooltip => '发送消息';
 
   @override
+  String get chat_error_no_agent => '请先选择一个 Agent';
+
+  @override
+  String get chat_input_disabled_no_agent => '选择一个 Agent 开始聊天';
+
+  @override
   String agent_selector_label(Object name) {
     return '当前 Agent：$name';
   }

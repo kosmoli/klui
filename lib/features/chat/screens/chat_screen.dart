@@ -60,6 +60,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
+    // Check if agent is selected
+    if (widget.agentId.isEmpty) {
+      final colors = Theme.of(context).extension<KluiCustomColors>()!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.chat_error_no_agent),
+          backgroundColor: colors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
     ref.read(chatStateHolderProvider(widget.agentId).notifier).sendMessage(text);
     _controller.clear();
     _focusNode.unfocus();
@@ -152,6 +165,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             controller: _controller,
             focusNode: _focusNode,
             isStreaming: isStreaming,
+            agentId: widget.agentId,
             onSend: _sendMessage,
           ),
         ],
@@ -255,18 +269,21 @@ class _ChatInputArea extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final bool isStreaming;
+  final String agentId;
   final VoidCallback onSend;
 
   const _ChatInputArea({
     required this.controller,
     required this.focusNode,
     required this.isStreaming,
+    required this.agentId,
     required this.onSend,
   });
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<KluiCustomColors>()!;
+    final hasAgent = agentId.isNotEmpty;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -284,7 +301,9 @@ class _ChatInputArea extends StatelessWidget {
               focusNode: focusNode,
               style: KluiTextStyles.assistantMessage,
               decoration: InputDecoration(
-                hintText: context.l10n.chat_input_hint,
+                hintText: hasAgent
+                    ? context.l10n.chat_input_hint
+                    : context.l10n.chat_input_disabled_no_agent,
                 hintStyle: TextStyle(color: colors.textSecondary),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -298,6 +317,10 @@ class _ChatInputArea extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide(color: colors.userBubble),
                 ),
+                disabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: colors.textDisabled.withOpacity(0.5)),
+                ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 8,
@@ -305,16 +328,18 @@ class _ChatInputArea extends StatelessWidget {
                 isDense: true,
               ),
               onSubmitted: (_) => onSend(),
-              enabled: !isStreaming,
+              enabled: hasAgent && !isStreaming,
               maxLines: null,
               textInputAction: TextInputAction.send,
             ),
           ),
           const SizedBox(width: 8),
           IconButton(
-            onPressed: isStreaming ? null : onSend,
+            onPressed: (!hasAgent || isStreaming) ? null : onSend,
             icon: const Icon(Icons.send),
-            color: isStreaming ? colors.textDisabled : colors.userBubble,
+            color: (!hasAgent || isStreaming)
+                ? colors.textDisabled
+                : colors.userBubble,
             style: IconButton.styleFrom(
               backgroundColor: colors.userBubble.withOpacity(0.1),
               minimumSize: const Size(40, 40),

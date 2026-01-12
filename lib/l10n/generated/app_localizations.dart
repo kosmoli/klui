@@ -1619,6 +1619,18 @@ abstract class AppLocalizations {
   /// **'Send message'**
   String get chat_send_tooltip;
 
+  /// No description provided for @chat_error_no_agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select an agent first'**
+  String get chat_error_no_agent;
+
+  /// No description provided for @chat_input_disabled_no_agent.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an agent to start chatting'**
+  String get chat_input_disabled_no_agent;
+
   /// No description provided for @agent_selector_label.
   ///
   /// In en, this message translates to:

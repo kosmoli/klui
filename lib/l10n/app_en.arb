@@ -291,6 +291,8 @@
   "chat_empty_subtitle": "Send a message to begin chatting with your agent",
   "chat_input_hint": "Type your message...",
   "chat_send_tooltip": "Send message",
+  "chat_error_no_agent": "Please select an agent first",
+  "chat_input_disabled_no_agent": "Select an agent to start chatting",
 
   "agent_selector_label": "Current agent: {name}",
   "agent_selector_hint": "Double tap to select an agent",

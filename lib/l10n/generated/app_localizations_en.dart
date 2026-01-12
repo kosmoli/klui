@@ -871,6 +871,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get chat_send_tooltip => 'Send message';
 
   @override
+  String get chat_error_no_agent => 'Please select an agent first';
+
+  @override
+  String get chat_input_disabled_no_agent =>
+      'Select an agent to start chatting';
+
+  @override
   String agent_selector_label(Object name) {
     return 'Current agent: $name';
   }

@@ -291,6 +291,8 @@
   "chat_empty_subtitle": "发送消息开始与您的 Agent 聊天",
   "chat_input_hint": "输入您的消息...",
   "chat_send_tooltip": "发送消息",
+  "chat_error_no_agent": "请先选择一个 Agent",
+  "chat_input_disabled_no_agent": "选择一个 Agent 开始聊天",
 
   "agent_selector_label": "当前 Agent：{name}",
   "agent_selector_hint": "双击选择 Agent",

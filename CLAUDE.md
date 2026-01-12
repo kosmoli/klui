@@ -258,6 +258,7 @@ git push origin v1.x-working
 - Delay load routes with `import ... deferred`
 - Error handling: try-catch with user-friendly messages
 - Riverpod: Use `@riverpod` annotation with code generation
+- **Data Models MUST use Freezed** (see 11.5 below)
 
 ### 11.1 CRITICAL: Command Retry Rule (MUST FOLLOW)
 
@@ -452,7 +453,7 @@ Priority for refactoring:
 
 ### 12. DO NOT
 - ❌ Modify Letta backend code (unless necessary)
-- ❌ Use Freezed for Web (compilation issues)
+- ❌ Use Freezed for Web (compilation issues) - **NOTE: This restriction is outdated. Freezed IS now REQUIRED for all data models.**
 - ❌ Hide advanced options (this is for power users)
 - ❌ Over-engineer simple features
 - ❌ Add comments/docs unless requested
@@ -460,6 +461,73 @@ Priority for refactoring:
 - ❌ **Skip Semantics annotations (blocks accessibility & testing)**
 - ❌ **Violate three-layer architecture (see 11.2)**
 - ❌ **Use KluiColors directly in new code (use Theme.of(context).extension<KluiCustomColors>() instead)**
+- ❌ **Create data models without Freezed (see 11.5 below)**
+
+### 11.5 Data Models MUST Use Freezed (MANDATORY)
+
+**CRITICAL**: All data models in `lib/core/models/` MUST use Freezed package.
+
+#### Why Freezed?
+- ✅ Immutable data classes by default
+- ✅ Auto-generated `copyWith`, `==`, `hashCode`, `toString`
+- ✅ Built-in JSON serialization with `@freezed` annotation
+- ✅ Union types (sealed classes) for state management
+- ✅ Null safety and pattern matching support
+
+#### How to Use Freezed
+
+**Basic Model**:
+```dart
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'my_model.freezed.dart';
+part 'my_model.g.dart';
+
+@freezed
+class MyModel with _$MyModel {
+  const factory MyModel({
+    required String id,
+    required String name,
+    String? description,
+  }) = _MyModel;
+
+  factory MyModel.fromJson(Map<String, dynamic> json) => _$MyModelFromJson(json);
+}
+```
+
+**Model with Collections**:
+```dart
+@freezed
+class Agent with _$Agent {
+  const factory Agent({
+    required String id,
+    required String name,
+    @Default([]) List<String> tools,
+    @JsonKey(name: 'created_at') DateTime? createdAt,
+  }) = _Agent;
+
+  factory Agent.fromJson(Map<String, dynamic> json) => _$AgentFromJson(json);
+}
+```
+
+#### Current Models Using Freezed
+- ✅ `chat_message.dart` - Chat messages with type enums
+- ✅ `agent.dart` - Agent configuration
+- ✅ `provider.dart` - Provider configuration
+- ✅ `llm_model.dart` - LLM model definitions
+- ✅ `embedding_model.dart` - Embedding model definitions
+
+#### Non-Freezed Files (To Be Migrated)
+The following files should be migrated to Freezed when touched:
+- `message.dart` - Internal message type
+- `create_agent_request.dart` - Request DTOs
+- `create_provider_request.dart` - Request DTOs
+- `create_agent_example.dart` - Example data
+
+#### Build Commands
+- Generate code: `dart run build_runner build --delete-conflicting-outputs`
+- Regenerate after model changes
+- Freezed generates both `.freezed.dart` and `.g.dart` files
 
 ### 13. Project Goals
 **Core定位**: Serve professional users who need full API access

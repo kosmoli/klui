@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http/retry.dart';
 import '../config/app_config.dart';
@@ -72,6 +73,29 @@ class ApiClient {
   Future<http.Response> delete(String path) async {
     final url = Uri.parse('${AppConfig.fullApiBaseUrl}$path');
     return _client.delete(url).timeout(AppConfig.requestTimeout);
+  }
+
+  /// Stream POST request for SSE
+  /// Returns a Stream of String lines from the server
+  Stream<String> streamPost(String path, {Object? body}) async* {
+    final url = Uri.parse('${AppConfig.fullApiBaseUrl}$path');
+    print('[ApiClient] STREAM POST: $url');  // Debug log
+
+    final request = http.Request('POST', url);
+    if (body != null) {
+      request.body = jsonEncode(body);
+    }
+    request.headers['Content-Type'] = 'application/json';
+    request.headers['Accept'] = 'text/event-stream';
+
+    final streamedResponse = await _client.send(request).timeout(
+      const Duration(minutes: 5), // Longer timeout for streaming
+    );
+
+    // Stream the response line by line
+    yield* streamedResponse.stream
+        .transform(utf8.decoder)
+        .transform(const LineSplitter());
   }
 
   /// Close the client

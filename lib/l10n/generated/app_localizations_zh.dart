@@ -21,6 +21,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get nav_providers => 'Provider';
 
   @override
+  String get nav_chat => '聊天';
+
+  @override
   String get nav_agents_tab => 'Agent标签页';
 
   @override
@@ -330,6 +333,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get agent_detail_edit_coming_soon => '编辑功能 - 即将推出！';
+
+  @override
+  String get agent_detail_start_chat => '开始聊天';
 
   @override
   String get agent_detail_failed_to_load => '加载Agent失败';
@@ -825,4 +831,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get common_not_specified => '未指定';
+
+  @override
+  String get chat_empty_title => '开始对话';
+
+  @override
+  String get chat_empty_subtitle => '发送消息开始与您的 Agent 聊天';
+
+  @override
+  String get chat_input_hint => '输入您的消息...';
+
+  @override
+  String get chat_send_tooltip => '发送消息';
 }

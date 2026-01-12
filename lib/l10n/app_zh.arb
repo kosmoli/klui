@@ -6,6 +6,7 @@
 
   "nav_agents": "Agent",
   "nav_providers": "Provider",
+  "nav_chat": "聊天",
   "nav_agents_tab": "Agent标签页",
   "nav_providers_tab": "Provider标签页",
   "nav_agents_hint": "查看Agent列表",
@@ -113,6 +114,7 @@
   "agent_detail_tooltip_edit": "编辑",
   "agent_detail_tooltip_delete": "删除",
   "agent_detail_edit_coming_soon": "编辑功能 - 即将推出！",
+  "agent_detail_start_chat": "开始聊天",
   "agent_detail_failed_to_load": "加载Agent失败",
   "agent_detail_deleted_success": "Agent删除成功",
   "agent_detail_delete_failed": "删除Agent失败：{error}",
@@ -283,5 +285,10 @@
   "common_button_refresh": "刷新",
   "common_loading": "加载中...",
   "common_error": "错误",
-  "common_not_specified": "未指定"
+  "common_not_specified": "未指定",
+
+  "chat_empty_title": "开始对话",
+  "chat_empty_subtitle": "发送消息开始与您的 Agent 聊天",
+  "chat_input_hint": "输入您的消息...",
+  "chat_send_tooltip": "发送消息"
 }

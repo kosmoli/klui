@@ -7,7 +7,7 @@ import '../../features/agents/screens/agent_create_screen.dart';
 import '../../features/providers/screens/provider_list_screen.dart';
 import '../../features/providers/screens/provider_create_screen.dart';
 import '../../features/providers/screens/provider_detail_screen.dart';
-import '../../features/chat/screens/chat_example_screen.dart';
+import '../../features/chat/screens/chat_screen.dart';
 import '../extensions/context_extensions.dart';
 
 /// Application router configuration
@@ -21,8 +21,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/chat',
         name: 'chat',
         pageBuilder: (context, state) {
+          // Get agent ID from query parameter, default to first agent if not provided
+          final agentId = state.uri.queryParameters['agentId'] ?? '';
           return CustomTransitionPage(
-            child: ChatExampleScreen(),
+            child: ChatScreen(agentId: agentId),
             transitionDuration: Duration.zero,
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return child;

@@ -31,6 +31,17 @@ class AgentDetailScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: colors.background,
       appBar: _buildAppBar(context, ref),
+      floatingActionButton: agentAsync.when(
+        data: (agent) => FloatingActionButton.extended(
+          onPressed: () => context.go('/chat?agentId=${agent.id}'),
+          icon: const Icon(Icons.chat),
+          label: Text(context.l10n.agent_detail_start_chat),
+          backgroundColor: colors.userBubble,
+          foregroundColor: colors.userText,
+        ),
+        loading: () => null,
+        error: (_, __) => null,
+      ),
       body: agentAsync.when(
         data: (agent) => _buildContent(context, agent),
         loading: () => Center(

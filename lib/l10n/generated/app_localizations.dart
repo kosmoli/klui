@@ -122,6 +122,12 @@ abstract class AppLocalizations {
   /// **'Providers'**
   String get nav_providers;
 
+  /// No description provided for @nav_chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get nav_chat;
+
   /// No description provided for @nav_agents_tab.
   ///
   /// In en, this message translates to:
@@ -679,6 +685,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit feature - Coming soon!'**
   String get agent_detail_edit_coming_soon;
+
+  /// No description provided for @agent_detail_start_chat.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Chat'**
+  String get agent_detail_start_chat;
 
   /// No description provided for @agent_detail_failed_to_load.
   ///
@@ -1582,6 +1594,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Not specified'**
   String get common_not_specified;
+
+  /// No description provided for @chat_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Start a conversation'**
+  String get chat_empty_title;
+
+  /// No description provided for @chat_empty_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send a message to begin chatting with your agent'**
+  String get chat_empty_subtitle;
+
+  /// No description provided for @chat_input_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your message...'**
+  String get chat_input_hint;
+
+  /// No description provided for @chat_send_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Send message'**
+  String get chat_send_tooltip;
 }
 
 class _AppLocalizationsDelegate

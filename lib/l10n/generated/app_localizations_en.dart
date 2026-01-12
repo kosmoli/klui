@@ -21,6 +21,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nav_providers => 'Providers';
 
   @override
+  String get nav_chat => 'Chat';
+
+  @override
   String get nav_agents_tab => 'Agents tab';
 
   @override
@@ -344,6 +347,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agent_detail_edit_coming_soon => 'Edit feature - Coming soon!';
+
+  @override
+  String get agent_detail_start_chat => 'Start Chat';
 
   @override
   String get agent_detail_failed_to_load => 'Failed to load agent';
@@ -850,4 +856,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get common_not_specified => 'Not specified';
+
+  @override
+  String get chat_empty_title => 'Start a conversation';
+
+  @override
+  String get chat_empty_subtitle =>
+      'Send a message to begin chatting with your agent';
+
+  @override
+  String get chat_input_hint => 'Type your message...';
+
+  @override
+  String get chat_send_tooltip => 'Send message';
 }

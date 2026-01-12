@@ -1,0 +1,317 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/extensions/context_extensions.dart';
+import '../../../../core/theme/klui_text_styles.dart';
+import '../../../../core/theme/klui_theme_extension.dart';
+import '../../../../core/providers/chat_providers.dart';
+import '../../../../core/models/chat_message.dart';
+import '../../../shared/widgets/retro_drawer.dart';
+import '../../../shared/widgets/retro_menu_button.dart';
+import '../widgets/bubbles/user_message_bubble.dart';
+import '../widgets/bubbles/assistant_message_bubble.dart';
+import '../widgets/bubbles/error_bubble.dart';
+import '../widgets/bubbles/reasoning_bubble.dart';
+import '../widgets/tool_call_card.dart';
+
+/// Chat Screen - Real-time chat with Agent
+class ChatScreen extends ConsumerStatefulWidget {
+  final String agentId;
+
+  const ChatScreen({
+    super.key,
+    required this.agentId,
+  });
+
+  @override
+  ConsumerState<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends ConsumerState<ChatScreen> {
+  final TextEditingController _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _scrollController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _scrollToBottom() {
+    if (_scrollController.hasClients) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.minScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+    }
+  }
+
+  void _sendMessage() {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+
+    ref.read(chatControllerProvider(widget.agentId)).sendMessage(text);
+    _controller.clear();
+    _focusNode.unfocus();
+    _scrollToBottom();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+    final chatState = ref.watch(chatStateProvider(widget.agentId));
+    final messages = chatState.messages;
+    final isStreaming = chatState.isStreaming;
+
+    // Auto-scroll when new messages arrive
+    if (messages.isNotEmpty) {
+      _scrollToBottom();
+    }
+
+    return Scaffold(
+      backgroundColor: colors.background,
+      drawer: const RetroDrawer(),
+      appBar: AppBar(
+        backgroundColor: colors.surface,
+        elevation: 0,
+        leading: const RetroMenuButton(),
+        title: Row(
+          children: [
+            Text(
+              context.l10n.nav_chat,
+              style: KluiTextStyles.headlineSmall.copyWith(
+                color: colors.textPrimary,
+              ),
+            ),
+            if (isStreaming) ...[
+              const SizedBox(width: 12),
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(colors.userBubble),
+                ),
+              ),
+            ],
+          ],
+        ),
+        toolbarHeight: 48,
+        iconTheme: IconThemeData(color: colors.textPrimary),
+        actions: [
+          IconButton(
+            onPressed: () {
+              ref.read(chatControllerProvider(widget.agentId)).clearMessages();
+            },
+            icon: const Icon(Icons.clear_all),
+            tooltip: 'Clear chat',
+            color: colors.textPrimary,
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Message List
+          Expanded(
+            child: messages.isEmpty
+                ? _buildEmptyState(context, colors)
+                : ListView.builder(
+                    controller: _scrollController,
+                    reverse: true,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    itemCount: messages.length,
+                    itemBuilder: (context, index) {
+                      final message = messages[messages.length - 1 - index];
+                      return _MessageTile(message: message);
+                    },
+                  ),
+          ),
+
+          // Input Area
+          _ChatInputArea(
+            controller: _controller,
+            focusNode: _focusNode,
+            isStreaming: isStreaming,
+            onSend: _sendMessage,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context, KluiCustomColors colors) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: colors.border,
+                width: 2,
+              ),
+            ),
+            child: Icon(
+              Icons.chat_bubble_outline,
+              size: 64,
+              color: colors.userBubble,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            context.l10n.chat_empty_title,
+            style: KluiTextStyles.headlineSmall,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            context.l10n.chat_empty_subtitle,
+            style: KluiTextStyles.bodyMedium.copyWith(
+              color: colors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Message Tile - Routes to appropriate widget based on type
+class _MessageTile extends StatelessWidget {
+  const _MessageTile({required this.message});
+
+  final ChatMessage message;
+
+  @override
+  Widget build(BuildContext context) {
+    switch (message.type) {
+      case MessageType.user:
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: UserMessageBubble(message: message),
+        );
+
+      case MessageType.assistant:
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: AssistantMessageBubble(message: message),
+        );
+
+      case MessageType.toolCall:
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: ToolCallCard(message: message),
+        );
+
+      case MessageType.toolReturn:
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: ToolCallCard(message: message),
+        );
+
+      case MessageType.reasoning:
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: ReasoningBubble(message: message),
+        );
+
+      case MessageType.error:
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: ErrorBubble(message: message),
+        );
+
+      case MessageType.status:
+        return const SizedBox.shrink(); // Status messages not shown in chat
+    }
+  }
+}
+
+/// Chat Input Area
+class _ChatInputArea extends StatelessWidget {
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final bool isStreaming;
+  final VoidCallback onSend;
+
+  const _ChatInputArea({
+    required this.controller,
+    required this.focusNode,
+    required this.isStreaming,
+    required this.onSend,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        border: Border(
+          top: BorderSide(color: colors.border, width: 1),
+        ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              style: KluiTextStyles.assistantMessage,
+              decoration: InputDecoration(
+                hintText: context.l10n.chat_input_hint,
+                hintStyle: TextStyle(color: colors.textSecondary),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: colors.border),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: colors.border),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(color: colors.userBubble),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                isDense: true,
+              ),
+              onSubmitted: (_) => onSend(),
+              enabled: !isStreaming,
+              maxLines: null,
+              textInputAction: TextInputAction.send,
+            ),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            onPressed: isStreaming ? null : onSend,
+            icon: const Icon(Icons.send),
+            color: isStreaming ? colors.textDisabled : colors.userBubble,
+            style: IconButton.styleFrom(
+              backgroundColor: colors.userBubble.withOpacity(0.1),
+              minimumSize: const Size(40, 40),
+              padding: const EdgeInsets.all(8),
+            ),
+            tooltip: context.l10n.chat_send_tooltip,
+          ),
+        ],
+      ),
+    );
+  }
+}

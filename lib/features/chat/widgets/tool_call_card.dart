@@ -149,17 +149,17 @@ class _StatusDotState extends State<_StatusDot>
   void initState() {
     super.initState();
 
-    // Blink animation for ready/running phases
+    // Blink animation for ready/running phases - faster speed
     if (widget.phase == 'ready' || widget.phase == 'running') {
       _controller = AnimationController(
         vsync: this,
-        duration: const Duration(milliseconds: 800),
+        duration: const Duration(milliseconds: 400), // Reduced from 800ms
       )..repeat(reverse: true);
       _animation = Tween<double>(begin: 0.3, end: 1.0).animate(_controller);
     } else {
       _controller = AnimationController(
         vsync: this,
-        duration: const Duration(milliseconds: 300),
+        duration: const Duration(milliseconds: 200), // Reduced from 300ms
       );
       _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
       _controller.forward();

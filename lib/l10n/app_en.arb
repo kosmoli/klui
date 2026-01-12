@@ -8,8 +8,13 @@
   "nav_providers": "Providers",
   "nav_agents_tab": "Agents tab",
   "nav_providers_tab": "Providers tab",
+  "nav_agents_hint": "View agents list",
+  "nav_providers_hint": "View providers list",
   "nav_selected": "selected",
   "nav_hint_navigate": "Double tap to navigate to {page} page",
+
+  "drawer_settings": "Settings",
+  "drawer_settings_hint": "Open settings (coming soon)",
 
   "agent_list_title": "Agents",
   "agent_list_no_agents": "No agents found",

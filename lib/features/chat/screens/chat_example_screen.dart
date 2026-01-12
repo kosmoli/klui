@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:klui/core/theme/klui_colors.dart';
 import 'package:klui/core/theme/klui_text_styles.dart';
+import 'package:klui/core/theme/klui_theme_extension.dart';
 import 'package:klui/core/models/chat_message.dart';
 import 'package:klui/features/chat/widgets/bubbles/user_message_bubble.dart';
 import 'package:klui/features/chat/widgets/bubbles/assistant_message_bubble.dart';
 import 'package:klui/features/chat/widgets/bubbles/error_bubble.dart';
 import 'package:klui/features/chat/widgets/bubbles/reasoning_bubble.dart';
 import 'package:klui/features/chat/widgets/tool_call_card.dart';
-import 'package:klui/shared/widgets/main_navigation.dart';
+import 'package:klui/shared/widgets/retro_menu_button.dart';
+import 'package:klui/shared/widgets/retro_drawer.dart';
 
 /// Chat Example Screen - Demo page showing all message types
 class ChatExampleScreen extends StatelessWidget {
@@ -15,21 +17,35 @@ class ChatExampleScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
     final messages = ChatMessage.demoMessages();
 
     return Scaffold(
       backgroundColor: KluiColors.background,
+      drawer: const RetroDrawer(),
       appBar: AppBar(
-        title: const Text(
+        leading: const RetroMenuButton(),
+        title: Text(
           'Chat UI Example',
           style: TextStyle(
-            color: KluiColors.textPrimary,
+            color: colors.textPrimary,
             fontWeight: FontWeight.w600,
           ),
         ),
-        backgroundColor: KluiColors.surface,
+        backgroundColor: colors.surface,
         elevation: 0,
-        iconTheme: const IconThemeData(color: KluiColors.textPrimary),
+        toolbarHeight: 48, // Reduced from default 56
+        iconTheme: IconThemeData(color: colors.textPrimary),
+        actions: [
+          // Optional: Add a status indicator or other actions here
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Icon(
+              Icons.more_vert,
+              color: colors.textSecondary,
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -47,7 +63,7 @@ class ChatExampleScreen extends StatelessWidget {
           ),
           // Input Area (Demo only)
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: KluiColors.surface,
               border: Border(
@@ -75,9 +91,10 @@ class ChatExampleScreen extends StatelessWidget {
                         borderSide: BorderSide(color: KluiColors.userBubble),
                       ),
                       contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
+                        horizontal: 12,
+                        vertical: 8,
                       ),
+                      isDense: true, // Reduces height
                     ),
                   ),
                 ),
@@ -87,7 +104,8 @@ class ChatExampleScreen extends StatelessWidget {
                   icon: const Icon(Icons.send, color: KluiColors.userBubble),
                   style: IconButton.styleFrom(
                     backgroundColor: KluiColors.userBubble.withOpacity(0.1),
-                    minimumSize: const Size(48, 48),
+                    minimumSize: const Size(40, 40),
+                    padding: const EdgeInsets.all(8),
                   ),
                 ),
               ],
@@ -95,7 +113,6 @@ class ChatExampleScreen extends StatelessWidget {
           ),
         ],
       ),
-      bottomNavigationBar: MainNavigation(currentPath: '/chat'),
     );
   }
 }

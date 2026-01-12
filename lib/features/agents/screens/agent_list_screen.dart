@@ -7,7 +7,8 @@ import '../../../core/theme/klui_text_styles.dart';
 import '../../../core/theme/klui_theme_extension.dart';
 import '../../../core/models/agent.dart';
 import '../../../shared/widgets/agent_card.dart';
-import '../../../shared/widgets/main_navigation.dart';
+import '../../../shared/widgets/retro_drawer.dart';
+import '../../../shared/widgets/retro_menu_button.dart';
 
 /// Screen displaying list of Agents with Neo-Brutalist design
 class AgentListScreen extends ConsumerStatefulWidget {
@@ -25,9 +26,12 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
 
     return Scaffold(
       backgroundColor: colors.background,
+      drawer: const RetroDrawer(),
       appBar: AppBar(
         backgroundColor: colors.surface,
         elevation: 0,
+        toolbarHeight: 48, // Reduced from default 56
+        leading: const RetroMenuButton(),
         iconTheme: IconThemeData(color: colors.textPrimary),
         title: Text(
           context.l10n.agent_list_title,
@@ -35,6 +39,18 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
             color: colors.textPrimary,
           ),
         ),
+        actions: [
+          // Back to Chat button
+          IconButton(
+            onPressed: () => context.go('/chat'),
+            icon: const Icon(Icons.chat_bubble_outline),
+            tooltip: 'Back to Chat',
+            style: IconButton.styleFrom(
+              backgroundColor: colors.userBubble.withOpacity(0.1),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: agentsAsync.when(
         data: (agents) {
@@ -184,25 +200,8 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
               foregroundColor: colors.userText,
             ),
           ),
-          // Chat Example Button (top-right corner)
-          Positioned(
-            top: -10,
-            right: -10,
-            child: Semantics(
-              label: 'Chat UI Example',
-              button: true,
-              hint: 'View chat UI example with all message types',
-              child: FloatingActionButton.small(
-                onPressed: () => context.go('/chat-example'),
-                heroTag: 'chat_example',
-                backgroundColor: colors.userBubble.withOpacity(0.9),
-                child: const Icon(Icons.chat_bubble_outline, size: 20),
-              ),
-            ),
-          ),
         ],
       ),
-      bottomNavigationBar: MainNavigation(currentPath: '/agents'),
     );
   }
 

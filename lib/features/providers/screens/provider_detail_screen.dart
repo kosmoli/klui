@@ -3,7 +3,8 @@ import '../../../core/extensions/context_extensions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/providers/api_providers.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/klui_text_styles.dart';
+import '../../../../core/theme/klui_theme_extension.dart';
 import '../../../../core/models/provider.dart';
 
 /// Provider Detail Screen with Neo-Brutalist design
@@ -24,37 +25,57 @@ class ProviderDetailScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final providerAsync = ref.watch(providerProvider(providerId));
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
 
     return Scaffold(
+      backgroundColor: colors.background,
       appBar: _buildAppBar(context, ref),
       body: providerAsync.when(
         data: (provider) => _buildContent(context, provider),
-        loading: () => const Center(
+        loading: () => Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+            valueColor: AlwaysStoppedAnimation<Color>(colors.userBubble),
           ),
         ),
         error: (error, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.error_outline,
-                size: 64,
-                color: AppTheme.errorColor,
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: colors.error.withOpacity(0.1),
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(12),
+                  ),
+                  border: Border.all(
+                    color: colors.error.withOpacity(0.3),
+                    width: 2,
+                  ),
+                ),
+                child: Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: colors.error,
+                ),
               ),
-              const SizedBox(height: AppTheme.spacing24),
+              const SizedBox(height: 24),
               Text(
                 context.l10n.provider_detail_failed_to_load,
-                style: AppTheme.headlineSmall,
+                style: KluiTextStyles.headlineSmall,
               ),
-              const SizedBox(height: AppTheme.spacing8),
-              Text(
-                error.toString(),
-                style: AppTheme.bodySmall.copyWith(
-                  color: AppTheme.textSecondaryColor,
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
                 ),
-                textAlign: TextAlign.center,
+                child: Text(
+                  error.toString(),
+                  style: KluiTextStyles.bodySmall.copyWith(
+                    color: colors.textSecondary,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ],
           ),
@@ -64,44 +85,56 @@ class ProviderDetailScreen extends ConsumerWidget {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
     return AppBar(
+      backgroundColor: colors.surface,
+      elevation: 0,
+      iconTheme: IconThemeData(color: colors.textPrimary),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
+        color: colors.textPrimary,
         onPressed: () => context.go('/providers'),
         tooltip: context.l10n.provider_detail_back_tooltip,
       ),
-      title: Text(context.l10n.provider_detail_title),
+      title: Text(
+        context.l10n.provider_detail_title,
+        style: KluiTextStyles.headlineSmall.copyWith(
+          color: colors.textPrimary,
+        ),
+      ),
       actions: [
         Tooltip(
           message: context.l10n.provider_detail_tooltip_edit,
           child: IconButton(
             icon: const Icon(Icons.edit_outlined),
+            color: colors.textPrimary,
             onPressed: () {
               // TODO: Implement edit
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(context.l10n.provider_detail_edit_coming_soon),
-                  backgroundColor: AppTheme.surfaceVariantColor,
+                  backgroundColor: colors.surfaceVariant,
                   behavior: SnackBarBehavior.floating,
                 ),
               );
             },
           ),
         ),
-        const SizedBox(width: AppTheme.spacing8),
+        const SizedBox(width: 8),
       ],
     );
   }
 
   Widget _buildContent(BuildContext context, ProviderConfig provider) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppTheme.spacing16),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header Section
           _HeaderSection(provider: provider),
-          const SizedBox(height: AppTheme.spacing24),
+          const SizedBox(height: 24),
 
           // Basic Info Section
           _SectionCard(
@@ -113,40 +146,40 @@ class ProviderDetailScreen extends ConsumerWidget {
                 _InfoRow(
                   label: context.l10n.provider_detail_field_id,
                   value: provider.id,
-                  valueStyle: AppTheme.monoSmall,
+                  valueStyle: KluiTextStyles.technical,
                 ),
-                const SizedBox(height: AppTheme.spacing12),
+                const SizedBox(height: 12),
                 _InfoRow(
                   label: context.l10n.provider_detail_field_name,
                   value: provider.name,
-                  valueStyle: AppTheme.bodyMedium,
+                  valueStyle: KluiTextStyles.bodyMedium,
                 ),
-                const SizedBox(height: AppTheme.spacing12),
+                const SizedBox(height: 12),
                 _InfoRow(
                   label: context.l10n.provider_detail_field_type,
                   value: provider.providerType,
-                  valueStyle: AppTheme.bodyMedium,
+                  valueStyle: KluiTextStyles.bodyMedium,
                 ),
-                const SizedBox(height: AppTheme.spacing12),
+                const SizedBox(height: 12),
                 _InfoRow(
                   label: context.l10n.provider_detail_field_category,
                   value: provider.providerCategory == 'base'
                       ? context.l10n.provider_detail_category_base
                       : context.l10n.provider_detail_category_byok,
-                  valueStyle: AppTheme.bodyMedium,
+                  valueStyle: KluiTextStyles.bodyMedium,
                 ),
                 if (provider.organizationId != null) ...[
-                  const SizedBox(height: AppTheme.spacing12),
+                  const SizedBox(height: 12),
                   _InfoRow(
                     label: context.l10n.provider_detail_field_organization_id,
                     value: provider.organizationId!,
-                    valueStyle: AppTheme.monoSmall,
+                    valueStyle: KluiTextStyles.technical,
                   ),
                 ],
               ],
             ),
           ),
-          const SizedBox(height: AppTheme.spacing24),
+          const SizedBox(height: 24),
 
           // Configuration Section
           if (provider.baseUrl != null || provider.region != null)
@@ -160,22 +193,22 @@ class ProviderDetailScreen extends ConsumerWidget {
                     _InfoRow(
                       label: context.l10n.provider_detail_field_base_url,
                       value: provider.baseUrl!,
-                      valueStyle: AppTheme.monoSmall,
+                      valueStyle: KluiTextStyles.technical,
                       isMultiline: true,
                     ),
                   if (provider.baseUrl != null && provider.region != null)
-                    const SizedBox(height: AppTheme.spacing12),
+                    const SizedBox(height: 12),
                   if (provider.region != null)
                     _InfoRow(
                       label: context.l10n.provider_detail_field_region,
                       value: provider.region!,
-                      valueStyle: AppTheme.bodyMedium,
+                      valueStyle: KluiTextStyles.bodyMedium,
                     ),
                 ],
               ),
             ),
           if (provider.baseUrl != null || provider.region != null)
-            const SizedBox(height: AppTheme.spacing24),
+            const SizedBox(height: 24),
 
           // Timestamp Section
           if (provider.updatedAt != null)
@@ -185,11 +218,11 @@ class ProviderDetailScreen extends ConsumerWidget {
               child: _InfoRow(
                 label: context.l10n.provider_detail_field_updated_at,
                 value: _formatDateTime(provider.updatedAt!),
-                valueStyle: AppTheme.monoSmall,
+                valueStyle: KluiTextStyles.technical,
               ),
             ),
 
-          const SizedBox(height: AppTheme.spacing80),
+          const SizedBox(height: 80),
         ],
       ),
     );
@@ -210,39 +243,43 @@ class _HeaderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(AppTheme.spacing12),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: _getProviderColor(provider.providerType).withOpacity(0.1),
+                color: _getProviderColor(context, provider.providerType).withOpacity(0.1),
                 borderRadius: const BorderRadius.all(
-                  Radius.circular(AppTheme.radiusMedium),
+                  Radius.circular(8),
                 ),
               ),
               child: Icon(
                 _getProviderIcon(provider.providerType),
-                color: _getProviderColor(provider.providerType),
+                color: _getProviderColor(context, provider.providerType),
                 size: 32,
               ),
             ),
-            const SizedBox(width: AppTheme.spacing16),
+            const SizedBox(width: 16),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     provider.name,
-                    style: AppTheme.headlineMedium,
+                    style: KluiTextStyles.headlineMedium.copyWith(
+                      color: colors.textPrimary,
+                    ),
                   ),
-                  const SizedBox(height: AppTheme.spacing4),
+                  const SizedBox(height: 4),
                   Text(
                     provider.providerType,
-                    style: AppTheme.bodyMedium.copyWith(
-                      color: AppTheme.textSecondaryColor,
+                    style: KluiTextStyles.bodyMedium.copyWith(
+                      color: colors.textSecondary,
                     ),
                   ),
                 ],
@@ -270,7 +307,9 @@ class _HeaderSection extends StatelessWidget {
     }
   }
 
-  Color _getProviderColor(String providerType) {
+  Color _getProviderColor(BuildContext context, String providerType) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
     switch (providerType.toLowerCase()) {
       case 'openai':
         return const Color(0xFF10A37F);
@@ -282,7 +321,7 @@ class _HeaderSection extends StatelessWidget {
       case 'google_vertex':
         return const Color(0xFF4285F4);
       default:
-        return AppTheme.primaryColor;
+        return colors.userBubble;
     }
   }
 }
@@ -301,15 +340,17 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
     return Container(
-      padding: const EdgeInsets.all(AppTheme.spacing16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
+        color: colors.surface,
         borderRadius: const BorderRadius.all(
-          Radius.circular(AppTheme.radiusMedium),
+          Radius.circular(8),
         ),
         border: Border.all(
-          color: AppTheme.borderColor,
+          color: colors.border,
           width: 2,
         ),
       ),
@@ -318,15 +359,17 @@ class _SectionCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, size: 20, color: AppTheme.textSecondaryColor),
-              const SizedBox(width: AppTheme.spacing8),
+              Icon(icon, size: 20, color: colors.textSecondary),
+              const SizedBox(width: 8),
               Text(
                 title,
-                style: AppTheme.titleMedium,
+                style: KluiTextStyles.headlineSmall.copyWith(
+                  color: colors.textPrimary,
+                ),
               ),
             ],
           ),
-          const SizedBox(height: AppTheme.spacing16),
+          const SizedBox(height: 16),
           child,
         ],
       ),
@@ -350,19 +393,23 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: AppTheme.labelSmall.copyWith(
-            color: AppTheme.textSecondaryColor,
+          style: KluiTextStyles.labelSmall.copyWith(
+            color: colors.textSecondary,
           ),
         ),
-        const SizedBox(height: AppTheme.spacing4),
+        const SizedBox(height: 4),
         Text(
           value,
-          style: valueStyle,
+          style: valueStyle.copyWith(
+            color: colors.textPrimary,
+          ),
           maxLines: isMultiline ? null : 1,
           overflow: isMultiline ? null : TextOverflow.ellipsis,
         ),
@@ -379,22 +426,25 @@ class _ConfigViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
     return Container(
-      padding: const EdgeInsets.all(AppTheme.spacing12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceVariantColor,
+        color: colors.surfaceVariant,
         borderRadius: const BorderRadius.all(
-          Radius.circular(AppTheme.radiusSmall),
+          Radius.circular(4),
         ),
         border: Border.all(
-          color: AppTheme.borderColor,
+          color: colors.border,
           width: 1,
         ),
       ),
       child: Text(
         _formatConfig(config),
-        style: AppTheme.monoSmall.copyWith(
+        style: KluiTextStyles.technical.copyWith(
           fontFamily: 'JetBrainsMono',
+          color: colors.textPrimary,
         ),
       ),
     );

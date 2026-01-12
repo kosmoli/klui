@@ -27,12 +27,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nav_providers_tab => 'Providers tab';
 
   @override
+  String get nav_agents_hint => 'View agents list';
+
+  @override
+  String get nav_providers_hint => 'View providers list';
+
+  @override
   String get nav_selected => 'selected';
 
   @override
   String nav_hint_navigate(Object page) {
     return 'Double tap to navigate to $page page';
   }
+
+  @override
+  String get drawer_settings => 'Settings';
+
+  @override
+  String get drawer_settings_hint => 'Open settings (coming soon)';
 
   @override
   String get agent_list_title => 'Agents';

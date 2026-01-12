@@ -27,12 +27,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get nav_providers_tab => 'Provider标签页';
 
   @override
+  String get nav_agents_hint => '查看Agent列表';
+
+  @override
+  String get nav_providers_hint => '查看Provider列表';
+
+  @override
   String get nav_selected => '已选中';
 
   @override
   String nav_hint_navigate(Object page) {
     return '双击导航到$page页面';
   }
+
+  @override
+  String get drawer_settings => '设置';
+
+  @override
+  String get drawer_settings_hint => '打开设置（即将推出）';
 
   @override
   String get agent_list_title => 'Agent';

@@ -8,8 +8,13 @@
   "nav_providers": "Provider",
   "nav_agents_tab": "Agent标签页",
   "nav_providers_tab": "Provider标签页",
+  "nav_agents_hint": "查看Agent列表",
+  "nav_providers_hint": "查看Provider列表",
   "nav_selected": "已选中",
   "nav_hint_navigate": "双击导航到{page}页面",
+
+  "drawer_settings": "设置",
+  "drawer_settings_hint": "打开设置（即将推出）",
 
   "agent_list_title": "Agent",
   "agent_list_no_agents": "未找到Agent",

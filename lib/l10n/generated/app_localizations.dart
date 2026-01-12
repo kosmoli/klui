@@ -134,6 +134,18 @@ abstract class AppLocalizations {
   /// **'Providers tab'**
   String get nav_providers_tab;
 
+  /// No description provided for @nav_agents_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'View agents list'**
+  String get nav_agents_hint;
+
+  /// No description provided for @nav_providers_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'View providers list'**
+  String get nav_providers_hint;
+
   /// No description provided for @nav_selected.
   ///
   /// In en, this message translates to:
@@ -145,6 +157,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Double tap to navigate to {page} page'**
   String nav_hint_navigate(Object page);
+
+  /// No description provided for @drawer_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get drawer_settings;
+
+  /// No description provided for @drawer_settings_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings (coming soon)'**
+  String get drawer_settings_hint;
 
   /// No description provided for @agent_list_title.
   ///

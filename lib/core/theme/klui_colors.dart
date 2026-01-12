@@ -19,10 +19,10 @@ class KluiColors {
   static const assistantBubble = Color(0xFF0F140F); // Panel
   static const assistantText = Color(0xFF98C998); // Muted green text
 
-  // Status Indicators - Green-themed palette
-  static const statusStreaming = Color(0xFF4A7A4A); // Dim green
-  static const statusReady = Color(0xFFCCFF33); // Yellow-green - blinking
-  static const statusRunning = Color(0xFF99FF33); // Bright green-yellow - blinking
+  // Status Indicators - CRT Retro Palette
+  static const statusStreaming = Color(0xFF5A7A8A); // Gray-blue - passive receiving
+  static const statusReady = Color(0xFFFFB800); // Amber - waiting for approval
+  static const statusRunning = Color(0xFF00CCCC); // Cyan - actively processing
   static const statusSuccess = Color(0xFF00FF41); // Fluorescent green - solid
   static const statusError = Color(0xFFFF3344); // CRT red - solid
 

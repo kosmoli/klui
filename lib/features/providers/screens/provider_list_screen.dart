@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/providers/api_providers.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../shared/widgets/main_navigation.dart';
+import '../../../core/theme/klui_theme_extension.dart';
+import '../../../shared/widgets/retro_drawer.dart';
+import '../../../shared/widgets/retro_menu_button.dart';
 import '../widgets/provider_card.dart';
 
 /// Screen displaying list of Providers with Neo-Brutalist design
@@ -19,10 +21,26 @@ class _ProviderListScreenState extends ConsumerState<ProviderListScreen> {
   @override
   Widget build(BuildContext context) {
     final providersAsync = ref.watch(providerListProvider);
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
 
     return Scaffold(
+      drawer: const RetroDrawer(),
       appBar: AppBar(
+        leading: const RetroMenuButton(),
         title: Text(context.l10n.provider_list_title),
+        toolbarHeight: 48, // Reduced from default 56
+        actions: [
+          // Back to Chat button
+          IconButton(
+            onPressed: () => context.go('/chat'),
+            icon: const Icon(Icons.chat_bubble_outline),
+            tooltip: 'Back to Chat',
+            style: IconButton.styleFrom(
+              backgroundColor: colors.userBubble.withOpacity(0.1),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: providersAsync.when(
         data: (providers) {
@@ -160,7 +178,6 @@ class _ProviderListScreenState extends ConsumerState<ProviderListScreen> {
           label: Text(context.l10n.provider_list_create_button),
         ),
       ),
-      bottomNavigationBar: MainNavigation(currentPath: '/providers'),
     );
   }
 

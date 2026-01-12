@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/providers/api_providers.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/klui_text_styles.dart';
+import '../../../core/theme/klui_theme_extension.dart';
 import '../../../core/models/agent.dart';
 import '../../../shared/widgets/agent_card.dart';
 import '../../../shared/widgets/main_navigation.dart';
@@ -20,10 +21,20 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
   @override
   Widget build(BuildContext context) {
     final agentsAsync = ref.watch(agentListProvider);
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
 
     return Scaffold(
+      backgroundColor: colors.background,
       appBar: AppBar(
-        title: Text(context.l10n.agent_list_title),
+        backgroundColor: colors.surface,
+        elevation: 0,
+        iconTheme: IconThemeData(color: colors.textPrimary),
+        title: Text(
+          context.l10n.agent_list_title,
+          style: KluiTextStyles.headlineSmall.copyWith(
+            color: colors.textPrimary,
+          ),
+        ),
       ),
       body: agentsAsync.when(
         data: (agents) {
@@ -34,34 +45,34 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
                 children: [
                   ExcludeSemantics(
                     child: Container(
-                      padding: const EdgeInsets.all(AppTheme.spacing24),
+                      padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: AppTheme.surfaceVariantColor,
+                        color: colors.surfaceVariant,
                         borderRadius: const BorderRadius.all(
-                          Radius.circular(AppTheme.radiusLarge),
+                          Radius.circular(12),
                         ),
                         border: Border.all(
-                          color: AppTheme.borderColor,
+                          color: colors.border,
                           width: 2,
                         ),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.smart_toy_outlined,
                         size: 64,
-                        color: AppTheme.textSecondaryColor,
+                        color: colors.textSecondary,
                       ),
                     ),
                   ),
-                  const SizedBox(height: AppTheme.spacing24),
+                  const SizedBox(height: 24),
                   Text(
                     context.l10n.agent_list_no_agents,
-                    style: AppTheme.headlineSmall,
+                    style: KluiTextStyles.headlineSmall,
                   ),
-                  const SizedBox(height: AppTheme.spacing8),
+                  const SizedBox(height: 8),
                   Text(
                     context.l10n.agent_list_create_first,
-                    style: AppTheme.bodyMedium.copyWith(
-                      color: AppTheme.textSecondaryColor,
+                    style: KluiTextStyles.bodyMedium.copyWith(
+                      color: colors.textSecondary,
                     ),
                   ),
                 ],
@@ -71,8 +82,8 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
 
           return ListView.builder(
             padding: const EdgeInsets.only(
-              top: AppTheme.spacing16,
-              bottom: AppTheme.spacing80,
+              top: 16,
+              bottom: 80,
             ),
             itemCount: agents.length,
             itemBuilder: (context, index) {
@@ -84,7 +95,7 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(context.l10n.agent_edit_coming_soon(agent.name)),
-                      backgroundColor: AppTheme.surfaceVariantColor,
+                      backgroundColor: colors.surfaceVariant,
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -96,9 +107,9 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
             },
           );
         },
-        loading: () => const Center(
+        loading: () => Center(
           child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+            valueColor: AlwaysStoppedAnimation<Color>(colors.userBubble),
           ),
         ),
         error: (error, stack) => Center(
@@ -106,42 +117,42 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(AppTheme.spacing24),
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: AppTheme.errorColor.withOpacity(0.1),
+                  color: colors.error.withOpacity(0.1),
                   borderRadius: const BorderRadius.all(
-                    Radius.circular(AppTheme.radiusLarge),
+                    Radius.circular(12),
                   ),
                   border: Border.all(
-                    color: AppTheme.errorColor.withOpacity(0.3),
+                    color: colors.error.withOpacity(0.3),
                     width: 2,
                   ),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.error_outline,
                   size: 64,
-                  color: AppTheme.errorColor,
+                  color: colors.error,
                 ),
               ),
-              const SizedBox(height: AppTheme.spacing24),
+              const SizedBox(height: 24),
               Text(
                 context.l10n.agent_list_error_loading,
-                style: AppTheme.headlineSmall,
+                style: KluiTextStyles.headlineSmall,
               ),
-              const SizedBox(height: AppTheme.spacing8),
+              const SizedBox(height: 8),
               Padding(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: AppTheme.spacing32,
+                  horizontal: 32,
                 ),
                 child: Text(
                   error.toString(),
-                  style: AppTheme.bodyMedium.copyWith(
-                    color: AppTheme.textSecondaryColor,
+                  style: KluiTextStyles.bodyMedium.copyWith(
+                    color: colors.textSecondary,
                   ),
                   textAlign: TextAlign.center,
                 ),
               ),
-              const SizedBox(height: AppTheme.spacing24),
+              const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: () {
                   ref.invalidate(agentListProvider);
@@ -149,20 +160,47 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
                 },
                 icon: const Icon(Icons.refresh),
                 label: Text(context.l10n.agent_list_retry),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: colors.userBubble,
+                  foregroundColor: colors.userText,
+                ),
               ),
             ],
           ),
         ),
       ),
-      floatingActionButton: Semantics(
-        label: context.l10n.agent_list_create_button,
-        button: true,
-        hint: context.l10n.agent_list_create_button,
-        child: FloatingActionButton.extended(
-          onPressed: () => context.go('/agents/create'),
-          icon: const Icon(Icons.add),
-          label: Text(context.l10n.agent_list_create_button),
-        ),
+      floatingActionButton: Stack(
+        children: [
+          // Create Agent Button
+          Semantics(
+            label: context.l10n.agent_list_create_button,
+            button: true,
+            hint: context.l10n.agent_list_create_button,
+            child: FloatingActionButton.extended(
+              onPressed: () => context.go('/agents/create'),
+              icon: const Icon(Icons.add),
+              label: Text(context.l10n.agent_list_create_button),
+              backgroundColor: colors.userBubble,
+              foregroundColor: colors.userText,
+            ),
+          ),
+          // Chat Example Button (top-right corner)
+          Positioned(
+            top: -10,
+            right: -10,
+            child: Semantics(
+              label: 'Chat UI Example',
+              button: true,
+              hint: 'View chat UI example with all message types',
+              child: FloatingActionButton.small(
+                onPressed: () => context.go('/chat-example'),
+                heroTag: 'chat_example',
+                backgroundColor: colors.userBubble.withOpacity(0.9),
+                child: const Icon(Icons.chat_bubble_outline, size: 20),
+              ),
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: MainNavigation(currentPath: '/agents'),
     );
@@ -171,13 +209,28 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
   void _showDeleteDialog(BuildContext context, Agent agent, WidgetRef ref) {
     showDialog(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(context.l10n.agent_delete_confirm_title(agent.name)),
-        content: Text(context.l10n.agent_delete_confirm_message),
+      builder: (dialogContext) {
+        final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
+        return AlertDialog(
+        backgroundColor: colors.surface,
+        title: Text(
+          context.l10n.agent_delete_confirm_title(agent.name),
+          style: KluiTextStyles.headlineSmall,
+        ),
+        content: Text(
+          context.l10n.agent_delete_confirm_message,
+          style: KluiTextStyles.bodyMedium,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
-            child: Text(context.l10n.agent_cancel_button),
+            child: Text(
+              context.l10n.agent_cancel_button,
+              style: KluiTextStyles.button.copyWith(
+                color: colors.textPrimary,
+              ),
+            ),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -189,8 +242,11 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text(context.l10n.agent_delete_success(agent.name)),
-                      backgroundColor: AppTheme.primaryColor,
+                      content: Text(
+                        context.l10n.agent_delete_success(agent.name),
+                        style: const TextStyle(color: Colors.black),
+                      ),
+                      backgroundColor: colors.success,
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -201,7 +257,7 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(context.l10n.agent_delete_failed(agent.name, e.toString())),
-                      backgroundColor: AppTheme.errorColor,
+                      backgroundColor: colors.error,
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
@@ -209,13 +265,17 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.errorColor,
+              backgroundColor: colors.error,
               foregroundColor: Colors.white,
             ),
-            child: Text(context.l10n.agent_delete_button),
+            child: Text(
+              context.l10n.agent_delete_button,
+              style: KluiTextStyles.button,
+            ),
           ),
         ],
-      ),
+      );
+      },
     );
   }
 }

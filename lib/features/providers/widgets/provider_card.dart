@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/models/provider.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/klui_text_styles.dart';
+import '../../../core/theme/klui_theme_extension.dart';
 
 /// A Neo-Brutalist card component for displaying Provider information
 ///
@@ -24,6 +25,8 @@ class ProviderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
     return MergeSemantics(
       child: Semantics(
         label: _getCardLabel(context),
@@ -36,33 +39,26 @@ class ProviderCard extends StatelessWidget {
             onTap: onTap,
             child: Container(
               margin: const EdgeInsets.symmetric(
-                horizontal: AppTheme.spacing16,
-                vertical: AppTheme.spacing8,
+                horizontal: 16,
+                vertical: 8,
               ),
               decoration: BoxDecoration(
-                color: AppTheme.surfaceColor,
+                color: colors.surface,
                 borderRadius: const BorderRadius.all(
-                  Radius.circular(AppTheme.radiusMedium),
+                  Radius.circular(12),
                 ),
                 border: Border.all(
-                  color: AppTheme.borderColor,
+                  color: colors.border,
                   width: 2,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.primaryColor.withOpacity(0.05),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
               ),
               child: InkWell(
                 onTap: onTap,
                 borderRadius: const BorderRadius.all(
-                  Radius.circular(AppTheme.radiusMedium),
+                  Radius.circular(12),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.all(AppTheme.spacing16),
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -75,23 +71,23 @@ class ProviderCard extends StatelessWidget {
                               width: 48,
                               height: 48,
                               decoration: BoxDecoration(
-                                color: _getProviderTypeColor().withOpacity(0.1),
+                                color: colors.userBubble.withOpacity(0.1),
                                 borderRadius: const BorderRadius.all(
-                                  Radius.circular(AppTheme.radiusSmall),
+                                  Radius.circular(8),
                                 ),
                                 border: Border.all(
-                                  color: _getProviderTypeColor().withOpacity(0.3),
+                                  color: colors.userBubble.withOpacity(0.3),
                                   width: 1,
                                 ),
                               ),
                               child: Icon(
                                 _getProviderTypeIcon(),
-                                color: _getProviderTypeColor(),
+                                color: colors.userBubble,
                                 size: 24,
                               ),
                             ),
                           ),
-                          const SizedBox(width: AppTheme.spacing12),
+                          const SizedBox(width: 12),
 
                           // Provider Name
                           Expanded(
@@ -100,16 +96,16 @@ class ProviderCard extends StatelessWidget {
                               children: [
                                 Text(
                                   provider.name,
-                                  style: AppTheme.titleMedium.copyWith(
+                                  style: KluiTextStyles.headlineMedium.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                const SizedBox(height: AppTheme.spacing4),
+                                const SizedBox(height: 4),
                                 Text(
                                   _formatProviderId(provider.id),
-                                  style: AppTheme.monoSmall,
+                                  style: KluiTextStyles.technical,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
@@ -119,7 +115,7 @@ class ProviderCard extends StatelessWidget {
 
                           // Action Buttons
                           if (onDelete != null) ...[
-                            const SizedBox(width: AppTheme.spacing8),
+                            const SizedBox(width: 8),
                             _ActionButton(
                               icon: Icons.delete_outlined,
                               onPressed: onDelete,
@@ -133,16 +129,16 @@ class ProviderCard extends StatelessWidget {
                       ),
 
                       // Footer: Type + Category + Updated Date
-                      const SizedBox(height: AppTheme.spacing12),
+                      const SizedBox(height: 12),
                       Row(
                         children: [
                           // Provider Type Badge
                           _InfoChip(
                             icon: Icons.cloud_outlined,
                             label: _formatProviderType(context),
-                            color: _getProviderTypeColor(),
+                            color: colors.userBubble,
                           ),
-                          const SizedBox(width: AppTheme.spacing8),
+                          const SizedBox(width: 8),
 
                           // Provider Category Badge
                           _InfoChip(
@@ -151,8 +147,8 @@ class ProviderCard extends StatelessWidget {
                                 : Icons.storage_outlined,
                             label: provider.providerCategory.toUpperCase(),
                             color: provider.providerCategory == 'base'
-                                ? AppTheme.primaryColor
-                                : AppTheme.secondaryColor,
+                                ? colors.toolFile
+                                : colors.toolSearch,
                           ),
 
                           const Spacer(),
@@ -161,12 +157,12 @@ class ProviderCard extends StatelessWidget {
 
                       // Base URL (if available)
                       if (provider.baseUrl != null) ...[
-                        const SizedBox(height: AppTheme.spacing12),
+                        const SizedBox(height: 12),
                         ExcludeSemantics(
                           child: Text(
                             provider.baseUrl!,
-                            style: AppTheme.monoSmall.copyWith(
-                              color: AppTheme.textSecondaryColor,
+                            style: KluiTextStyles.technical.copyWith(
+                              color: colors.textSecondary,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -240,24 +236,6 @@ class ProviderCard extends StatelessWidget {
         return Icons.cloud_outlined;
     }
   }
-
-  Color _getProviderTypeColor() {
-    switch (provider.providerType.toLowerCase()) {
-      case 'openai':
-        return const Color(0xFF10A37F);
-      case 'anthropic':
-        return const Color(0xFFD97757);
-      case 'ollama':
-        return const Color(0xFF000000);
-      case 'google_ai':
-      case 'google_vertex':
-        return const Color(0xFF4285F4);
-      case 'letta':
-        return AppTheme.primaryColor;
-      default:
-        return AppTheme.textSecondaryColor;
-    }
-  }
 }
 
 class _ActionButton extends StatelessWidget {
@@ -279,6 +257,8 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
     return Semantics(
       label: semanticLabel,
       button: true,
@@ -288,28 +268,28 @@ class _ActionButton extends StatelessWidget {
         child: InkWell(
           onTap: onPressed,
           borderRadius: const BorderRadius.all(
-            Radius.circular(AppTheme.radiusSmall),
+            Radius.circular(8),
           ),
           child: Container(
-            padding: const EdgeInsets.all(AppTheme.spacing8),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: isDestructive
-                  ? AppTheme.errorColor.withOpacity(0.1)
-                  : AppTheme.primaryColor.withOpacity(0.1),
+                  ? colors.error.withOpacity(0.1)
+                  : colors.userBubble.withOpacity(0.1),
               borderRadius: const BorderRadius.all(
-                Radius.circular(AppTheme.radiusSmall),
+                Radius.circular(8),
               ),
               border: Border.all(
                 color: isDestructive
-                    ? AppTheme.errorColor.withOpacity(0.3)
-                    : AppTheme.primaryColor.withOpacity(0.3),
+                    ? colors.error.withOpacity(0.3)
+                    : colors.userBubble.withOpacity(0.3),
                 width: 1,
               ),
             ),
             child: Icon(
               icon,
               size: 18,
-              color: isDestructive ? AppTheme.errorColor : AppTheme.primaryColor,
+              color: isDestructive ? colors.error : colors.userBubble,
             ),
           ),
         ),
@@ -321,32 +301,35 @@ class _ActionButton extends StatelessWidget {
 class _InfoChip extends StatelessWidget {
   final IconData icon;
   final String label;
-  final Color color;
+  final Color? color;
 
   const _InfoChip({
     required this.icon,
     required this.label,
-    required this.color,
+    this.color,
   });
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+    final chipColor = color ?? colors.userBubble;
+
     return MergeSemantics(
       child: Semantics(
         label: context.l10n.provider_card_type_label(label),
         container: true,
         child: Container(
           padding: const EdgeInsets.symmetric(
-            horizontal: AppTheme.spacing8,
-            vertical: AppTheme.spacing4,
+            horizontal: 8,
+            vertical: 4,
           ),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
+            color: chipColor.withOpacity(0.1),
             borderRadius: const BorderRadius.all(
-              Radius.circular(AppTheme.radiusSmall),
+              Radius.circular(6),
             ),
             border: Border.all(
-              color: color.withOpacity(0.3),
+              color: chipColor.withOpacity(0.3),
               width: 1,
             ),
           ),
@@ -356,14 +339,15 @@ class _InfoChip extends StatelessWidget {
               Icon(
                 icon,
                 size: 14,
-                color: color,
+                color: chipColor,
               ),
-              const SizedBox(width: AppTheme.spacing4),
+              const SizedBox(width: 4),
               Text(
                 label,
-                style: AppTheme.labelSmall.copyWith(
-                  color: color,
+                style: KluiTextStyles.labelSmall.copyWith(
+                  color: chipColor,
                   fontWeight: FontWeight.w600,
+                  fontFamily: 'JetBrains Mono',
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,

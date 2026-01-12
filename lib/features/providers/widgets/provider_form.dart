@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/extensions/context_extensions.dart';
 import '../../../core/models/create_provider_request.dart';
-import '../../../core/theme/app_theme.dart';
+import '../../../core/theme/klui_text_styles.dart';
+import '../../../core/theme/klui_theme_extension.dart';
 
 /// Provider type selection option
 class ProviderTypeOption {
@@ -27,55 +28,59 @@ class ProviderTypeOption {
   });
 }
 
-/// Available provider types
-const List<ProviderTypeOption> providerTypes = [
-  ProviderTypeOption(
-    type: 'openai',
-    displayName: 'OpenAI',
-    description: 'GPT-4, GPT-3.5 and more',
-    icon: Icons.psychology_outlined,
-    color: Color(0xFF10A37F),
-    requiresApiKey: true,
-    requiresBaseUrl: true,
-  ),
-  ProviderTypeOption(
-    type: 'anthropic',
-    displayName: 'Anthropic',
-    description: 'Claude 3.5 Sonnet, Opus, and more',
-    icon: Icons.auto_awesome_outlined,
-    color: Color(0xFFD97757),
-    requiresApiKey: true,
-    requiresBaseUrl: false,
-  ),
-  ProviderTypeOption(
-    type: 'ollama',
-    displayName: 'Ollama',
-    description: 'Local open-source models',
-    icon: Icons.pets_outlined,
-    color: Color(0xFF000000),
-    requiresApiKey: false,
-    requiresBaseUrl: true,
-  ),
-  ProviderTypeOption(
-    type: 'google_ai',
-    displayName: 'Google AI',
-    description: 'Gemini Pro, Gemini Flash',
-    icon: Icons.search_outlined,
-    color: Color(0xFF4285F4),
-    requiresApiKey: true,
-    requiresBaseUrl: false,
-  ),
-  ProviderTypeOption(
-    type: 'google_vertex',
-    displayName: 'Google Vertex AI',
-    description: 'Enterprise AI models',
-    icon: Icons.business_outlined,
-    color: Color(0xFF4285F4),
-    requiresApiKey: false,
-    requiresBaseUrl: false,
-    requiresProject: true,
-  ),
-];
+/// Available provider types - function to get them with theme colors
+List<ProviderTypeOption> getProviderTypes(BuildContext context) {
+  final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
+  return [
+    ProviderTypeOption(
+      type: 'openai',
+      displayName: 'OpenAI',
+      description: 'GPT-4, GPT-3.5 and more',
+      icon: Icons.psychology_outlined,
+      color: colors.userBubble,
+      requiresApiKey: true,
+      requiresBaseUrl: true,
+    ),
+    ProviderTypeOption(
+      type: 'anthropic',
+      displayName: 'Anthropic',
+      description: 'Claude 3.5 Sonnet, Opus, and more',
+      icon: Icons.auto_awesome_outlined,
+      color: colors.userBubble,
+      requiresApiKey: true,
+      requiresBaseUrl: false,
+    ),
+    ProviderTypeOption(
+      type: 'ollama',
+      displayName: 'Ollama',
+      description: 'Local open-source models',
+      icon: Icons.pets_outlined,
+      color: colors.userBubble,
+      requiresApiKey: false,
+      requiresBaseUrl: true,
+    ),
+    ProviderTypeOption(
+      type: 'google_ai',
+      displayName: 'Google AI',
+      description: 'Gemini Pro, Gemini Flash',
+      icon: Icons.search_outlined,
+      color: colors.userBubble,
+      requiresApiKey: true,
+      requiresBaseUrl: false,
+    ),
+    ProviderTypeOption(
+      type: 'google_vertex',
+      displayName: 'Google Vertex AI',
+      description: 'Enterprise AI models',
+      icon: Icons.business_outlined,
+      color: colors.userBubble,
+      requiresApiKey: false,
+      requiresBaseUrl: false,
+      requiresProject: true,
+    ),
+  ];
+}
 
 /// Provider creation form (single-page with dropdown)
 class ProviderCreateForm extends ConsumerStatefulWidget {
@@ -113,7 +118,7 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppTheme.spacing16),
+      padding: const EdgeInsets.all(16),
       child: Form(
         key: _formKey,
         child: Column(
@@ -131,7 +136,7 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
                     hintText: context.l10n.provider_create_field_provider_type_hint,
                     border: const OutlineInputBorder(),
                   ),
-                  items: providerTypes.map((providerType) {
+                  items: getProviderTypes(context).map((providerType) {
                     return DropdownMenuItem<ProviderTypeOption>(
                       value: providerType,
                       child: Row(
@@ -141,7 +146,7 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
                             color: providerType.color,
                             size: 20,
                           ),
-                          const SizedBox(width: AppTheme.spacing8),
+                          const SizedBox(width: 8),
                           Text(providerType.displayName),
                         ],
                       ),
@@ -166,7 +171,7 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
                 ),
               ),
             ),
-            const SizedBox(height: AppTheme.spacing24),
+            const SizedBox(height: 24),
 
             // Configuration fields (shown when type is selected)
             if (_selectedProviderType != null) ...[
@@ -190,7 +195,7 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
                   },
                 ),
               ),
-              const SizedBox(height: AppTheme.spacing16),
+              const SizedBox(height: 16),
 
               // API Key (if required)
               if (_selectedProviderType!.requiresApiKey)
@@ -218,7 +223,7 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
                   ),
                 ),
               if (_selectedProviderType!.requiresApiKey)
-                const SizedBox(height: AppTheme.spacing16),
+                const SizedBox(height: 16),
 
               // Base URL (if required)
               if (_selectedProviderType!.requiresBaseUrl)
@@ -243,7 +248,7 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
                   ),
                 ),
               if (_selectedProviderType!.requiresBaseUrl)
-                const SizedBox(height: AppTheme.spacing16),
+                const SizedBox(height: 16),
 
               // Project (for Google Vertex)
               if (_selectedProviderType!.requiresProject) ...[
@@ -267,7 +272,7 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
                     },
                   ),
                 ),
-                const SizedBox(height: AppTheme.spacing16),
+                const SizedBox(height: 16),
                 Semantics(
                   label: context.l10n.provider_create_field_location_semantic,
                   hint: context.l10n.provider_create_field_location_hint_semantic,
@@ -288,12 +293,12 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
                     },
                   ),
                 ),
-                const SizedBox(height: AppTheme.spacing16),
+                const SizedBox(height: 16),
               ],
 
               // Selected provider info
               _buildSelectedProviderInfo(context),
-              const SizedBox(height: AppTheme.spacing32),
+              const SizedBox(height: 32),
 
               // Submit button
               SizedBox(
@@ -315,6 +320,8 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
       return const SizedBox.shrink();
     }
 
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
     return MergeSemantics(
       child: Semantics(
         label: context.l10n.provider_create_selected_semantic(
@@ -323,15 +330,15 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
         value: _selectedProviderType!.description,
         container: true,
         child: Container(
-          padding: const EdgeInsets.all(AppTheme.spacing16),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: AppTheme.surfaceVariantColor,
+            color: colors.surfaceVariant,
             borderRadius: const BorderRadius.all(
-              Radius.circular(AppTheme.radiusMedium),
+              Radius.circular(12),
             ),
             border: Border.all(
-              color: AppTheme.borderColor,
-              width: 1,
+              color: colors.border,
+              width: 2,
             ),
           ),
           child: Column(
@@ -346,20 +353,20 @@ class _ProviderCreateFormState extends ConsumerState<ProviderCreateForm> {
                       size: 20,
                     ),
                   ),
-                  const SizedBox(width: AppTheme.spacing8),
+                  const SizedBox(width: 8),
                   Text(
                     context.l10n.provider_create_selected(_selectedProviderType!.displayName),
-                    style: AppTheme.labelLarge.copyWith(
+                    style: KluiTextStyles.labelMedium.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: AppTheme.spacing8),
+              const SizedBox(height: 8),
               Text(
                 _selectedProviderType!.description,
-                style: AppTheme.bodySmall.copyWith(
-                  color: AppTheme.textSecondaryColor,
+                style: KluiTextStyles.bodySmall.copyWith(
+                  color: colors.textSecondary,
                 ),
               ),
             ],

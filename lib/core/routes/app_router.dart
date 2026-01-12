@@ -7,14 +7,29 @@ import '../../features/agents/screens/agent_create_screen.dart';
 import '../../features/providers/screens/provider_list_screen.dart';
 import '../../features/providers/screens/provider_create_screen.dart';
 import '../../features/providers/screens/provider_detail_screen.dart';
+import '../../features/chat/screens/chat_example_screen.dart';
 import '../extensions/context_extensions.dart';
 
 /// Application router configuration
+/// Chat is now the homepage - this is an AI assistant first, management tool second
 final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: '/agents',
+    initialLocation: '/chat',
     routes: [
-      GoRoute(path: '/', redirect: (_, __) => '/agents'),
+      GoRoute(path: '/', redirect: (_, __) => '/chat'),
+      GoRoute(
+        path: '/chat',
+        name: 'chat',
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            child: ChatExampleScreen(),
+            transitionDuration: Duration.zero,
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return child;
+            },
+          );
+        },
+      ),
       GoRoute(
         path: '/agents',
         name: 'agents',

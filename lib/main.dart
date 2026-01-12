@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/routes/app_router.dart';
-import 'core/theme/app_theme.dart';
+import 'core/theme/neo_brutalist_theme.dart';
 import 'l10n/generated/app_localizations.dart';
 
 void main() {
@@ -18,10 +18,10 @@ class MyApp extends ConsumerWidget {
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
-      title: 'Klui - Letta Agent Management',
+      title: 'Klui - Letta AI Assistant',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
-      darkTheme: AppTheme.darkTheme,
+      theme: NeoBrutalistTheme.dark,
+      darkTheme: NeoBrutalistTheme.dark,
       themeMode: ThemeMode.dark,
 
       // Localization

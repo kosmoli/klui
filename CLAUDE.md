@@ -361,6 +361,95 @@ Semantics(
 - Setup: `flutter gen-l10n` (generates from ARB files)
 - Rebuild: `flutter build web` (auto-generates l10n + riverpod)
 
+### 11.4 Theme System Usage (MANDATORY - Color Management)
+
+**CRITICAL**: ALL new code MUST use theme system for colors
+
+#### Why Theme System?
+- **Single source of truth**: Change colors in ONE place, entire app updates
+- **Theme switching ready**: Easy to add light/dark/custom themes later
+- **Future-proof**: Follows Flutter best practices for theming
+
+#### How to Use Theme System
+
+**✅ CORRECT - Use Theme Extension**:
+```dart
+@override
+Widget build(BuildContext context) {
+  final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
+  return Container(
+    color: colors.surface,              // ✅ Theme-aware
+    border: Border.all(color: colors.border),
+    child: Text(
+      'Hello',
+      style: TextStyle(color: colors.textPrimary),
+    ),
+  );
+}
+```
+
+**❌ WRONG - Direct KluiColors**:
+```dart
+import 'klui_colors.dart';
+
+Container(
+  color: KluiColors.surface,  // ❌ Not theme-aware
+  border: Border.all(color: KluiColors.border),
+)
+```
+
+#### Available Colors
+
+```dart
+final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
+// Backgrounds
+colors.background          // Main background
+colors.surface            // Card/surface background
+colors.surfaceVariant     // Input/variant background
+
+// Message Bubbles
+colors.userBubble         // User message background (CRT green)
+colors.userText           // Text on user bubble
+colors.assistantBubble    // Assistant message background
+colors.assistantText      // Assistant message text
+colors.reasoning          // Thinking/reasoning text
+
+// Tool Colors
+colors.toolFile           // File operations
+colors.toolSearch         // Search operations
+
+// Status Colors
+colors.success            // Success state
+colors.error              // Error state
+colors.warning            // Warning state
+
+// Text Colors
+colors.textPrimary        // Primary text
+colors.textSecondary      // Secondary text
+colors.textDisabled       // Disabled text
+
+// Border
+colors.border             // Standard border
+```
+
+#### Import Requirements
+
+```dart
+import '../../core/theme/klui_theme_extension.dart';
+// DO NOT import 'klui_colors.dart' in new code
+```
+
+#### Legacy Code
+
+Old code using `KluiColors.xxx` still works but should be refactored when touched.
+Priority for refactoring:
+1. High-traffic components (cards, lists, navigation)
+2. User-facing messages
+3. Status indicators
+4. Low-utility widgets (can keep `KluiColors` if rarely used)
+
 ### 12. DO NOT
 - ❌ Modify Letta backend code (unless necessary)
 - ❌ Use Freezed for Web (compilation issues)
@@ -370,6 +459,7 @@ Semantics(
 - ❌ Forget error handling at system boundaries
 - ❌ **Skip Semantics annotations (blocks accessibility & testing)**
 - ❌ **Violate three-layer architecture (see 11.2)**
+- ❌ **Use KluiColors directly in new code (use Theme.of(context).extension<KluiCustomColors>() instead)**
 
 ### 13. Project Goals
 **Core定位**: Serve professional users who need full API access

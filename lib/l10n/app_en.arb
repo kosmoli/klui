@@ -303,5 +303,8 @@
   "chat_abort_button_hint": "Double tap to stop the current operation",
   "chat_abort_esc_hint": "Press ESC to stop",
   "chat_aborted_message": "Operation stopped by user",
-  "chat_abort_failed": "Failed to stop operation"
+  "chat_abort_failed": "Failed to stop operation",
+  "chat_clear_button_tooltip": "Clear chat history",
+  "chat_operation_stopped": "Operation stopped",
+  "chat_retrying_message": "Retrying... (Attempt {current}/{total})"
 }

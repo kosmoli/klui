@@ -250,8 +250,13 @@ class ChatStateHolder extends _$ChatStateHolder {
         break;
 
       case 'stop_reason':
-        // Stream ending
+        // Stream ending - stop streaming state
         print('[ChatController] Stream stopped: ${json['stop_reason']}');
+        state = state.copyWith(
+          isStreaming: false,
+          canAbort: false,
+        );
+        _saveMessages();
         break;
 
       case 'ping':

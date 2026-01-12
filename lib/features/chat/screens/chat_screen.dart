@@ -138,16 +138,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   ),
                 ),
               ],
-              if (canAbort) ...[
-                const SizedBox(width: 8),
-                Text(
-                  context.l10n.chat_abort_esc_hint,
-                  style: KluiTextStyles.labelSmall.copyWith(
-                    color: colors.textSecondary,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ],
             ],
           ),
           toolbarHeight: 48,
@@ -178,7 +168,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               ref.read(chatStateHolderProvider(widget.agentId).notifier).clearMessages();
             },
             icon: const Icon(Icons.clear_all),
-            tooltip: 'Clear chat',
+            tooltip: context.l10n.chat_clear_button_tooltip,
             color: colors.textPrimary,
           ),
           const SizedBox(width: 8),

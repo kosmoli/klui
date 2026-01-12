@@ -79,14 +79,18 @@ class ProviderCreateScreen extends ConsumerWidget {
 
             // Show error message
             if (context.mounted) {
+              final colors = Theme.of(context).extension<KluiCustomColors>()!;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(context.l10n.provider_create_failed(e.toString())),
-                  backgroundColor: AppTheme.errorColor,
+                  content: Text(
+                    context.l10n.provider_create_failed(e.toString()),
+                    style: TextStyle(color: colors.userText),
+                  ),
+                  backgroundColor: colors.error,
                   behavior: SnackBarBehavior.floating,
                   action: SnackBarAction(
                     label: context.l10n.agent_cancel_button,
-                    textColor: Colors.white,
+                    textColor: colors.userText,
                     onPressed: () {
                       ScaffoldMessenger.of(context).hideCurrentSnackBar();
                     },

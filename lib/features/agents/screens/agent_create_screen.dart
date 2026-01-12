@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/providers/api_providers.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/klui_colors.dart';
 import '../../../../core/theme/klui_theme_extension.dart';
 import '../../../../core/models/provider.dart' as models;
 import '../../../../core/models/llm_model.dart';
@@ -115,10 +116,14 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoadingProviders = false);
+        final colors = Theme.of(context).extension<KluiCustomColors>()!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(context.l10n.agent_create_error_loading(e.toString())),
-            backgroundColor: AppTheme.errorColor,
+            content: Text(
+              context.l10n.agent_create_error_loading(e.toString()),
+              style: TextStyle(color: colors.userText),
+            ),
+            backgroundColor: colors.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -142,10 +147,14 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoadingLLMModels = false);
+        final colors = Theme.of(context).extension<KluiCustomColors>()!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(context.l10n.agent_create_error_llm_models(e.toString())),
-            backgroundColor: AppTheme.errorColor,
+            content: Text(
+              context.l10n.agent_create_error_llm_models(e.toString()),
+              style: TextStyle(color: colors.userText),
+            ),
+            backgroundColor: colors.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -171,10 +180,14 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoadingEmbeddingModels = false);
+        final colors = Theme.of(context).extension<KluiCustomColors>()!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(context.l10n.agent_create_error_embedding_models(e.toString())),
-            backgroundColor: AppTheme.errorColor,
+            content: Text(
+              context.l10n.agent_create_error_embedding_models(e.toString()),
+              style: TextStyle(color: colors.userText),
+            ),
+            backgroundColor: colors.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -192,6 +205,7 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
     return AppBar(
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
@@ -209,19 +223,19 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
               vertical: AppTheme.spacing8,
             ),
             decoration: BoxDecoration(
-              color: AppTheme.primaryColor.withOpacity(0.1),
+              color: colors.success.withOpacity(0.15),
               borderRadius: const BorderRadius.all(
                 Radius.circular(AppTheme.radiusSmall),
               ),
               border: Border.all(
-                color: AppTheme.primaryColor.withOpacity(0.3),
+                color: colors.success.withOpacity(0.5),
                 width: 1,
               ),
             ),
             child: Text(
               context.l10n.agent_create_step_indicator(_currentStep + 1, 3),
               style: AppTheme.labelMedium.copyWith(
-                color: AppTheme.primaryColor,
+                color: colors.success,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -232,6 +246,7 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
   }
 
   Widget _buildBody(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
     return Form(
       key: _formKey,
       child: SingleChildScrollView(
@@ -240,7 +255,7 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Progress bar
-            _buildProgressBar(),
+            _buildProgressBar(colors),
             const SizedBox(height: AppTheme.spacing24),
 
             // Step content
@@ -253,7 +268,7 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
     );
   }
 
-  Widget _buildProgressBar() {
+  Widget _buildProgressBar(KluiCustomColors colors) {
     return Row(
       children: List.generate(
         3,
@@ -265,8 +280,8 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
             height: 4,
             decoration: BoxDecoration(
               color: index <= _currentStep
-                  ? AppTheme.primaryColor
-                  : AppTheme.surfaceVariantColor,
+                  ? colors.success
+                  : colors.surfaceVariant,
               borderRadius: const BorderRadius.all(
                 Radius.circular(AppTheme.radiusSmall),
               ),
@@ -281,7 +296,7 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
     if (_isLoadingProviders) {
       return const Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+          valueColor: AlwaysStoppedAnimation<Color>(KluiColors.success),
         ),
       );
     }
@@ -362,13 +377,14 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
   }
 
   Widget _buildBottomNavigation(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
     return Container(
       padding: const EdgeInsets.all(AppTheme.spacing16),
       decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
+        color: colors.surface,
         border: Border(
           top: BorderSide(
-            color: AppTheme.borderColor,
+            color: colors.border,
             width: 2,
           ),
         ),
@@ -381,6 +397,10 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: () => setState(() => _currentStep--),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: colors.textPrimary,
+                    side: BorderSide(color: colors.border, width: 2),
+                  ),
                   child: Text(context.l10n.agent_create_button_back),
                 ),
               ),
@@ -396,18 +416,26 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
               child: _currentStep < 2
                   ? ElevatedButton(
                       onPressed: _handleNext,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colors.success,
+                        foregroundColor: colors.userText,
+                      ),
                       child: Text(context.l10n.agent_create_button_next),
                     )
                   : ElevatedButton(
                       onPressed: _isCreating ? null : _handleCreate,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: colors.success,
+                        foregroundColor: colors.userText,
+                      ),
                       child: _isCreating
-                          ? const SizedBox(
+                          ? SizedBox(
                               height: 20,
                               width: 20,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
                                 valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
+                                  colors.userText,
                                 ),
                               ),
                             )
@@ -421,6 +449,7 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
   }
 
   void _handleNext() {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
     if (_currentStep == 0) {
       // Validate provider/model selection
       if (_byokMode) {
@@ -428,8 +457,11 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
         if (_selectedLLMProvider == null || _selectedLLMModel == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(context.l10n.agent_create_validation_llm_provider),
-              backgroundColor: AppTheme.errorColor,
+              content: Text(
+                context.l10n.agent_create_validation_llm_provider,
+                style: TextStyle(color: colors.userText),
+              ),
+              backgroundColor: colors.error,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -438,8 +470,11 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
         if (_selectedEmbeddingProvider == null || _selectedEmbeddingModel == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(context.l10n.agent_create_validation_embedding_provider),
-              backgroundColor: AppTheme.errorColor,
+              content: Text(
+                context.l10n.agent_create_validation_embedding_provider,
+                style: TextStyle(color: colors.userText),
+              ),
+              backgroundColor: colors.error,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -450,8 +485,11 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
         if (_selectedLLMModel == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(context.l10n.agent_create_validation_llm_model),
-              backgroundColor: AppTheme.errorColor,
+              content: Text(
+                context.l10n.agent_create_validation_llm_model,
+                style: TextStyle(color: colors.userText),
+              ),
+              backgroundColor: colors.error,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -460,8 +498,11 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
         if (_selectedEmbeddingModel == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(context.l10n.agent_create_validation_embedding_model),
-              backgroundColor: AppTheme.errorColor,
+              content: Text(
+                context.l10n.agent_create_validation_embedding_model,
+                style: TextStyle(color: colors.userText),
+              ),
+              backgroundColor: colors.error,
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -473,8 +514,11 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
       if (_nameController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(context.l10n.agent_create_validation_name),
-            backgroundColor: AppTheme.errorColor,
+            content: Text(
+              context.l10n.agent_create_validation_name,
+              style: TextStyle(color: colors.userText),
+            ),
+            backgroundColor: colors.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -483,8 +527,11 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
       if (_systemPromptController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(context.l10n.agent_create_validation_system_prompt),
-            backgroundColor: AppTheme.errorColor,
+            content: Text(
+              context.l10n.agent_create_validation_system_prompt,
+              style: TextStyle(color: colors.userText),
+            ),
+            backgroundColor: colors.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -533,10 +580,14 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final colors = Theme.of(context).extension<KluiCustomColors>()!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('$e'),
-            backgroundColor: AppTheme.errorColor,
+            content: Text(
+              '$e',
+              style: TextStyle(color: colors.userText),
+            ),
+            backgroundColor: colors.error,
             behavior: SnackBarBehavior.floating,
             duration: const Duration(seconds: 5),
           ),
@@ -588,6 +639,7 @@ class _ProviderSelectionStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -602,7 +654,7 @@ class _ProviderSelectionStep extends StatelessWidget {
               ? context.l10n.agent_create_step_provider_desc
               : context.l10n.agent_create_step_model_desc,
           style: AppTheme.bodyMedium.copyWith(
-            color: AppTheme.textSecondaryColor,
+            color: colors.textSecondary,
           ),
         ),
         const SizedBox(height: AppTheme.spacing24),
@@ -611,12 +663,12 @@ class _ProviderSelectionStep extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(AppTheme.spacing16),
           decoration: BoxDecoration(
-            color: AppTheme.surfaceColor,
+            color: colors.surface,
             borderRadius: const BorderRadius.all(
               Radius.circular(AppTheme.radiusMedium),
             ),
             border: Border.all(
-              color: AppTheme.borderColor,
+              color: colors.border,
               width: 2,
             ),
           ),
@@ -631,7 +683,7 @@ class _ProviderSelectionStep extends StatelessWidget {
               Text(
                 context.l10n.agent_create_byok_desc,
                 style: AppTheme.bodyMedium.copyWith(
-                  color: AppTheme.textSecondaryColor,
+                  color: colors.textSecondary,
                 ),
               ),
               const SizedBox(height: AppTheme.spacing16),
@@ -640,7 +692,7 @@ class _ProviderSelectionStep extends StatelessWidget {
                   Switch(
                     value: byokMode,
                     onChanged: onByokModeChanged,
-                    activeColor: AppTheme.primaryColor,
+                    activeColor: colors.success,
                   ),
                   const SizedBox(width: AppTheme.spacing8),
                   Text(
@@ -728,6 +780,7 @@ class _BasicInfoStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -739,7 +792,7 @@ class _BasicInfoStep extends StatelessWidget {
         Text(
           context.l10n.agent_create_step_basic_desc,
           style: AppTheme.bodyMedium.copyWith(
-            color: AppTheme.textSecondaryColor,
+            color: colors.textSecondary,
           ),
         ),
         const SizedBox(height: AppTheme.spacing24),
@@ -784,6 +837,7 @@ class _ReviewStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -795,7 +849,7 @@ class _ReviewStep extends StatelessWidget {
         Text(
           context.l10n.agent_create_step_review_desc,
           style: AppTheme.bodyMedium.copyWith(
-            color: AppTheme.textSecondaryColor,
+            color: colors.textSecondary,
           ),
         ),
         const SizedBox(height: AppTheme.spacing24),
@@ -820,6 +874,7 @@ class _ReviewItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppTheme.spacing16),
       child: Column(
@@ -828,7 +883,7 @@ class _ReviewItem extends StatelessWidget {
           Text(
             label,
             style: AppTheme.labelSmall.copyWith(
-              color: AppTheme.textSecondaryColor,
+              color: colors.textSecondary,
             ),
           ),
           const SizedBox(height: AppTheme.spacing4),
@@ -858,6 +913,7 @@ class _TextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -876,7 +932,7 @@ class _TextField extends StatelessWidget {
                 Radius.circular(AppTheme.radiusSmall),
               ),
               borderSide: BorderSide(
-                color: AppTheme.borderColor,
+                color: colors.border,
                 width: 2,
               ),
             ),
@@ -885,7 +941,7 @@ class _TextField extends StatelessWidget {
                 Radius.circular(AppTheme.radiusSmall),
               ),
               borderSide: BorderSide(
-                color: AppTheme.borderColor,
+                color: colors.border,
                 width: 2,
               ),
             ),
@@ -894,7 +950,7 @@ class _TextField extends StatelessWidget {
                 Radius.circular(AppTheme.radiusSmall),
               ),
               borderSide: BorderSide(
-                color: AppTheme.primaryColor,
+                color: colors.success,
                 width: 2,
               ),
             ),
@@ -903,12 +959,12 @@ class _TextField extends StatelessWidget {
                 Radius.circular(AppTheme.radiusSmall),
               ),
               borderSide: BorderSide(
-                color: AppTheme.errorColor,
+                color: colors.error,
                 width: 2,
               ),
             ),
             filled: true,
-            fillColor: AppTheme.surfaceVariantColor,
+            fillColor: colors.surfaceVariant,
           ),
         ),
       ],

@@ -3,9 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'core/routes/app_router.dart';
 import 'core/theme/neo_brutalist_theme.dart';
+import 'core/utils/logger.dart';
 import 'l10n/generated/app_localizations.dart';
 
 void main() {
+  // Initialize logging
+  initLogging();
+
   const app = ProviderScope(child: MyApp());
   runApp(app);
 }

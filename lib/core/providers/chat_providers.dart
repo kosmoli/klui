@@ -5,9 +5,12 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../utils/api_client.dart';
 import '../models/chat_message.dart';
 import '../utils/chat_storage.dart';
+import '../utils/logger.dart';
 import 'api_providers.dart';
 
 part 'chat_providers.g.dart';
+
+final _log = KluiLogger('ChatController');
 
 /// Chat state for a specific agent
 class ChatState {
@@ -64,11 +67,13 @@ class ChatStateHolder extends _$ChatStateHolder {
     // Load saved messages on build
     _loadMessages();
 
+    _log.debug('ChatStateHolder initialized for agent: $agentId');
     return const ChatState();
   }
 
   /// Abort the current streaming operation
   Future<void> abortMessage() async {
+    _log.info('Aborting message for agent $_agentId');
     await _streamSubscription?.cancel();
     _streamSubscription = null;
 
@@ -102,8 +107,8 @@ class ChatStateHolder extends _$ChatStateHolder {
         final isLastAttempt = attempt == maxRetries;
         final isTransient = _isTransientError(e);
 
-        print('[ChatController] Attempt ${attempt + 1}/${maxRetries + 1} failed: $e');
-        print('[ChatController] Is transient: $isTransient, Last attempt: $isLastAttempt');
+        _log.warning('Attempt ${attempt + 1}/${maxRetries + 1} failed: $e');
+        _log.debug('Is transient: $isTransient, Last attempt: $isLastAttempt');
 
         if (isLastAttempt || !isTransient) {
           // Either out of retries or non-transient error
@@ -112,7 +117,7 @@ class ChatStateHolder extends _$ChatStateHolder {
 
         // Exponential backoff: 2^attempt seconds (1s, 2s, 4s)
         final delaySeconds = Duration(seconds: 1 << attempt);
-        print('[ChatController] Waiting ${delaySeconds.inSeconds}s before retry...');
+        _log.info('Waiting ${delaySeconds.inSeconds}s before retry...');
         await Future.delayed(delaySeconds);
 
         // Show retry status to user
@@ -155,8 +160,8 @@ class ChatStateHolder extends _$ChatStateHolder {
         'max_steps': 10,
       };
 
-      print('[ChatController] Sending message to agent $_agentId');
-      print('[ChatController] Request: ${jsonEncode(requestBody)}');
+      _log.info('Sending message to agent $_agentId');
+      _log.debug('Request: ${jsonEncode(requestBody)}');
 
       // Start streaming - use /stream endpoint for SSE
       final stream = _client.streamPost(
@@ -178,13 +183,13 @@ class ChatStateHolder extends _$ChatStateHolder {
               final json = jsonDecode(data);
               _handleSSEEvent(json);
             } catch (e) {
-              print('[ChatController] Failed to parse SSE data: $e');
-              print('[ChatController] Data: $data');
+              _log.error('Failed to parse SSE data: $e');
+              _log.debug('Data: $data');
             }
           }
         },
         onDone: () {
-          print('[ChatController] Stream completed');
+          _log.info('Stream completed');
           state = state.copyWith(
             isStreaming: false,
             canAbort: false,
@@ -192,7 +197,7 @@ class ChatStateHolder extends _$ChatStateHolder {
           _saveMessages();
         },
         onError: (e) {
-          print('[ChatController] Stream error: $e');
+          _log.error('Stream error: $e');
           state = state.copyWith(
             isStreaming: false,
             canAbort: false,
@@ -204,7 +209,7 @@ class ChatStateHolder extends _$ChatStateHolder {
 
       await _streamSubscription!.asFuture();
     } catch (e) {
-      print('[ChatController] Error sending message: $e');
+      _log.error('Error sending message: $e');
       state = state.copyWith(
         isStreaming: false,
         canAbort: false,
@@ -218,7 +223,7 @@ class ChatStateHolder extends _$ChatStateHolder {
   /// Handle SSE events from the server
   void _handleSSEEvent(Map<String, dynamic> json) {
     final messageType = json['message_type'];
-    print('[ChatController] Received event: $messageType');
+    _log.debug('Received event: $messageType');
 
     switch (messageType) {
       case 'user_message':
@@ -251,7 +256,7 @@ class ChatStateHolder extends _$ChatStateHolder {
 
       case 'stop_reason':
         // Stream ending - stop streaming state
-        print('[ChatController] Stream stopped: ${json['stop_reason']}');
+        _log.info('Stream stopped: ${json['stop_reason']}');
         state = state.copyWith(
           isStreaming: false,
           canAbort: false,
@@ -269,13 +274,13 @@ class ChatStateHolder extends _$ChatStateHolder {
         break;
 
       default:
-        print('[ChatController] Unknown message type: $messageType');
+        _log.warning('Unknown message type: $messageType');
     }
   }
 
   void _handleUserMessage(Map<String, dynamic> json) {
     // User messages are already added, so we can skip or update
-    print('[ChatController] User message: ${json['content']}');
+    _log.debug('User message: ${json['content']}');
   }
 
   void _handleAssistantMessage(Map<String, dynamic> json) {
@@ -379,7 +384,7 @@ class ChatStateHolder extends _$ChatStateHolder {
       errorMessage = json['message'];
     }
 
-    print('[ChatController] Error message: $errorMessage');
+    _log.error('Error message: $errorMessage');
 
     final message = ChatMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -405,10 +410,10 @@ class ChatStateHolder extends _$ChatStateHolder {
       final messages = await ChatStorage.loadMessages(_agentId);
       if (messages.isNotEmpty) {
         state = state.copyWith(messages: messages);
-        print('[ChatController] Loaded ${messages.length} saved messages');
+        _log.info('Loaded ${messages.length} saved messages');
       }
     } catch (e) {
-      print('[ChatController] Error loading messages: $e');
+      _log.error('Error loading messages: $e');
     }
   }
 
@@ -417,7 +422,7 @@ class ChatStateHolder extends _$ChatStateHolder {
     try {
       await ChatStorage.saveMessages(_agentId, state.messages);
     } catch (e) {
-      print('[ChatController] Error saving messages: $e');
+      _log.error('Error saving messages: $e');
     }
   }
 

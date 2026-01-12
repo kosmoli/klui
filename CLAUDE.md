@@ -259,6 +259,7 @@ git push origin v1.x-working
 - Error handling: try-catch with user-friendly messages
 - Riverpod: Use `@riverpod` annotation with code generation
 - **Data Models MUST use Freezed** (see 11.5 below)
+- **Logging MUST use KluiLogger** (see 11.6 below)
 
 ### 11.1 CRITICAL: Command Retry Rule (MUST FOLLOW)
 
@@ -462,6 +463,7 @@ Priority for refactoring:
 - ❌ **Violate three-layer architecture (see 11.2)**
 - ❌ **Use KluiColors directly in new code (use Theme.of(context).extension<KluiCustomColors>() instead)**
 - ❌ **Create data models without Freezed (see 11.5 below)**
+- ❌ **Use print() statements for logging (use KluiLogger instead, see 11.6 below)**
 
 ### 11.5 Data Models MUST Use Freezed (MANDATORY)
 
@@ -528,6 +530,73 @@ The following files should be migrated to Freezed when touched:
 - Generate code: `dart run build_runner build --delete-conflicting-outputs`
 - Regenerate after model changes
 - Freezed generates both `.freezed.dart` and `.g.dart` files
+
+### 11.6 Logging Standards (MANDATORY)
+
+**CRITICAL**: All code MUST use `KluiLogger` instead of `print()` statements.
+
+#### Why Use KluiLogger?
+- ✅ Structured log levels (FINEST, DEBUG, INFO, WARNING, SEVERE)
+- ✅ Timestamps and source tracking
+- ✅ Production-ready (auto-filters debug logs in release mode)
+- ✅ Consistent formatting across the app
+- ✅ Easy to redirect to external logging services
+
+#### How to Use KluiLogger
+
+**Import and Initialize**:
+```dart
+import '../utils/logger.dart';
+
+// Create logger at file level
+final _log = KluiLogger('MyClassName');
+```
+
+**Log Levels**:
+```dart
+// DEBUG - Detailed diagnostics (hidden in release)
+_log.debug('Variable value: $variable');
+_log.d('Shorthand for debug');
+
+// INFO - General information (shown in release)
+_log.info('User logged in');
+_log.i('Shorthand for info');
+
+// WARNING - Something unexpected but recoverable
+_log.warning('Cache miss, fetching from network');
+_log.w('Shorthand for warning');
+
+// ERROR - Error that occurred
+_log.error('Failed to connect to API', error, stackTrace);
+_log.e('Shorthand for error');
+```
+
+**Initialization in main()**:
+```dart
+void main() {
+  initLogging(); // MUST be first
+  runApp(MyApp());
+}
+```
+
+#### Log Level Guidelines
+
+- **DEBUG**: Variable values, detailed flow, JSON dumps
+- **INFO**: User actions, API calls, state changes
+- **WARNING**: Retry attempts, fallbacks, deprecated usage
+- **ERROR**: Exceptions, API failures, validation errors
+
+#### DO
+- ✅ Use `KluiLogger` in all new code
+- ✅ Use appropriate log levels
+- ✅ Include context in log messages
+- ✅ Log errors with error objects and stack traces
+
+#### DON'T
+- ❌ Use `print()` statements (breaks production)
+- ❌ Log sensitive data (passwords, tokens, PII)
+- ❌ Use excessive DEBUG logging (performance impact)
+- ❌ Forget to call `initLogging()` in main()
 
 ### 13. Project Goals
 **Core定位**: Serve professional users who need full API access

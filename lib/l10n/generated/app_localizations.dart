@@ -1684,6 +1684,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to stop operation'**
   String get chat_abort_failed;
+
+  /// No description provided for @chat_clear_button_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear chat history'**
+  String get chat_clear_button_tooltip;
+
+  /// No description provided for @chat_operation_stopped.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation stopped'**
+  String get chat_operation_stopped;
+
+  /// No description provided for @chat_retrying_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Retrying... (Attempt {current}/{total})'**
+  String chat_retrying_message(Object current, Object total);
 }
 
 class _AppLocalizationsDelegate

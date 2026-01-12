@@ -908,4 +908,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chat_abort_failed => 'Failed to stop operation';
+
+  @override
+  String get chat_clear_button_tooltip => 'Clear chat history';
+
+  @override
+  String get chat_operation_stopped => 'Operation stopped';
+
+  @override
+  String chat_retrying_message(Object current, Object total) {
+    return 'Retrying... (Attempt $current/$total)';
+  }
 }

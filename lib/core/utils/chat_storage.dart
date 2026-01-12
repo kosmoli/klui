@@ -1,6 +1,9 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/chat_message.dart';
+import 'logger.dart';
+
+final _log = KluiLogger('ChatStorage');
 
 /// Storage service for chat message persistence
 /// Uses SharedPreferences (localStorage on web)
@@ -18,9 +21,9 @@ class ChatStorage {
       final jsonString = jsonEncode(jsonList);
 
       await prefs.setString(key, jsonString);
-      print('[ChatStorage] Saved ${messages.length} messages for agent $agentId');
+      _log.debug('Saved ${messages.length} messages for agent $agentId');
     } catch (e) {
-      print('[ChatStorage] Error saving messages: $e');
+      _log.error('Error saving messages: $e');
     }
   }
 
@@ -32,17 +35,17 @@ class ChatStorage {
       final jsonString = prefs.getString(key);
 
       if (jsonString == null) {
-        print('[ChatStorage] No saved messages for agent $agentId');
+        _log.debug('No saved messages for agent $agentId');
         return [];
       }
 
       final List<dynamic> decoded = jsonDecode(jsonString);
       final messages = decoded.map((json) => ChatMessage.fromJson(json as Map<String, dynamic>)).toList();
 
-      print('[ChatStorage] Loaded ${messages.length} messages for agent $agentId');
+      _log.debug('Loaded ${messages.length} messages for agent $agentId');
       return messages;
     } catch (e) {
-      print('[ChatStorage] Error loading messages: $e');
+      _log.error('Error loading messages: $e');
       return [];
     }
   }
@@ -53,9 +56,9 @@ class ChatStorage {
       final prefs = await SharedPreferences.getInstance();
       final key = '$_keyPrefix$agentId';
       await prefs.remove(key);
-      print('[ChatStorage] Cleared messages for agent $agentId');
+      _log.info('Cleared messages for agent $agentId');
     } catch (e) {
-      print('[ChatStorage] Error clearing messages: $e');
+      _log.error('Error clearing messages: $e');
     }
   }
 
@@ -69,9 +72,9 @@ class ChatStorage {
         await prefs.remove(key);
       }
 
-      print('[ChatStorage] Cleared messages for ${keys.length} agents');
+      _log.info('Cleared messages for ${keys.length} agents');
     } catch (e) {
-      print('[ChatStorage] Error clearing all messages: $e');
+      _log.error('Error clearing all messages: $e');
     }
   }
 }

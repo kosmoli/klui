@@ -318,15 +318,20 @@ class ChatStateHolder extends _$ChatStateHolder {
 
   void _handleToolCallMessage(Map<String, dynamic> json) {
     final toolCall = json['tool_call'];
-    if (toolCall == null) return;
+    if (toolCall == null) {
+      _log.warning('Tool call message missing tool_call field: $json');
+      return;
+    }
+
+    _log.debug('Tool call: ${toolCall['name']}, args: ${toolCall['arguments']}');
 
     final message = ChatMessage(
       id: json['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
       type: MessageType.toolCall,
       content: '',
-      toolName: toolCall['name'],
-      toolInput: toolCall['arguments'],
-      toolCallId: toolCall['tool_call_id'],
+      toolName: toolCall['name'] as String?,
+      toolInput: toolCall['arguments'] as Map<String, dynamic>?,
+      toolCallId: toolCall['tool_call_id'] as String?,
       metadata: {'phase': 'ready'},
     );
 
@@ -334,11 +339,14 @@ class ChatStateHolder extends _$ChatStateHolder {
   }
 
   void _handleToolReturnMessage(Map<String, dynamic> json) {
+    _log.debug('Tool return: status=${json['status']}, return=${json['tool_return']}');
+
     final message = ChatMessage(
       id: json['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
       type: MessageType.toolReturn,
-      content: json['tool_return'] ?? '',
-      toolName: json['tool_call_id'],
+      content: json['tool_return']?.toString() ?? '',
+      toolName: json['tool_call_id'] as String?, // This is the ID, not name - will be matched with tool_call message
+      toolCallId: json['tool_call_id'] as String?,
       metadata: {
         'phase': 'finished',
         'isOk': json['status'] == 'success',

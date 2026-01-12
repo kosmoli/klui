@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:klui/core/theme/klui_theme_extension.dart';
 import 'package:klui/core/theme/klui_text_styles.dart';
@@ -37,6 +39,8 @@ class _ToolCallCardState extends State<ToolCallCard> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
+    // Safely extract tool information with null checks
     final toolName = widget.message.toolName ?? 'Unknown Tool';
     final toolInput = widget.message.toolInput ?? {};
     final phase = widget.message.metadata?['phase'] ?? 'ready';
@@ -227,6 +231,14 @@ class _ToolInputSection extends StatelessWidget {
   final Map<String, dynamic> toolInput;
   final Color toolColor;
 
+  String _formatValue(dynamic value) {
+    if (value == null) return 'null';
+    if (value is Map || value is List) {
+      return const JsonEncoder.withIndent('  ').convert(value);
+    }
+    return value.toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<KluiCustomColors>()!;
@@ -244,6 +256,9 @@ class _ToolInputSection extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           ...toolInput.entries.map((entry) {
+            final valueStr = _formatValue(entry.value);
+            final isMultiline = valueStr.contains('\n');
+
             return Padding(
               padding: const EdgeInsets.only(bottom: 4),
               child: Row(
@@ -258,10 +273,18 @@ class _ToolInputSection extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    child: Text(
-                      entry.value.toString(),
-                      style: KluiTextStyles.parameter,
-                    ),
+                    child: isMultiline
+                        ? Text(
+                            valueStr,
+                            style: KluiTextStyles.codeBlock.copyWith(
+                              fontSize: 12,
+                              color: colors.textPrimary,
+                            ),
+                          )
+                        : Text(
+                            valueStr,
+                            style: KluiTextStyles.parameter,
+                          ),
                   ),
                 ],
               ),

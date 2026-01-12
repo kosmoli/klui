@@ -1654,6 +1654,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Double tap to select this agent'**
   String get agent_selector_select_hint;
+
+  /// No description provided for @chat_abort_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop'**
+  String get chat_abort_button;
+
+  /// No description provided for @chat_abort_button_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Double tap to stop the current operation'**
+  String get chat_abort_button_hint;
+
+  /// No description provided for @chat_abort_esc_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Press ESC to stop'**
+  String get chat_abort_esc_hint;
+
+  /// No description provided for @chat_aborted_message.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation stopped by user'**
+  String get chat_aborted_message;
+
+  /// No description provided for @chat_abort_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to stop operation'**
+  String get chat_abort_failed;
 }
 
 class _AppLocalizationsDelegate

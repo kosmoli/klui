@@ -13,6 +13,7 @@ class ChatState {
   final List<ChatMessage> messages;
   final bool isLoading;
   final bool isStreaming;
+  final bool canAbort;
   final String? error;
   final Map<String, dynamic>? usage;
 
@@ -20,6 +21,7 @@ class ChatState {
     this.messages = const [],
     this.isLoading = false,
     this.isStreaming = false,
+    this.canAbort = false,
     this.error,
     this.usage,
   });
@@ -28,6 +30,7 @@ class ChatState {
     List<ChatMessage>? messages,
     bool? isLoading,
     bool? isStreaming,
+    bool? canAbort,
     String? error,
     Map<String, dynamic>? usage,
   }) {
@@ -35,6 +38,7 @@ class ChatState {
       messages: messages ?? this.messages,
       isLoading: isLoading ?? this.isLoading,
       isStreaming: isStreaming ?? this.isStreaming,
+      canAbort: canAbort ?? this.canAbort,
       error: error,
       usage: usage ?? this.usage,
     );
@@ -46,12 +50,34 @@ class ChatState {
 class ChatStateHolder extends _$ChatStateHolder {
   late ApiClient _client;
   late String _agentId;
+  StreamSubscription<String>? _streamSubscription;
 
   @override
   ChatState build(String agentId) {
     _client = ref.watch(apiClientProvider);
     _agentId = agentId;
+    ref.onDispose(() {
+      _streamSubscription?.cancel();
+    });
     return const ChatState();
+  }
+
+  /// Abort the current streaming operation
+  Future<void> abortMessage() async {
+    await _streamSubscription?.cancel();
+    _streamSubscription = null;
+
+    final abortMessage = ChatMessage(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      type: MessageType.status,
+      content: 'Operation stopped',
+    );
+
+    state = state.copyWith(
+      messages: [...state.messages, abortMessage],
+      isStreaming: false,
+      canAbort: false,
+    );
   }
 
   /// Send a message and stream the response
@@ -66,6 +92,7 @@ class ChatStateHolder extends _$ChatStateHolder {
     state = state.copyWith(
       messages: [...state.messages, userMessage],
       isStreaming: true,
+      canAbort: true,
       error: null,
     );
 
@@ -75,7 +102,7 @@ class ChatStateHolder extends _$ChatStateHolder {
         'messages': [
           {'role': 'user', 'content': content}
         ],
-        'stream': true,  // Changed from 'streaming' to 'stream'
+        'stream': true,
         'stream_tokens': false,
         'max_steps': 10,
       };
@@ -89,31 +116,48 @@ class ChatStateHolder extends _$ChatStateHolder {
         body: requestBody,
       );
 
-      // Parse SSE stream
-      await for (final line in stream) {
-        if (line.isEmpty) continue;
+      // Create stream subscription for cancellation support
+      _streamSubscription = stream.listen(
+        (line) {
+          if (line.isEmpty) return;
 
-        // SSE format: "data: {...}"
-        if (line.startsWith('data: ')) {
-          final data = line.substring(6).trim();
-          if (data.isEmpty || data == '[DONE]') continue;
+          // SSE format: "data: {...}"
+          if (line.startsWith('data: ')) {
+            final data = line.substring(6).trim();
+            if (data.isEmpty || data == '[DONE]') return;
 
-          try {
-            final json = jsonDecode(data);
-            _handleSSEEvent(json);
-          } catch (e) {
-            print('[ChatController] Failed to parse SSE data: $e');
-            print('[ChatController] Data: $data');
+            try {
+              final json = jsonDecode(data);
+              _handleSSEEvent(json);
+            } catch (e) {
+              print('[ChatController] Failed to parse SSE data: $e');
+              print('[ChatController] Data: $data');
+            }
           }
-        }
-      }
+        },
+        onDone: () {
+          print('[ChatController] Stream completed');
+          state = state.copyWith(
+            isStreaming: false,
+            canAbort: false,
+          );
+        },
+        onError: (e) {
+          print('[ChatController] Stream error: $e');
+          state = state.copyWith(
+            isStreaming: false,
+            canAbort: false,
+            error: e.toString(),
+          );
+        },
+      );
 
-      // Stream completed
-      state = state.copyWith(isStreaming: false);
+      await _streamSubscription!.asFuture();
     } catch (e) {
       print('[ChatController] Error sending message: $e');
       state = state.copyWith(
         isStreaming: false,
+        canAbort: false,
         error: e.toString(),
       );
     }

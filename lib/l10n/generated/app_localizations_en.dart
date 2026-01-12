@@ -892,4 +892,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get agent_selector_select_hint => 'Double tap to select this agent';
+
+  @override
+  String get chat_abort_button => 'Stop';
+
+  @override
+  String get chat_abort_button_hint =>
+      'Double tap to stop the current operation';
+
+  @override
+  String get chat_abort_esc_hint => 'Press ESC to stop';
+
+  @override
+  String get chat_aborted_message => 'Operation stopped by user';
+
+  @override
+  String get chat_abort_failed => 'Failed to stop operation';
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/context_extensions.dart';
@@ -33,12 +34,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
+  final FocusNode _keyboardFocusNode = FocusNode();
 
   @override
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
     _focusNode.dispose();
+    _keyboardFocusNode.dispose();
     super.dispose();
   }
 
@@ -54,6 +57,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         }
       });
     }
+  }
+
+  void _abortMessage() {
+    ref.read(chatStateHolderProvider(widget.agentId).notifier).abortMessage();
   }
 
   void _sendMessage() {
@@ -85,6 +92,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final chatState = ref.watch(chatStateHolderProvider(widget.agentId));
     final messages = chatState.messages;
     final isStreaming = chatState.isStreaming;
+    final canAbort = chatState.canAbort;
 
     // Auto-scroll when new messages arrive
     if (messages.isNotEmpty) {
@@ -94,43 +102,77 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     // Get all agents and current agent
     final agentsAsync = ref.watch(agentListProvider);
 
-    return Scaffold(
-      backgroundColor: colors.background,
-      drawer: const RetroDrawer(),
-      appBar: AppBar(
-        backgroundColor: colors.surface,
-        elevation: 0,
-        leading: const RetroMenuButton(),
-        title: Row(
-          children: [
-            Text(
-              context.l10n.nav_chat,
-              style: KluiTextStyles.headlineSmall.copyWith(
-                color: colors.textPrimary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            if (isStreaming) ...[
-              const SizedBox(width: 12),
-              SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(colors.userBubble),
+    return KeyboardListener(
+      focusNode: _keyboardFocusNode,
+      onKeyEvent: (event) {
+        if (event is KeyDownEvent &&
+            event.logicalKey == LogicalKeyboardKey.escape &&
+            canAbort) {
+          _abortMessage();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: colors.background,
+        drawer: const RetroDrawer(),
+        appBar: AppBar(
+          backgroundColor: colors.surface,
+          elevation: 0,
+          leading: const RetroMenuButton(),
+          title: Row(
+            children: [
+              Text(
+                context.l10n.nav_chat,
+                style: KluiTextStyles.headlineSmall.copyWith(
+                  color: colors.textPrimary,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
+              if (isStreaming) ...[
+                const SizedBox(width: 12),
+                SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(colors.userBubble),
+                  ),
+                ),
+              ],
+              if (canAbort) ...[
+                const SizedBox(width: 8),
+                Text(
+                  context.l10n.chat_abort_esc_hint,
+                  style: KluiTextStyles.labelSmall.copyWith(
+                    color: colors.textSecondary,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
             ],
-          ],
-        ),
-        toolbarHeight: 48,
-        iconTheme: IconThemeData(color: colors.textPrimary),
-        actions: [
-          // Agent Selector
-          _AgentSelector(
-            agentsAsync: agentsAsync,
+          ),
+          toolbarHeight: 48,
+          iconTheme: IconThemeData(color: colors.textPrimary),
+          actions: [
+            // Agent Selector
+            _AgentSelector(
+              agentsAsync: agentsAsync,
             currentAgentId: widget.agentId,
           ),
+          if (canAbort)
+            Semantics(
+              label: context.l10n.chat_abort_button,
+              button: true,
+              hint: context.l10n.chat_abort_button_hint,
+              child: IconButton(
+                onPressed: _abortMessage,
+                icon: const Icon(Icons.stop),
+                tooltip: context.l10n.chat_abort_button,
+                style: IconButton.styleFrom(
+                  backgroundColor: colors.error.withOpacity(0.1),
+                  foregroundColor: colors.error,
+                ),
+              ),
+            ),
           IconButton(
             onPressed: () {
               ref.read(chatStateHolderProvider(widget.agentId).notifier).clearMessages();
@@ -170,7 +212,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildEmptyState(BuildContext context, KluiCustomColors colors) {

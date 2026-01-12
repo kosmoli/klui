@@ -536,7 +536,7 @@ The following files should be migrated to Freezed when touched:
 **CRITICAL**: All code MUST use `KluiLogger` instead of `print()` statements.
 
 #### Why Use KluiLogger?
-- ✅ Structured log levels (FINEST, DEBUG, INFO, WARNING, SEVERE)
+- ✅ Structured log levels (DEBUG, INFO, WARNING, ERROR)
 - ✅ Timestamps and source tracking
 - ✅ Production-ready (auto-filters debug logs in release mode)
 - ✅ Consistent formatting across the app
@@ -548,27 +548,36 @@ The following files should be migrated to Freezed when touched:
 ```dart
 import '../utils/logger.dart';
 
-// Create logger at file level
+// Create logger at FILE level (not method level)
 final _log = KluiLogger('MyClassName');
 ```
 
-**Log Levels**:
+**Log Levels and When to Use**:
+
+| Level | Shorthand | Use Case | Example | Release Mode |
+|-------|-----------|----------|---------|--------------|
+| **DEBUG** | `d()` | Detailed diagnostics | Variable values, JSON dumps, API bodies | ❌ Hidden |
+| **INFO** | `i()` | General information | User actions, API calls, state changes | ✅ Shown |
+| **WARNING** | `w()` | Recoverable issues | Retry attempts, fallbacks, deprecated usage | ✅ Shown |
+| **ERROR** | `e()` | Errors and failures | API failures, exceptions, critical errors | ✅ Shown |
+
+**Examples**:
 ```dart
 // DEBUG - Detailed diagnostics (hidden in release)
-_log.debug('Variable value: $variable');
-_log.d('Shorthand for debug');
+_log.debug('Request body: ${jsonEncode(requestBody)}');
+_log.d('User input length: ${text.length}');
 
 // INFO - General information (shown in release)
-_log.info('User logged in');
-_log.i('Shorthand for info');
+_log.info('User sent message to agent $agentId');
+_log.i('State changed: isStreaming = true');
 
-// WARNING - Something unexpected but recoverable
-_log.warning('Cache miss, fetching from network');
-_log.w('Shorthand for warning');
+// WARNING - Unexpected but recoverable (shown in release)
+_log.warning('Retry attempt $attempt/${maxRetries} failed');
+_log.w('Using fallback value for missing config');
 
-// ERROR - Error that occurred
+// ERROR - Errors and exceptions (shown in release)
 _log.error('Failed to connect to API', error, stackTrace);
-_log.e('Shorthand for error');
+_log.e('Message parsing failed', e, s);
 ```
 
 **Initialization in main()**:
@@ -579,24 +588,119 @@ void main() {
 }
 ```
 
-#### Log Level Guidelines
+#### Best Practices
 
-- **DEBUG**: Variable values, detailed flow, JSON dumps
-- **INFO**: User actions, API calls, state changes
-- **WARNING**: Retry attempts, fallbacks, deprecated usage
-- **ERROR**: Exceptions, API failures, validation errors
+**DO**:
+- ✅ Declare logger at **file level** (not inside methods)
+- ✅ Use **descriptive logger names** (e.g., `'ChatController'` not `'log'`)
+- ✅ Include **context** in log messages (agent IDs, user IDs, etc.)
+- ✅ Log errors **with error object and stackTrace**
+- ✅ Use **appropriate log levels** (see table above)
 
-#### DO
-- ✅ Use `KluiLogger` in all new code
-- ✅ Use appropriate log levels
-- ✅ Include context in log messages
-- ✅ Log errors with error objects and stack traces
-
-#### DON'T
+**DON'T**:
 - ❌ Use `print()` statements (breaks production)
-- ❌ Log sensitive data (passwords, tokens, PII)
+- ❌ Declare logger inside methods (performance impact)
+- ❌ Use generic logger names (`'log1'`, `'logger'`, etc.)
+- ❌ Log sensitive data (passwords, tokens, PII, API keys)
 - ❌ Use excessive DEBUG logging (performance impact)
 - ❌ Forget to call `initLogging()` in main()
+
+#### Logger Declaration Examples
+
+**✅ CORRECT**:
+```dart
+// File: chat_providers.dart
+import '../utils/logger.dart';
+
+final _log = KluiLogger('ChatController');
+
+class ChatStateHolder extends _$ChatStateHolder {
+  void sendMessage(String content) {
+    _log.info('Sending message: $content');
+  }
+}
+```
+
+**❌ WRONG**:
+```dart
+// Don't do this - logger inside method
+class ChatStateHolder extends _$ChatStateHolder {
+  void sendMessage(String content) {
+    final log = KluiLogger('ChatController'); // ❌ Creates new logger each call
+    log.info('Sending message');
+  }
+}
+
+// Don't do this - generic logger name
+final _log = KluiLogger('log'); // ❌ Not descriptive
+final logger1 = KluiLogger('logger1'); // ❌ Not descriptive
+```
+
+#### Error Logging Best Practices
+
+**Always include error object and stackTrace**:
+```dart
+try {
+  await someAPIOperation();
+} catch (e, s) {
+  _log.error('API operation failed', e, s);  // ✅ Includes error and stackTrace
+  rethrow;
+}
+```
+
+**Include context in error messages**:
+```dart
+// ❌ Bad - No context
+_log.error('API failed');
+
+// ✅ Good - Includes context
+_log.error('Failed to send message to agent $agentId', error, stackTrace);
+```
+
+#### Performance Considerations
+
+- **DEBUG logs** are **completely filtered out** in release mode (zero overhead)
+- **String interpolation** happens **before** logging: `log.debug('Value: $expensiveVar')` - `$expensiveVar` is evaluated even if log is filtered
+- **Lazy logging** pattern for expensive operations:
+  ```dart
+  // ❌ Bad - Always evaluates jsonEncode
+  _log.debug('Request: ${jsonEncode(hugeObject)}');
+
+  // ✅ Good - Only logs if needed (manual check)
+  if (_log.isEnabled(Level.FINEST)) {
+    _log.debug('Request: ${jsonEncode(hugeObject)}');
+  }
+  ```
+
+#### Output Format
+
+**Debug Mode**:
+```
+[14:25:30] [  FINEST] [   ChatController] Request body: {"messages":[...]}
+[14:25:31] [    INFO] [   ChatController] Sending message to agent agent-123
+[14:25:32] [ WARNING] [   ChatController] Retry attempt 1/3 failed: NetworkException
+[14:25:33] [  SEVERE] [   ChatController] API call failed: Connection timeout
+  └─ Error: TimeoutException: Connection timed out
+  └─ StackTrace:
+#0      ApiClient.post (package:klui/utils/api_client.dart:48)
+#1      ChatState.sendMessage (package:klui/providers/chat_providers.dart:92)
+```
+
+**Release Mode** (DEBUG logs filtered):
+```
+[14:25:31] [    INFO] [   ChatController] Sending message to agent agent-123
+[14:25:32] [ WARNING] [   ChatController] Retry attempt 1/3 failed: NetworkException
+[14:25:33] [  SEVERE] [   ChatController] API call failed: Connection timeout
+```
+
+#### Platform-Specific Output
+
+| Platform | Output Location | How to View |
+|----------|-----------------|-------------|
+| **Web** | Browser console | F12 → Console |
+| **Android** | Logcat | `adb logcat` or Android Studio |
+| **iOS** | System console | Xcode → Devices → Console |
+| **Desktop** | stdout | Terminal window |
 
 ### 13. Project Goals
 **Core定位**: Serve professional users who need full API access

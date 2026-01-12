@@ -518,7 +518,10 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
         final colors = Theme.of(context).extension<KluiCustomColors>()!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(context.l10n.agent_create_success(agent.name)),
+            content: Text(
+              context.l10n.agent_create_success(agent.name),
+              style: TextStyle(color: colors.userText), // Dark text for contrast
+            ),
             backgroundColor: colors.success,
             behavior: SnackBarBehavior.floating,
           ),
@@ -942,6 +945,7 @@ class _ProviderSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -959,12 +963,12 @@ class _ProviderSection extends StatelessWidget {
                 Radius.circular(AppTheme.radiusSmall),
               ),
               borderSide: BorderSide(
-                color: AppTheme.borderColor,
+                color: colors.border,
                 width: 2,
               ),
             ),
             filled: true,
-            fillColor: AppTheme.surfaceVariantColor,
+            fillColor: colors.surfaceVariant,
           ),
           hint: Text(context.l10n.agent_create_select_provider),
           items: availableProviders.map((provider) {
@@ -985,12 +989,12 @@ class _ProviderSection extends StatelessWidget {
                 Radius.circular(AppTheme.radiusSmall),
               ),
               borderSide: BorderSide(
-                color: AppTheme.borderColor,
+                color: colors.border,
                 width: 2,
               ),
             ),
             filled: true,
-            fillColor: AppTheme.surfaceVariantColor,
+            fillColor: colors.surfaceVariant,
           ),
           hint: availableModels.isEmpty
               ? Text(
@@ -999,8 +1003,8 @@ class _ProviderSection extends StatelessWidget {
                       : context.l10n.agent_create_no_models,
                   style: TextStyle(
                     color: selectedProvider == null
-                        ? AppTheme.textSecondaryColor
-                        : AppTheme.errorColor,
+                        ? colors.textSecondary
+                        : colors.error,
                     fontSize: 14,
                   ),
                 )
@@ -1049,6 +1053,7 @@ class _DirectModelSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1066,18 +1071,18 @@ class _DirectModelSection extends StatelessWidget {
                 Radius.circular(AppTheme.radiusSmall),
               ),
               borderSide: BorderSide(
-                color: AppTheme.borderColor,
+                color: colors.border,
                 width: 2,
               ),
             ),
             filled: true,
-            fillColor: AppTheme.surfaceVariantColor,
+            fillColor: colors.surfaceVariant,
           ),
           hint: availableModels.isEmpty
               ? Text(
                   context.l10n.agent_create_no_models,
                   style: TextStyle(
-                    color: AppTheme.errorColor,
+                    color: colors.error,
                     fontSize: 14,
                   ),
                 )

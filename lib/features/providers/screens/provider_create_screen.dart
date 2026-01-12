@@ -59,7 +59,10 @@ class ProviderCreateScreen extends ConsumerWidget {
               final colors = Theme.of(context).extension<KluiCustomColors>()!;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text(context.l10n.provider_create_success(request.name)),
+                  content: Text(
+                    context.l10n.provider_create_success(request.name),
+                    style: TextStyle(color: colors.userText), // Dark text for contrast
+                  ),
                   backgroundColor: colors.success,
                   behavior: SnackBarBehavior.floating,
                 ),

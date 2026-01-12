@@ -37,6 +37,7 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
           context.l10n.agent_list_title,
           style: KluiTextStyles.headlineSmall.copyWith(
             color: colors.textPrimary,
+            fontWeight: FontWeight.w700,
           ),
         ),
         actions: [

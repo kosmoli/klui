@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/klui_text_styles.dart';
 import '../../../../core/theme/klui_theme_extension.dart';
 import '../../../../core/providers/chat_providers.dart';
+import '../../../../core/providers/api_providers.dart';
 import '../../../../core/models/chat_message.dart';
 import '../../../shared/widgets/retro_drawer.dart';
 import '../../../shared/widgets/retro_menu_button.dart';
@@ -75,6 +77,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       _scrollToBottom();
     }
 
+    // Get all agents and current agent
+    final agentsAsync = ref.watch(agentListProvider);
+
     return Scaffold(
       backgroundColor: colors.background,
       drawer: const RetroDrawer(),
@@ -88,6 +93,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               context.l10n.nav_chat,
               style: KluiTextStyles.headlineSmall.copyWith(
                 color: colors.textPrimary,
+                fontWeight: FontWeight.w700,
               ),
             ),
             if (isStreaming) ...[
@@ -106,6 +112,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         toolbarHeight: 48,
         iconTheme: IconThemeData(color: colors.textPrimary),
         actions: [
+          // Agent Selector
+          _AgentSelector(
+            agentsAsync: agentsAsync,
+            currentAgentId: widget.agentId,
+          ),
           IconButton(
             onPressed: () {
               ref.read(chatControllerProvider(widget.agentId)).clearMessages();
@@ -313,5 +324,145 @@ class _ChatInputArea extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// Agent Selector Widget - Shows current agent and allows switching
+class _AgentSelector extends ConsumerWidget {
+  final AsyncValue<List<dynamic>> agentsAsync;
+  final String currentAgentId;
+
+  const _AgentSelector({
+    required this.agentsAsync,
+    required this.currentAgentId,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
+    return agentsAsync.when(
+      data: (agents) {
+        // Find current agent in the list
+        final currentAgent = agents.firstWhere(
+          (a) => a.id == currentAgentId,
+          orElse: () => null,
+        );
+
+        final currentAgentName = currentAgent?.name ?? 'Select Agent';
+
+        return Padding(
+          padding: const EdgeInsets.only(right: 8),
+          child: InkWell(
+            onTap: agents.isEmpty
+                ? null
+                : () => _showAgentMenu(context, agents, ref),
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                border: Border.all(color: colors.border),
+                borderRadius: BorderRadius.circular(8),
+                color: colors.surfaceVariant.withOpacity(0.5),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.smart_toy_outlined,
+                    size: 18,
+                    color: colors.userBubble,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    currentAgentName,
+                    style: KluiTextStyles.labelMedium.copyWith(
+                      color: colors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  if (agents.isNotEmpty) ...[
+                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.arrow_drop_down,
+                      size: 20,
+                      color: colors.textSecondary,
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+      loading: () => Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: SizedBox(
+          width: 24,
+          height: 24,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation<Color>(colors.userBubble),
+          ),
+        ),
+      ),
+      error: (_, __) => const SizedBox.shrink(),
+    );
+  }
+
+  void _showAgentMenu(
+    BuildContext context,
+    List<dynamic> agents,
+    WidgetRef ref,
+  ) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
+    showMenu<String>(
+      context: context,
+      position: const RelativeRect.fromLTRB(80, 48, 0, 0),
+      items: agents.map((agent) {
+        final isSelected = agent.id == currentAgentId;
+        return PopupMenuItem<String>(
+          value: agent.id,
+          child: Container(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.smart_toy_outlined,
+                  size: 18,
+                  color: isSelected
+                      ? colors.userBubble
+                      : colors.textSecondary,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    agent.name ?? 'Unnamed Agent',
+                    style: KluiTextStyles.bodyMedium.copyWith(
+                      color: isSelected
+                          ? colors.userBubble
+                          : colors.textPrimary,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                  ),
+                ),
+                if (isSelected)
+                  Icon(
+                    Icons.check,
+                    size: 18,
+                    color: colors.userBubble,
+                  ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
+    ).then((value) {
+      if (value != null) {
+        context.go('/chat?agentId=$value');
+      }
+    });
   }
 }

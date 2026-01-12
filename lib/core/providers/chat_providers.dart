@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../utils/api_client.dart';
 import '../models/chat_message.dart';
+import '../utils/chat_storage.dart';
 import 'api_providers.dart';
 
 part 'chat_providers.g.dart';
@@ -59,6 +60,10 @@ class ChatStateHolder extends _$ChatStateHolder {
     ref.onDispose(() {
       _streamSubscription?.cancel();
     });
+
+    // Load saved messages on build
+    _loadMessages();
+
     return const ChatState();
   }
 
@@ -78,6 +83,8 @@ class ChatStateHolder extends _$ChatStateHolder {
       isStreaming: false,
       canAbort: false,
     );
+
+    await _saveMessages();
   }
 
   /// Send a message and stream the response
@@ -141,6 +148,7 @@ class ChatStateHolder extends _$ChatStateHolder {
             isStreaming: false,
             canAbort: false,
           );
+          _saveMessages();
         },
         onError: (e) {
           print('[ChatController] Stream error: $e');
@@ -149,6 +157,7 @@ class ChatStateHolder extends _$ChatStateHolder {
             canAbort: false,
             error: e.toString(),
           );
+          _saveMessages();
         },
       );
 
@@ -160,6 +169,7 @@ class ChatStateHolder extends _$ChatStateHolder {
         canAbort: false,
         error: e.toString(),
       );
+      await _saveMessages();
     }
   }
 
@@ -339,5 +349,28 @@ class ChatStateHolder extends _$ChatStateHolder {
   /// Clear all messages
   void clearMessages() {
     state = const ChatState();
+    ChatStorage.clearMessages(_agentId);
+  }
+
+  /// Load messages from localStorage
+  Future<void> _loadMessages() async {
+    try {
+      final messages = await ChatStorage.loadMessages(_agentId);
+      if (messages.isNotEmpty) {
+        state = state.copyWith(messages: messages);
+        print('[ChatController] Loaded ${messages.length} saved messages');
+      }
+    } catch (e) {
+      print('[ChatController] Error loading messages: $e');
+    }
+  }
+
+  /// Save messages to localStorage
+  Future<void> _saveMessages() async {
+    try {
+      await ChatStorage.saveMessages(_agentId, state.messages);
+    } catch (e) {
+      print('[ChatController] Error saving messages: $e');
+    }
   }
 }

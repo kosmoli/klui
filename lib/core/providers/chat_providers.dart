@@ -89,6 +89,47 @@ class ChatStateHolder extends _$ChatStateHolder {
 
   /// Send a message and stream the response
   Future<void> sendMessage(String content) async {
+    await _sendMessageWithRetry(content, maxRetries: 3);
+  }
+
+  /// Send message with retry logic for transient errors
+  Future<void> _sendMessageWithRetry(String content, {required int maxRetries}) async {
+    for (int attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        await _sendMessageInternal(content);
+        return; // Success, exit retry loop
+      } catch (e) {
+        final isLastAttempt = attempt == maxRetries;
+        final isTransient = _isTransientError(e);
+
+        print('[ChatController] Attempt ${attempt + 1}/${maxRetries + 1} failed: $e');
+        print('[ChatController] Is transient: $isTransient, Last attempt: $isLastAttempt');
+
+        if (isLastAttempt || !isTransient) {
+          // Either out of retries or non-transient error
+          rethrow;
+        }
+
+        // Exponential backoff: 2^attempt seconds (1s, 2s, 4s)
+        final delaySeconds = Duration(seconds: 1 << attempt);
+        print('[ChatController] Waiting ${delaySeconds.inSeconds}s before retry...');
+        await Future.delayed(delaySeconds);
+
+        // Show retry status to user
+        final retryMessage = ChatMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          type: MessageType.status,
+          content: 'Retrying... (Attempt ${attempt + 2}/${maxRetries + 1})',
+        );
+        state = state.copyWith(
+          messages: [...state.messages, retryMessage],
+        );
+      }
+    }
+  }
+
+  /// Internal message sending logic
+  Future<void> _sendMessageInternal(String content) async {
     // Add user message immediately
     final userMessage = ChatMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -170,6 +211,7 @@ class ChatStateHolder extends _$ChatStateHolder {
         error: e.toString(),
       );
       await _saveMessages();
+      rethrow; // Rethrow for retry logic
     }
   }
 
@@ -372,5 +414,44 @@ class ChatStateHolder extends _$ChatStateHolder {
     } catch (e) {
       print('[ChatController] Error saving messages: $e');
     }
+  }
+
+  /// Check if an error is transient (should retry)
+  bool _isTransientError(dynamic error) {
+    if (error == null) return false;
+
+    final errorMsg = error.toString().toLowerCase();
+
+    // Network-related errors
+    if (errorMsg.contains('timeout') ||
+        errorMsg.contains('connection') ||
+        errorMsg.contains('network') ||
+        errorMsg.contains('socket')) {
+      return true;
+    }
+
+    // API rate limiting
+    if (errorMsg.contains('rate limit') ||
+        errorMsg.contains('429') ||
+        errorMsg.contains('too many requests')) {
+      return true;
+    }
+
+    // Temporary server errors
+    if (errorMsg.contains('503') ||
+        errorMsg.contains('502') ||
+        errorMsg.contains('504') ||
+        errorMsg.contains('service unavailable') ||
+        errorMsg.contains('bad gateway')) {
+      return true;
+    }
+
+    // Connection reset
+    if (errorMsg.contains('connection reset') ||
+        errorMsg.contains('econnreset')) {
+      return true;
+    }
+
+    return false;
   }
 }

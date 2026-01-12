@@ -75,7 +75,7 @@ class ChatStateHolder extends _$ChatStateHolder {
         'messages': [
           {'role': 'user', 'content': content}
         ],
-        'streaming': true,
+        'stream': true,  // Changed from 'streaming' to 'stream'
         'stream_tokens': false,
         'max_steps': 10,
       };

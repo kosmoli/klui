@@ -88,14 +88,36 @@ class ApiClient {
     request.headers['Content-Type'] = 'application/json';
     request.headers['Accept'] = 'text/event-stream';
 
-    final streamedResponse = await _client.send(request).timeout(
-      const Duration(minutes: 5), // Longer timeout for streaming
-    );
+    try {
+      final streamedResponse = await _client.send(request).timeout(
+        const Duration(minutes: 5), // Longer timeout for streaming
+      );
 
-    // Stream the response line by line
-    yield* streamedResponse.stream
-        .transform(utf8.decoder)
-        .transform(const LineSplitter());
+      print('[ApiClient] Response status: ${streamedResponse.statusCode}');
+      print('[ApiClient] Response headers: ${streamedResponse.headers}');
+
+      // Check for error status codes
+      if (streamedResponse.statusCode != 200) {
+        print('[ApiClient] ERROR: Status ${streamedResponse.statusCode}');
+        throw Exception('HTTP ${streamedResponse.statusCode}: ${streamedResponse.reasonPhrase}');
+      }
+
+      // Stream the response line by line
+      int lineCount = 0;
+      await for (final line in streamedResponse.stream
+          .transform(utf8.decoder)
+          .transform(const LineSplitter())) {
+        lineCount++;
+        if (lineCount <= 10) {  // Log first 10 lines
+          print('[ApiClient] Received line $lineCount: ${line.length > 100 ? line.substring(0, 100) : line}');
+        }
+        yield line;
+      }
+      print('[ApiClient] Stream completed. Total lines: $lineCount');
+    } catch (e) {
+      print('[ApiClient] Stream error: $e');
+      rethrow;
+    }
   }
 
   /// Close the client

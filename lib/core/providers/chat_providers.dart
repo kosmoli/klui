@@ -399,9 +399,31 @@ class ChatStateHolder extends _$ChatStateHolder {
   }
 
   /// Clear all messages
-  void clearMessages() {
+  Future<void> clearMessages() async {
+    _log.info('Clearing messages for agent $_agentId');
+
+    // Clear local state and storage first
     state = const ChatState();
-    ChatStorage.clearMessages(_agentId);
+    await ChatStorage.clearMessages(_agentId);
+
+    // Clear backend agent context
+    try {
+      final response = await _client.patch(
+        '/agents/$_agentId/reset-messages',
+        body: {
+          'add_default_initial_messages': false,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        _log.info('Backend messages reset successfully');
+      } else {
+        _log.warning('Backend reset failed with status ${response.statusCode}');
+      }
+    } catch (e) {
+      _log.error('Failed to reset backend messages: $e');
+      // Don't rethrow - local clear is still successful
+    }
   }
 
   /// Load messages from localStorage

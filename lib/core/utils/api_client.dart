@@ -69,6 +69,19 @@ class ApiClient {
         .timeout(AppConfig.requestTimeout);
   }
 
+  /// PATCH request
+  Future<http.Response> patch(String path, {Object? body}) async {
+    final url = Uri.parse('${AppConfig.fullApiBaseUrl}$path');
+    print('[ApiClient] PATCH: $url');  // Debug log
+    return _client
+        .patch(
+          url,
+          body: body,
+          headers: body != null ? {'Content-Type': 'application/json'} : {},
+        )
+        .timeout(AppConfig.requestTimeout);
+  }
+
   /// DELETE request
   Future<http.Response> delete(String path) async {
     final url = Uri.parse('${AppConfig.fullApiBaseUrl}$path');

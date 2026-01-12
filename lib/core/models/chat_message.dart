@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'chat_message.freezed.dart';
+part 'chat_message.g.dart';
 
 /// Chat message types from Letta backend
 enum MessageType {
@@ -29,6 +30,8 @@ abstract class ChatMessage with _$ChatMessage {
     @JsonKey(name: 'tool_call_id') String? toolCallId,
     @JsonKey(name: 'is_tool_error') bool? isToolError,
   }) = _ChatMessage;
+
+  factory ChatMessage.fromJson(Map<String, dynamic> json) => _$ChatMessageFromJson(json);
 
   /// Create example messages for demo
   static List<ChatMessage> demoMessages() => [

@@ -11,6 +11,7 @@ part of 'chat_message.dart';
 
 // dart format off
 T _$identity<T>(T value) => value;
+
 /// @nodoc
 mixin _$ChatMessage {
 
@@ -22,6 +23,8 @@ mixin _$ChatMessage {
 @pragma('vm:prefer-inline')
 $ChatMessageCopyWith<ChatMessage> get copyWith => _$ChatMessageCopyWithImpl<ChatMessage>(this as ChatMessage, _$identity);
 
+  /// Serializes this ChatMessage to a JSON map.
+  Map<String, dynamic> toJson();
 
 
 @override
@@ -29,7 +32,7 @@ bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is ChatMessage&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.content, content) || other.content == content)&&const DeepCollectionEquality().equals(other.metadata, metadata)&&(identical(other.toolName, toolName) || other.toolName == toolName)&&const DeepCollectionEquality().equals(other.toolInput, toolInput)&&(identical(other.toolCallId, toolCallId) || other.toolCallId == toolCallId)&&(identical(other.isToolError, isToolError) || other.isToolError == isToolError));
 }
 
-
+@JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode => Object.hash(runtimeType,id,type,content,const DeepCollectionEquality().hash(metadata),toolName,const DeepCollectionEquality().hash(toolInput),toolCallId,isToolError);
 
@@ -211,11 +214,11 @@ return $default(_that.id,_that.type,_that.content,_that.metadata,_that.toolName,
 }
 
 /// @nodoc
-
+@JsonSerializable()
 
 class _ChatMessage extends ChatMessage {
   const _ChatMessage({required this.id, required this.type, required this.content, final  Map<String, dynamic>? metadata, @JsonKey(name: 'tool_name') this.toolName, @JsonKey(name: 'tool_input') final  Map<String, dynamic>? toolInput, @JsonKey(name: 'tool_call_id') this.toolCallId, @JsonKey(name: 'is_tool_error') this.isToolError}): _metadata = metadata,_toolInput = toolInput,super._();
-  
+  factory _ChatMessage.fromJson(Map<String, dynamic> json) => _$ChatMessageFromJson(json);
 
 @override final  String id;
 @override final  MessageType type;
@@ -249,14 +252,17 @@ class _ChatMessage extends ChatMessage {
 @pragma('vm:prefer-inline')
 _$ChatMessageCopyWith<_ChatMessage> get copyWith => __$ChatMessageCopyWithImpl<_ChatMessage>(this, _$identity);
 
-
+@override
+Map<String, dynamic> toJson() {
+  return _$ChatMessageToJson(this, );
+}
 
 @override
 bool operator ==(Object other) {
   return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChatMessage&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.content, content) || other.content == content)&&const DeepCollectionEquality().equals(other._metadata, _metadata)&&(identical(other.toolName, toolName) || other.toolName == toolName)&&const DeepCollectionEquality().equals(other._toolInput, _toolInput)&&(identical(other.toolCallId, toolCallId) || other.toolCallId == toolCallId)&&(identical(other.isToolError, isToolError) || other.isToolError == isToolError));
 }
 
-
+@JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode => Object.hash(runtimeType,id,type,content,const DeepCollectionEquality().hash(_metadata),toolName,const DeepCollectionEquality().hash(_toolInput),toolCallId,isToolError);
 

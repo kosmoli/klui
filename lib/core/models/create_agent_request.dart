@@ -22,13 +22,52 @@ class CreateAgentRequest {
   /// Check if this is a BYOK mode request
   bool get isBYOK => llmModel.providerCategory == 'byok';
 
+  /// Get the correct handle for LLM model based on provider type and base URL
+  ///
+  /// Letta backend has special handling for OpenAI-compatible APIs:
+  /// - If provider_type is "openai" and base_url is NOT "https://api.openai.com/v1"
+  ///   → Must use "openai-proxy" as handle prefix
+  /// - Otherwise, use the provider's normal handle
+  ///
+  /// See: /root/work/letta/letta/schemas/providers/openai.py:153-157
+  String _getCorrectLLMHandle() {
+    // OpenAI-compatible API with custom base URL
+    if (llmModel.providerType == 'openai' &&
+        llmModel.modelEndpoint != 'https://api.openai.com/v1') {
+      // Extract model name from handle (format: "provider-name/model-name")
+      final modelName = llmModel.handle.contains('/')
+          ? llmModel.handle.split('/').last
+          : llmModel.model;
+      return 'openai-proxy/$modelName';
+    }
+
+    // For all other cases, use the original handle
+    return llmModel.handle;
+  }
+
+  /// Get the correct handle for embedding model based on provider type and base URL
+  String _getCorrectEmbeddingHandle() {
+    // OpenAI-compatible API with custom base URL
+    if (embeddingModel.providerType == 'openai' &&
+        embeddingModel.embeddingEndpoint != 'https://api.openai.com/v1') {
+      // Extract model name from handle
+      final modelName = embeddingModel.handle.contains('/')
+          ? embeddingModel.handle.split('/').last
+          : embeddingModel.embeddingModel;
+      return 'openai-proxy/$modelName';
+    }
+
+    // For all other cases, use the original handle
+    return embeddingModel.handle;
+  }
+
   /// Convert to simple format (non-BYOK mode)
   /// Example: {"name": "...", "model": "openai-proxy/claude-sonnet-4-5-20250929", "embedding": "openai-proxy/text-embedding-3-small", "system": "..."}
   Map<String, dynamic> toSimpleJson() {
     final json = <String, dynamic>{
       'name': name,
-      'model': llmModel.handle,  // Use handle instead of providerName/model
-      'embedding': embeddingModel.handle,  // Use handle instead of providerName/model
+      'model': _getCorrectLLMHandle(),  // Use transformed handle for OpenAI-compatible APIs
+      'embedding': _getCorrectEmbeddingHandle(),  // Use transformed handle for OpenAI-compatible APIs
     };
 
     if (description != null) {

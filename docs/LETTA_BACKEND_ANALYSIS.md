@@ -1,7 +1,162 @@
 # Letta 后端工具能力分析
 
-**Date**: 2026-01-11
+**Date**: 2026-01-12
 **Purpose**: 分析 Letta 后端是否支持远程开发所需的工具执行能力
+
+---
+
+## ⚠️ 重大发现：Provider Handle 机制问题 (2026-01-12)
+
+### 问题背景
+
+用户创建自定义Provider（使用OpenAI兼容的API）时遇到认证失败问题。经过深入调查，发现Letta后端对OpenAI兼容的API有特殊的handle机制。
+
+### 核心发现
+
+#### 1. **`openai-proxy` 是硬编码的特殊handle前缀**
+
+**位置**: `/root/work/letta/letta/schemas/providers/openai.py:153-157`
+
+```python
+# Note: openai-proxy just means that the model is using the OpenAIProvider
+if self.base_url != "https://api.openai.com/v1":
+    handle = self.get_handle(model_name, base_name="openai-proxy")
+else:
+    handle = self.get_handle(model_name)
+```
+
+**逻辑说明**:
+- 如果Provider的`base_url` **不是**官方OpenAI (`https://api.openai.com/v1`)
+  → 强制使用 `openai-proxy` 作为handle的前缀
+- 如果是官方OpenAI
+  → 使用provider的name作为前缀
+
+**示例**:
+```
+用户创建Provider:
+- name: "CC Test"
+- base_url: "https://api.custom.com/v1"
+- model: "claude-sonnet-4-5-20250929"
+
+后端生成的handle: "openai-proxy/claude-sonnet-4-5-20250929"
+                    ^^^^^^^^^^^^^
+                    注意：不是 "CC Test/claude-sonnet-4-5-20250929"
+```
+
+#### 2. **Agent运行时自动转换handle**
+
+**位置**: `/root/work/letta/letta/agents/letta_agent_v3.py`
+
+```python
+if "/" in summarizer_config.model:
+    provider, model_name = summarizer_config.model.split("/", 1)
+    if provider == "openai-proxy":
+        # fix for pydantic LLMConfig validation
+        provider = "openai"  # ← 自动将openai-proxy替换为openai
+```
+
+**说明**:
+- `openai-proxy` 只是一个**标记**，表示"这是OpenAI兼容的API"
+- Agent运行时自动转换为 `openai` provider类型
+- 确保使用OpenAIProvider类来处理请求
+
+#### 3. **Handle覆盖规则不影响Provider名称**
+
+**位置**: `/root/work/letta/letta/schemas/llm_config_overrides.py`
+
+```python
+LLM_HANDLE_OVERRIDES: Dict[str, Dict[str, str]] = {
+    "openai": {  # ← provider name (不是provider name的前缀)
+        "gpt-4o-2024-05-13": "gpt-4o-may",  # ← 只映射model name
+        "gpt-4o-2024-08-06": "gpt-4o-aug",
+    }
+}
+```
+
+**作用**:
+- 只用于简化模型名称（如 `gpt-4o-2024-05-13` → `gpt-4o-may`）
+- **不影响provider名称**
+- 创建名为 `openai` 的provider不会覆盖Letta内置的openai provider
+
+### 问题影响
+
+#### ❌ **当前问题**
+
+1. **用户自定义Provider无法正常工作**
+   - 用户创建名为 "CC Test" 的provider
+   - 后端生成handle: `openai-proxy/model-name`
+   - Agent创建时使用: `CC Test/model-name` (错误)
+   - 导致Agent运行时找不到正确的provider配置
+
+2. **用户无法区分不同的Provider**
+   - 所有OpenAI兼容的API都被标记为 `openai-proxy`
+   - 无法通过handle区分不同的custom endpoint
+
+### BYOK模式下的Handle限制
+
+| Provider类型 | Base URL | Handle前缀 | 备注 |
+|-------------|----------|-----------|------|
+| **官方OpenAI** | `https://api.openai.com/v1` | `openai` | 使用provider的name |
+| **OpenAI兼容API** | 其他URL | `openai-proxy` | **硬编码**，无法自定义 |
+| **Anthropic** | 任意 | `anthropic` | 使用provider的name |
+| **Together AI** | 任意 | `together` | 使用provider的name |
+
+### 解决方案选项
+
+#### 方案1: 修改Provider创建逻辑（推荐）
+- 在前端检测OpenAI类型 + custom base_url
+- 自动使用正确的handle格式
+- 用户界面仍显示自定义name，但后端使用`openai-proxy`
+
+#### 方案2: 修改后端Letta（不推荐）
+- 修改 `openai.py` 支持custom provider name
+- 需要修改多个文件
+- 可能破坏现有功能
+
+#### 方案3: 文档说明（临时方案）
+- 在UI上提示用户使用 `openai-proxy` 作为provider name
+- 用户体验差
+
+### 数据流示例
+
+**场景**: 用户创建使用自定义API的Agent
+
+```
+1. 用户在前端创建Provider:
+   - Name: "CC Test"
+   - Type: OpenAI
+   - Base URL: "https://api.custom.com"
+   - API Key: "sk-xxx"
+
+2. 后端创建Provider对象:
+   - provider.name = "CC Test"
+   - provider.base_url = "https://api.custom.com"
+   - 生成LLMConfig时，handle = "openai-proxy/claude-sonnet-4-5-20250929"
+
+3. 用户创建Agent时:
+   - 选择的LLM model handle: "CC Test/claude-sonnet-4-5-20250929"  ❌ 错误
+   - 应该是: "openai-proxy/claude-sonnet-4-5-20250929"  ✅ 正确
+
+4. Agent运行时:
+   - 期望找到handle为 "openai-proxy/..." 的配置
+   - 实际收到的是 "CC Test/..."
+   - 导致provider lookup失败，认证错误
+```
+
+### 相关文件
+
+- `/root/work/letta/letta/schemas/providers/openai.py` - OpenAI Provider实现
+- `/root/work/letta/letta/schemas/providers/base.py` - Provider基类，get_handle方法
+- `/root/work/letta/letta/schemas/llm_config_overrides.py` - Handle覆盖规则
+- `/root/work/letta/letta/agents/letta_agent_v3.py` - Agent运行时的handle转换逻辑
+
+### 参考资料
+
+- OpenAI Provider源码: `letta/schemas/providers/openai.py:19-200`
+- Provider基类: `letta/schemas/providers/base.py:161-178`
+- Agent执行逻辑: `letta/agents/letta_agent_v3.py` (搜索"openai-proxy")
+
+---
 
 ## 🔍 研究方法
 
@@ -146,3 +301,178 @@ PATCH /api/v1/tools/{tool_id}       # 更新工具定义
 - Letta 代码执行: `letta/functions/function_sets/builtin.py`
 - Letta 沙箱: `letta/sandbox/`
 - Letta 工具 API: `letta/server/rest_api/routers/v1/tools.py`
+
+## 解决方案实现 (2026-01-12)
+
+### 实现位置
+
+**文件**: `/root/work/klui/lib/core/models/create_agent_request.dart`
+
+### 实现逻辑
+
+#### 1. LLM Model Handle 转换
+
+```dart
+String _getCorrectLLMHandle() {
+  // OpenAI-compatible API with custom base URL
+  if (llmModel.providerType == 'openai' &&
+      llmModel.modelEndpoint != 'https://api.openai.com/v1') {
+    // Extract model name from handle (format: "provider-name/model-name")
+    final modelName = llmModel.handle.contains('/')
+        ? llmModel.handle.split('/').last
+        : llmModel.model;
+    return 'openai-proxy/$modelName';
+  }
+
+  // For all other cases, use the original handle
+  return llmModel.handle;
+}
+```
+
+**判断条件**:
+- `providerType == 'openai'` ← 必须是OpenAI类型
+- `modelEndpoint != 'https://api.openai.com/v1'` ← 且不是官方OpenAI API
+
+**转换动作**:
+- 从原始handle中提取model name
+- 使用 `openai-proxy` 作为前缀
+- 返回新格式: `openai-proxy/{model_name}`
+
+#### 2. Embedding Model Handle 转换
+
+```dart
+String _getCorrectEmbeddingHandle() {
+  // OpenAI-compatible API with custom base URL
+  if (embeddingModel.providerType == 'openai' &&
+      embeddingModel.embeddingEndpoint != 'https://api.openai.com/v1') {
+    // Extract model name from handle
+    final modelName = embeddingModel.handle.contains('/')
+        ? embeddingModel.handle.split('/').last
+        : embeddingModel.embeddingModel;
+    return 'openai-proxy/$modelName';
+  }
+
+  // For all other cases, use the original handle
+  return embeddingModel.handle;
+}
+```
+
+**逻辑相同**，但针对embedding模型：
+- 使用 `embeddingEndpoint` 而不是 `modelEndpoint`
+- 使用 `embeddingModel` 而不是 `model`
+
+#### 3. 在Agent创建时应用转换
+
+```dart
+Map<String, dynamic> toSimpleJson() {
+  final json = <String, dynamic>{
+    'name': name,
+    'model': _getCorrectLLMHandle(),  // ← 使用转换后的handle
+    'embedding': _getCorrectEmbeddingHandle(),  // ← 使用转换后的handle
+  };
+  // ...
+}
+```
+
+### 测试用例
+
+#### 测试场景 1: 自定义OpenAI兼容API
+
+**输入**:
+```dart
+Provider:
+  - name: "CC Test"
+  - providerType: "openai"
+  - baseUrl: "https://api.custom.com/v1"
+
+LLMModel:
+  - handle: "CC Test/claude-sonnet-4-5-20250929"
+  - model: "claude-sonnet-4-5-20250929"
+  - modelEndpoint: "https://api.custom.com/v1"
+```
+
+**转换结果**:
+```json
+{
+  "model": "openai-proxy/claude-sonnet-4-5-20250929"
+}
+```
+
+**预期行为**: ✅ Agent可以使用自定义API正常工作
+
+#### 测试场景 2: 官方OpenAI API
+
+**输入**:
+```dart
+Provider:
+  - name: "openai"
+  - providerType: "openai"
+  - baseUrl: "https://api.openai.com/v1"
+
+LLMModel:
+  - handle: "openai/gpt-4o"
+  - modelEndpoint: "https://api.openai.com/v1"
+```
+
+**转换结果**:
+```json
+{
+  "model": "openai/gpt-4o"
+}
+```
+
+**预期行为**: ✅ 保持原样，不转换
+
+#### 测试场景 3: Anthropic API
+
+**输入**:
+```dart
+Provider:
+  - name: "My Anthropic"
+  - providerType: "anthropic"
+  - baseUrl: "https://api.anthropic.com"
+
+LLMModel:
+  - handle: "My Anthropic/claude-3-5-sonnet-20241022"
+```
+
+**转换结果**:
+```json
+{
+  "model": "My Anthropic/claude-3-5-sonnet-20241022"
+}
+```
+
+**预期行为**: ✅ 保持原样，不转换
+
+### 用户界面影响
+
+**无需改变**，用户界面仍然显示用户友好的名称：
+
+```
+Provider选择下拉框:
+  ✅ "CC Test - Claude Sonnet 4.5"
+  ✅ "My Custom API - GPT-4o"
+  ✅ "Production OpenAI - GPT-4o"
+
+发送到后端:
+  - "CC Test/..." → "openai-proxy/..."
+  - "My Custom API/..." → "openai-proxy/..."
+  - "Production OpenAI/..." → "openai/..." (如果是官方API)
+```
+
+### 关键优势
+
+1. **✅ 用户可以自由命名Provider** - 无限制
+2. **✅ 自动适配Letta后端规则** - 透明转换
+3. **✅ 支持多个OpenAI兼容API** - 不会冲突
+4. **✅ 向后兼容** - 不影响现有功能
+5. **✅ 代码集中管理** - 所有逻辑在CreateAgentRequest中
+
+### 相关文件
+
+- 实现文件: `lib/core/models/create_agent_request.dart`
+- 测试文档: `test_handle_transformation.dart`
+- 后端逻辑: `/root/work/letta/letta/schemas/providers/openai.py:153-157`
+
+---

@@ -83,9 +83,9 @@ class ChatStateHolder extends _$ChatStateHolder {
       print('[ChatController] Sending message to agent $_agentId');
       print('[ChatController] Request: ${jsonEncode(requestBody)}');
 
-      // Start streaming
+      // Start streaming - use /stream endpoint for SSE
       final stream = _client.streamPost(
-        '/agents/$_agentId/messages',
+        '/agents/$_agentId/messages/stream',
         body: requestBody,
       );
 
@@ -163,6 +163,7 @@ class ChatStateHolder extends _$ChatStateHolder {
         break;
 
       case 'error':
+      case 'error_message':
         _handleErrorMessage(json);
         break;
 
@@ -263,10 +264,21 @@ class ChatStateHolder extends _$ChatStateHolder {
   }
 
   void _handleErrorMessage(Map<String, dynamic> json) {
-    final error = json['error'];
-    final errorMessage = error is Map
-        ? error['detail'] ?? error['type'] ?? 'Unknown error'
-        : 'Unknown error';
+    // Extract error from various possible formats
+    String errorMessage = 'Unknown error';
+
+    if (json.containsKey('error')) {
+      final error = json['error'];
+      if (error is Map) {
+        errorMessage = error['detail'] ?? error['message'] ?? error['type'] ?? 'Unknown error';
+      } else if (error is String) {
+        errorMessage = error;
+      }
+    } else if (json.containsKey('message')) {
+      errorMessage = json['message'];
+    }
+
+    print('[ChatController] Error message: $errorMessage');
 
     final message = ChatMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),

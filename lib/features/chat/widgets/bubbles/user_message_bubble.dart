@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:klui/core/theme/klui_text_styles.dart';
 import 'package:klui/core/theme/klui_theme_extension.dart';
 import 'package:klui/core/models/chat_message.dart';
+import 'package:klui/core/extensions/context_extensions.dart';
 
 /// User message bubble - right-aligned, blue background
-class UserMessageBubble extends StatelessWidget {
+class UserMessageBubble extends ConsumerWidget {
   const UserMessageBubble({
     super.key,
     required this.message,
+    this.onEdit,
   });
 
   final ChatMessage message;
+  final Function(String)? onEdit;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).extension<KluiCustomColors>()!;
 
     return Align(
@@ -33,10 +37,105 @@ class UserMessageBubble extends StatelessWidget {
             ),
           ],
         ),
-        child: Text(
-          message.content,
-          style: KluiTextStyles.userMessage,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                message.content,
+                style: KluiTextStyles.userMessage,
+              ),
+            ),
+            if (onEdit != null) ...[
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => _showEditMenu(context),
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  child: Icon(
+                    Icons.more_vert,
+                    size: 14,
+                    color: colors.userText.withOpacity(0.7),
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
+      ),
+    );
+  }
+
+  void _showEditMenu(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+    
+    showMenu(
+      context: context,
+      position: const RelativeRect.fromLTRB(0, 40, 0, 0),
+      items: [
+        PopupMenuItem(
+          height: 36,
+          child: Row(
+            children: [
+              Icon(Icons.edit_outlined, size: 16, color: colors.textPrimary),
+              const SizedBox(width: 12),
+              Text('Edit', style: KluiTextStyles.bodyMedium),
+            ],
+          ),
+        ),
+      ],
+    ).then((_) {
+      if (onEdit != null) {
+        _showEditDialog(context);
+      }
+    });
+  }
+
+  void _showEditDialog(BuildContext context) {
+    final controller = TextEditingController(text: message.content);
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: colors.surface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        title: Text('Edit Message', style: KluiTextStyles.headlineSmall),
+        content: TextField(
+          controller: controller,
+          maxLines: 5,
+          style: KluiTextStyles.bodyMedium,
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: colors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: colors.userBubble),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(context.l10n.common_button_cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final newText = controller.text.trim();
+              if (newText.isNotEmpty && newText != message.content) {
+                onEdit?.call(newText);
+              }
+              Navigator.of(context).pop();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colors.userBubble,
+              foregroundColor: colors.userText,
+            ),
+            child: const Text('Save'),
+          ),
+        ],
       ),
     );
   }

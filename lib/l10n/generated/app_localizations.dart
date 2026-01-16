@@ -1858,6 +1858,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} result(s)'**
   String chat_search_results(Object count);
+
+  /// No description provided for @tools_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent Tools'**
+  String get tools_title;
+
+  /// No description provided for @tools_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage agent tools'**
+  String get tools_tooltip;
+
+  /// No description provided for @tools_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No tools attached'**
+  String get tools_empty;
+
+  /// No description provided for @tools_loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading tools...'**
+  String get tools_loading;
+
+  /// No description provided for @tools_error_loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load tools'**
+  String get tools_error_loading;
+
+  /// No description provided for @tools_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Tools'**
+  String get tools_available;
+
+  /// No description provided for @tools_attach.
+  ///
+  /// In en, this message translates to:
+  /// **'Attach'**
+  String get tools_attach;
+
+  /// No description provided for @tools_detach.
+  ///
+  /// In en, this message translates to:
+  /// **'Detach'**
+  String get tools_detach;
+
+  /// No description provided for @tools_attach_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Tool attached successfully'**
+  String get tools_attach_success;
+
+  /// No description provided for @tools_attach_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to attach tool'**
+  String get tools_attach_failed;
+
+  /// No description provided for @tools_detach_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Tool detached successfully'**
+  String get tools_detach_success;
+
+  /// No description provided for @tools_detach_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to detach tool'**
+  String get tools_detach_failed;
+
+  /// No description provided for @tools_no_available.
+  ///
+  /// In en, this message translates to:
+  /// **'No available tools'**
+  String get tools_no_available;
+
+  /// No description provided for @tools_type_custom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get tools_type_custom;
+
+  /// No description provided for @tools_type_builtin.
+  ///
+  /// In en, this message translates to:
+  /// **'Built-in'**
+  String get tools_type_builtin;
+
+  /// No description provided for @tools_type_mcp.
+  ///
+  /// In en, this message translates to:
+  /// **'MCP'**
+  String get tools_type_mcp;
 }
 
 class _AppLocalizationsDelegate

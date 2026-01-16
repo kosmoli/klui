@@ -20,6 +20,7 @@ import '../widgets/context_size_indicator.dart';
 import '../widgets/memory_view_dialog.dart';
 import '../widgets/chat_search_bar.dart';
 import '../services/chat_export_service.dart';
+import '../widgets/tools_manage_dialog.dart';
 
 /// Chat Screen - Real-time chat with Agent
 class ChatScreen extends ConsumerStatefulWidget {
@@ -125,6 +126,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     ref.read(chatStateHolderProvider(agentId).notifier).abortMessage();
   }
 
+  void _onMessageEdit(String newContent) {
+    final agentId = ref.read(selectedAgentIdProvider);
+    if (agentId.isEmpty) return;
+    
+    final chatState = ref.read(chatStateHolderProvider(agentId));
+    final messages = chatState.messages;
+    
+    // Find the last user message and update it
+    for (int i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].type == MessageType.user) {
+        ref.read(chatStateHolderProvider(agentId).notifier).editMessage(i, newContent);
+        break;
+      }
+    }
+  }
+
   void _sendMessage(String agentId) {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
@@ -167,6 +184,27 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       error: (_, __) {},
     );
   }
+
+  void _showToolsDialog(String agentId, AsyncValue<List<Agent>> agentsAsync) {
+    agentsAsync.when(
+      data: (agents) {
+        final agent = agents.firstWhere(
+          (a) => a.id == agentId,
+          orElse: () => Agent(id: agentId, name: 'Unknown'),
+        );
+        showDialog(
+          context: context,
+          builder: (context) => ToolsManageDialog(
+            agentId: agentId,
+            agentName: agent.name ?? 'Unknown',
+          ),
+        );
+      },
+      loading: () {},
+      error: (_, __) {},
+    );
+  }
+
 
   void _showExportMenu(String agentId, List<ChatMessage> messages) {
     if (messages.isEmpty) {
@@ -358,6 +396,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               tooltip: context.l10n.memory_view_tooltip,
               color: colors.textPrimary,
             ),
+          // Tools button
+          if (agentId.isNotEmpty)
+            IconButton(
+              onPressed: () => _showToolsDialog(agentId, agentsAsync),
+              icon: const Icon(Icons.build_outlined),
+              tooltip: context.l10n.tools_tooltip,
+              color: colors.textPrimary,
+            ),
+
           // Export button
           if (messages.isNotEmpty)
             IconButton(
@@ -424,6 +471,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         message: message,
                         isHighlighted: isHighlighted,
                         isMatched: isMatched && _searchQuery.isNotEmpty,
+                        onEdit: message.type == MessageType.user ? _onMessageEdit : null,
                       );
                     },
                   ),
@@ -488,12 +536,14 @@ class _MessageTile extends StatelessWidget {
     required this.message,
     this.isHighlighted = false,
     this.isMatched = false,
+    this.onEdit,
     super.key,
   });
 
   final ChatMessage message;
   final bool isHighlighted;
   final bool isMatched;
+  final Function(String)? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -521,7 +571,10 @@ class _MessageTile extends StatelessWidget {
       case MessageType.user:
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: UserMessageBubble(message: message),
+          child: UserMessageBubble(
+            message: message,
+            onEdit: message.type == MessageType.user ? onEdit : null,
+          ),
         );
 
       case MessageType.assistant:

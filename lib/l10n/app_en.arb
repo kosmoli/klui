@@ -335,5 +335,22 @@
 
   "chat_search_placeholder": "Search messages...",
   "chat_search_no_results": "No messages found",
-  "chat_search_results": "{count} result(s)"
+  "chat_search_results": "{count} result(s)",
+
+  "tools_title": "Agent Tools",
+  "tools_tooltip": "Manage agent tools",
+  "tools_empty": "No tools attached",
+  "tools_loading": "Loading tools...",
+  "tools_error_loading": "Failed to load tools",
+  "tools_available": "Available Tools",
+  "tools_attach": "Attach",
+  "tools_detach": "Detach",
+  "tools_attach_success": "Tool attached successfully",
+  "tools_attach_failed": "Failed to attach tool",
+  "tools_detach_success": "Tool detached successfully",
+  "tools_detach_failed": "Failed to detach tool",
+  "tools_no_available": "No available tools",
+  "tools_type_custom": "Custom",
+  "tools_type_builtin": "Built-in",
+  "tools_type_mcp": "MCP"
 }

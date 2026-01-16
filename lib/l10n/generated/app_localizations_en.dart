@@ -1004,4 +1004,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String chat_search_results(Object count) {
     return '$count result(s)';
   }
+
+  @override
+  String get tools_title => 'Agent Tools';
+
+  @override
+  String get tools_tooltip => 'Manage agent tools';
+
+  @override
+  String get tools_empty => 'No tools attached';
+
+  @override
+  String get tools_loading => 'Loading tools...';
+
+  @override
+  String get tools_error_loading => 'Failed to load tools';
+
+  @override
+  String get tools_available => 'Available Tools';
+
+  @override
+  String get tools_attach => 'Attach';
+
+  @override
+  String get tools_detach => 'Detach';
+
+  @override
+  String get tools_attach_success => 'Tool attached successfully';
+
+  @override
+  String get tools_attach_failed => 'Failed to attach tool';
+
+  @override
+  String get tools_detach_success => 'Tool detached successfully';
+
+  @override
+  String get tools_detach_failed => 'Failed to detach tool';
+
+  @override
+  String get tools_no_available => 'No available tools';
+
+  @override
+  String get tools_type_custom => 'Custom';
+
+  @override
+  String get tools_type_builtin => 'Built-in';
+
+  @override
+  String get tools_type_mcp => 'MCP';
 }

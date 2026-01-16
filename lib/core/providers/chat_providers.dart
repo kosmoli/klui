@@ -499,6 +499,33 @@ class ChatStateHolder extends _$ChatStateHolder {
     }
   }
 
+  /// Edit a message at given index
+  void editMessage(int index, String newContent) {
+    final messages = [...state.messages];
+    if (index >= 0 && index < messages.length) {
+      final oldMessage = messages[index];
+      final updatedMessage = ChatMessage(
+        id: oldMessage.id,
+        type: oldMessage.type,
+        content: newContent,
+        metadata: oldMessage.metadata,
+        toolName: oldMessage.toolName,
+        toolInput: oldMessage.toolInput,
+        toolCallId: oldMessage.toolCallId,
+        isToolError: oldMessage.isToolError,
+      );
+
+      // Remove all messages after this message (including assistant response)
+      // and keep only messages up to and including the edited message
+      final truncatedMessages = messages.sublist(0, index + 1);
+      
+      state = state.copyWith(messages: truncatedMessages);
+      _saveMessages();
+      
+      _log.info('Edited message at index $index');
+    }
+  }
+
   /// Load messages from localStorage
   Future<void> _loadMessages() async {
     try {

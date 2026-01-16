@@ -312,5 +312,28 @@
   "chat_context_size_label": "Context",
   "chat_context_size_tooltip": "Tokens used in conversation context",
   "chat_context_size_warning": "Context window almost full",
-  "chat_context_size_critical": "Context window nearly full, consider clearing history"
+  "chat_context_size_critical": "Context window nearly full, consider clearing history",
+
+  "chat_export_button_tooltip": "Export chat",
+  "chat_export_title": "Export Chat",
+  "chat_export_format_markdown": "Markdown (.md)",
+  "chat_export_format_json": "JSON (.json)",
+  "chat_export_success": "Chat exported successfully",
+  "chat_export_failed": "Failed to export chat",
+  "chat_export_no_messages": "No messages to export",
+
+  "memory_view_title": "Agent Memory",
+  "memory_view_tooltip": "View and edit agent memory",
+  "memory_section_core": "Core Memory",
+  "memory_section_archival": "Archival Memory",
+  "memory_empty": "No memory entries",
+  "memory_edit_success": "Memory updated successfully",
+  "memory_edit_failed": "Failed to update memory",
+  "memory_label": "Label",
+  "memory_value": "Content",
+  "memory_count": "{count} items",
+
+  "chat_search_placeholder": "Search messages...",
+  "chat_search_no_results": "No messages found",
+  "chat_search_results": "{count} result(s)"
 }

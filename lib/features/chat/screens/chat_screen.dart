@@ -17,6 +17,9 @@ import '../widgets/bubbles/error_bubble.dart';
 import '../widgets/bubbles/reasoning_bubble.dart';
 import '../widgets/tool_call_card.dart';
 import '../widgets/context_size_indicator.dart';
+import '../widgets/memory_view_dialog.dart';
+import '../widgets/chat_search_bar.dart';
+import '../services/chat_export_service.dart';
 
 /// Chat Screen - Real-time chat with Agent
 class ChatScreen extends ConsumerStatefulWidget {
@@ -38,6 +41,23 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
   final FocusNode _keyboardFocusNode = FocusNode();
+
+  // Search state
+  List<ChatMessage> _filteredMessages = [];
+  String _searchQuery = '';
+
+  void _onSearchResultsChanged(List<ChatMessage> results) {
+    setState(() {
+      _filteredMessages = results;
+    });
+  }
+
+  List<ChatMessage> _getDisplayMessages(List<ChatMessage> allMessages) {
+    if (_searchQuery.isEmpty) {
+      return allMessages;
+    }
+    return _filteredMessages;
+  }
 
   @override
   void initState() {
@@ -98,6 +118,133 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     _scrollToBottom();
   }
 
+  void _showMemoryDialog(String agentId, AsyncValue<List<Agent>> agentsAsync) {
+    agentsAsync.when(
+      data: (agents) {
+        final agent = agents.firstWhere(
+          (a) => a.id == agentId,
+          orElse: () => Agent(id: agentId, name: 'Unknown'),
+        );
+        showDialog(
+          context: context,
+          builder: (context) => MemoryViewDialog(
+            agentId: agentId,
+            agentName: agent.name ?? 'Unknown',
+          ),
+        );
+      },
+      loading: () {},
+      error: (_, __) {},
+    );
+  }
+
+  void _showExportMenu(String agentId, List<ChatMessage> messages) {
+    if (messages.isEmpty) {
+      final colors = Theme.of(context).extension<KluiCustomColors>()!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.chat_export_no_messages),
+          backgroundColor: colors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final agentsAsync = ref.read(agentListProvider);
+    agentsAsync.when(
+      data: (agents) {
+        final agent = agents.firstWhere(
+          (a) => a.id == agentId,
+          orElse: () => Agent(id: agentId, name: 'Unknown'),
+        );
+
+        showMenu<String>(
+          context: context,
+          position: const RelativeRect.fromLTRB(100, 48, 0, 0),
+          items: [
+            PopupMenuItem<String>(
+              value: 'markdown',
+              child: Row(
+                children: [
+                  const Icon(Icons.description, size: 18),
+                  const SizedBox(width: 12),
+                  Text(context.l10n.chat_export_format_markdown),
+                ],
+              ),
+            ),
+            PopupMenuItem<String>(
+              value: 'json',
+              child: Row(
+                children: [
+                  const Icon(Icons.code, size: 18),
+                  const SizedBox(width: 12),
+                  Text(context.l10n.chat_export_format_json),
+                ],
+              ),
+            ),
+          ],
+        ).then((format) {
+          if (format != null) {
+            _exportChat(agent, messages, format);
+          }
+        });
+      },
+      loading: () {},
+      error: (_, __) {},
+    );
+  }
+
+  void _exportChat(Agent agent, List<ChatMessage> messages, String format) {
+    try {
+      final filename = ChatExportService.generateFilename(
+        agentName: agent.name ?? 'chat',
+        extension: format == 'markdown' ? '.md' : '.json',
+      );
+
+      String content;
+      String mimeType;
+
+      if (format == 'markdown') {
+        content = ChatExportService.toMarkdown(
+          messages: messages,
+          agent: agent,
+        );
+        mimeType = 'text/markdown';
+      } else {
+        content = ChatExportService.toJson(
+          messages: messages,
+          agent: agent,
+        );
+        mimeType = 'application/json';
+      }
+
+      ChatExportService.downloadFile(
+        content: content,
+        filename: filename,
+        mimeType: mimeType,
+      );
+
+      final colors = Theme.of(context).extension<KluiCustomColors>()!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.chat_export_success),
+          backgroundColor: colors.success,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      final colors = Theme.of(context).extension<KluiCustomColors>()!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${context.l10n.chat_export_failed}: $e'),
+          backgroundColor: colors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Read agent ID from provider - this will update when provider changes
@@ -108,8 +255,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final isStreaming = chatState.isStreaming;
     final canAbort = chatState.canAbort;
 
-    // Auto-scroll when new messages arrive
-    if (messages.isNotEmpty) {
+    // Get display messages (filtered or all)
+    final displayMessages = _getDisplayMessages(messages);
+
+    // Auto-scroll when new messages arrive (only if not searching)
+    if (messages.isNotEmpty && _searchQuery.isEmpty) {
       _scrollToBottom();
     }
 
@@ -173,6 +323,22 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 ),
               ),
             ),
+          // Memory button
+          if (agentId.isNotEmpty)
+            IconButton(
+              onPressed: () => _showMemoryDialog(agentId, agentsAsync),
+              icon: const Icon(Icons.psychology_outlined),
+              tooltip: context.l10n.memory_view_tooltip,
+              color: colors.textPrimary,
+            ),
+          // Export button
+          if (messages.isNotEmpty)
+            IconButton(
+              onPressed: () => _showExportMenu(agentId, messages),
+              icon: const Icon(Icons.download),
+              tooltip: context.l10n.chat_export_button_tooltip,
+              color: colors.textPrimary,
+            ),
           if (canAbort)
             Semantics(
               label: context.l10n.chat_abort_button,
@@ -201,17 +367,27 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       ),
       body: Column(
         children: [
+          // Search bar (shown when there are messages)
+          if (messages.isNotEmpty && messages.length > 3)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: ChatSearchBar(
+                allMessages: messages,
+                onResultsChanged: _onSearchResultsChanged,
+              ),
+            ),
+
           // Message List
           Expanded(
-            child: messages.isEmpty
-                ? _buildEmptyState(context, colors)
+            child: displayMessages.isEmpty
+                ? _buildEmptyState(context, colors, _searchQuery.isNotEmpty)
                 : ListView.builder(
                     controller: _scrollController,
                     reverse: true,
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemCount: messages.length,
+                    itemCount: displayMessages.length,
                     itemBuilder: (context, index) {
-                      final message = messages[messages.length - 1 - index];
+                      final message = displayMessages[displayMessages.length - 1 - index];
                       return _MessageTile(message: message);
                     },
                   ),
@@ -230,7 +406,27 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     ));
   }
 
-  Widget _buildEmptyState(BuildContext context, KluiCustomColors colors) {
+  Widget _buildEmptyState(BuildContext context, KluiCustomColors colors, bool isSearchResult) {
+    if (isSearchResult) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 64,
+              color: colors.textSecondary,
+            ),
+            const SizedBox(height: 24),
+            Text(
+              context.l10n.chat_search_no_results,
+              style: KluiTextStyles.headlineSmall,
+            ),
+          ],
+        ),
+      );
+    }
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

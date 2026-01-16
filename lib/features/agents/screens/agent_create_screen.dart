@@ -36,8 +36,8 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
   // Current step (0-indexed)
   int _currentStep = 0;
 
-  // BYOK Mode
-  bool _byokMode = false;
+  // BYOK Mode - In Memos, always use provider mode (user-created providers)
+  bool _byokMode = true;
 
   // Selected providers
   models.ProviderConfig? _selectedLLMProvider;
@@ -78,40 +78,16 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
     setState(() => _isLoadingProviders = true);
 
     try {
-      if (_byokMode) {
-        // BYOK mode: load providers from database
-        final providers = await ref.read(providerListProvider.future);
+      // In Memos, always load providers from database (user-created providers only)
+      final providers = await ref.read(providerListProvider.future);
 
-        if (mounted) {
-          setState(() {
-            _availableProviders = providers;
-            _availableLLMModels = [];
-            _availableEmbeddingModels = [];
-            _isLoadingProviders = false;
-          });
-        }
-      } else {
-        // Non-BYOK mode: load base models directly (no provider selection needed)
-        final allModels = await ref.read(baseLLMModelListProvider.future);
-
-        // Also load embedding models from /v1/models/embedding
-        final embeddingResponse = await ref.read(apiClientProvider).get('/models/embedding');
-        final List<dynamic> embeddingData = jsonDecode(embeddingResponse.body);
-        final embeddingModels = embeddingData
-            .map((json) => LLMModel.fromJson(json as Map<String, dynamic>))
-            .toList();
-
-        // Filter LLM models by model_type field from API
-        final llmModels = allModels.where((m) => m.modelType == 'llm').toList();
-
-        if (mounted) {
-          setState(() {
-            _availableProviders = [];
-            _availableLLMModels = llmModels;
-            _availableEmbeddingModels = embeddingModels;
-            _isLoadingProviders = false;
-          });
-        }
+      if (mounted) {
+        setState(() {
+          _availableProviders = providers;
+          _availableLLMModels = [];
+          _availableEmbeddingModels = [];
+          _isLoadingProviders = false;
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -313,7 +289,6 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
           availableEmbeddingModels: _availableEmbeddingModels,
           isLoadingLLMModels: _isLoadingLLMModels,
           isLoadingEmbeddingModels: _isLoadingEmbeddingModels,
-          byokMode: _byokMode,
           onLLMProviderChanged: (provider) {
             setState(() {
               _selectedLLMProvider = provider;
@@ -342,20 +317,6 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
               setState(() => _selectedLLMModel = model),
           onEmbeddingModelChanged: (model) =>
               setState(() => _selectedEmbeddingModel = model),
-          onByokModeChanged: (value) {
-            setState(() {
-              _byokMode = value;
-              // Clear selections when switching modes
-              _selectedLLMProvider = null;
-              _selectedEmbeddingProvider = null;
-              _selectedLLMModel = null;
-              _selectedEmbeddingModel = null;
-              _availableLLMModels = [];
-              _availableEmbeddingModels = [];
-            });
-            // Reload data based on new mode
-            _loadProvidersAndModels();
-          },
         );
       case 1:
         return _BasicInfoStep(
@@ -451,63 +412,32 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
   void _handleNext() {
     final colors = Theme.of(context).extension<KluiCustomColors>()!;
     if (_currentStep == 0) {
-      // Validate provider/model selection
-      if (_byokMode) {
-        // BYOK mode: validate provider and model selection
-        if (_selectedLLMProvider == null || _selectedLLMModel == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                context.l10n.agent_create_validation_llm_provider,
-                style: TextStyle(color: colors.userText),
-              ),
-              backgroundColor: colors.error,
-              behavior: SnackBarBehavior.floating,
+      // In Memos, validate provider and model selection
+      if (_selectedLLMProvider == null || _selectedLLMModel == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.agent_create_validation_llm_provider,
+              style: TextStyle(color: colors.userText),
             ),
-          );
-          return;
-        }
-        if (_selectedEmbeddingProvider == null || _selectedEmbeddingModel == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                context.l10n.agent_create_validation_embedding_provider,
-                style: TextStyle(color: colors.userText),
-              ),
-              backgroundColor: colors.error,
-              behavior: SnackBarBehavior.floating,
+            backgroundColor: colors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+      if (_selectedEmbeddingProvider == null || _selectedEmbeddingModel == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.agent_create_validation_embedding_provider,
+              style: TextStyle(color: colors.userText),
             ),
-          );
-          return;
-        }
-      } else {
-        // Non-BYOK mode: only validate model selection
-        if (_selectedLLMModel == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                context.l10n.agent_create_validation_llm_model,
-                style: TextStyle(color: colors.userText),
-              ),
-              backgroundColor: colors.error,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-          return;
-        }
-        if (_selectedEmbeddingModel == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                context.l10n.agent_create_validation_embedding_model,
-                style: TextStyle(color: colors.userText),
-              ),
-              backgroundColor: colors.error,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-          return;
-        }
+            backgroundColor: colors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
       }
     } else if (_currentStep == 1) {
       // Validate basic info
@@ -602,22 +532,21 @@ class _AgentCreateScreenState extends ConsumerState<AgentCreateScreen> {
 }
 
 /// Step 0: Provider Selection
+/// In Memos, all providers are user-created (no BYOK/base distinction)
 class _ProviderSelectionStep extends StatelessWidget {
   final models.ProviderConfig? selectedLLMProvider;
   final models.ProviderConfig? selectedEmbeddingProvider;
   final LLMModel? selectedLLMModel;
-  final LLMModel? selectedEmbeddingModel;  // Changed to LLMModel
+  final LLMModel? selectedEmbeddingModel;
   final List<models.ProviderConfig> availableProviders;
   final List<LLMModel> availableLLMModels;
-  final List<LLMModel> availableEmbeddingModels;  // Changed to LLMModel
+  final List<LLMModel> availableEmbeddingModels;
   final bool isLoadingLLMModels;
-  final bool isLoadingEmbeddingModels;  // Added
-  final bool byokMode;  // Added
+  final bool isLoadingEmbeddingModels;
   final Function(models.ProviderConfig?) onLLMProviderChanged;
   final Function(models.ProviderConfig?) onEmbeddingProviderChanged;
   final Function(LLMModel?) onLLMModelChanged;
-  final Function(LLMModel?) onEmbeddingModelChanged;  // Changed to LLMModel
-  final Function(bool) onByokModeChanged;  // Added
+  final Function(LLMModel?) onEmbeddingModelChanged;
 
   const _ProviderSelectionStep({
     required this.selectedLLMProvider,
@@ -629,12 +558,10 @@ class _ProviderSelectionStep extends StatelessWidget {
     required this.availableEmbeddingModels,
     required this.isLoadingLLMModels,
     required this.isLoadingEmbeddingModels,
-    required this.byokMode,
     required this.onLLMProviderChanged,
     required this.onEmbeddingProviderChanged,
     required this.onLLMModelChanged,
     required this.onEmbeddingModelChanged,
-    required this.onByokModeChanged,
   });
 
   @override
@@ -645,122 +572,44 @@ class _ProviderSelectionStep extends StatelessWidget {
       children: [
         // Step title
         Text(
-          byokMode ? context.l10n.agent_create_step_provider_title : context.l10n.agent_create_step_model_title,
+          context.l10n.agent_create_step_provider_title,
           style: AppTheme.headlineSmall,
         ),
         const SizedBox(height: AppTheme.spacing8),
         Text(
-          byokMode
-              ? context.l10n.agent_create_step_provider_desc
-              : context.l10n.agent_create_step_model_desc,
+          context.l10n.agent_create_step_provider_desc,
           style: AppTheme.bodyMedium.copyWith(
             color: colors.textSecondary,
           ),
         ),
         const SizedBox(height: AppTheme.spacing24),
 
-        // BYOK Mode Toggle
-        Container(
-          padding: const EdgeInsets.all(AppTheme.spacing16),
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: const BorderRadius.all(
-              Radius.circular(AppTheme.radiusMedium),
-            ),
-            border: Border.all(
-              color: colors.border,
-              width: 2,
-            ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                context.l10n.agent_create_byok_mode,
-                style: AppTheme.titleMedium,
-              ),
-              const SizedBox(height: AppTheme.spacing8),
-              Text(
-                context.l10n.agent_create_byok_desc,
-                style: AppTheme.bodyMedium.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: AppTheme.spacing16),
-              Row(
-                children: [
-                  Switch(
-                    value: byokMode,
-                    onChanged: onByokModeChanged,
-                    activeColor: colors.success,
-                  ),
-                  const SizedBox(width: AppTheme.spacing8),
-                  Text(
-                    byokMode ? context.l10n.agent_create_byok_enabled : context.l10n.agent_create_byok_disabled,
-                    style: AppTheme.bodyMedium,
-                  ),
-                ],
-              ),
-            ],
-          ),
+        // LLM Provider Section
+        _ProviderSection(
+          title: context.l10n.agent_create_llm_provider,
+          selectedProvider: selectedLLMProvider,
+          selectedModel: selectedLLMModel,
+          availableProviders: availableProviders,
+          availableModels: availableLLMModels,
+          isLoadingModels: isLoadingLLMModels,
+          onProviderChanged: (value) => onLLMProviderChanged(value as models.ProviderConfig?),
+          onModelChanged: (value) => onLLMModelChanged(value as LLMModel?),
+          modelType: _ModelType.llm,
         ),
+        const SizedBox(height: AppTheme.spacing24),
 
-        if (byokMode) ...[
-          // BYOK Mode: Show Provider Selection
-          const SizedBox(height: AppTheme.spacing24),
-
-          // LLM Provider Section
-          _ProviderSection(
-            title: context.l10n.agent_create_llm_provider,
-            selectedProvider: selectedLLMProvider,
-            selectedModel: selectedLLMModel,
-            availableProviders: availableProviders,
-            availableModels: availableLLMModels,
-            isLoadingModels: isLoadingLLMModels,
-            onProviderChanged: (value) => onLLMProviderChanged(value as models.ProviderConfig?),
-            onModelChanged: (value) => onLLMModelChanged(value as LLMModel?),
-            modelType: _ModelType.llm,
-          ),
-          const SizedBox(height: AppTheme.spacing24),
-
-          // Embedding Provider Section (only show in BYOK mode)
-          _ProviderSection(
-            title: context.l10n.agent_create_embedding_provider,
-            selectedProvider: selectedEmbeddingProvider,
-            selectedModel: selectedEmbeddingModel,
-            availableProviders: availableProviders,
-            availableModels: availableEmbeddingModels,
-            isLoadingModels: isLoadingEmbeddingModels,
-            onProviderChanged: (value) => onEmbeddingProviderChanged(value as models.ProviderConfig?),
-            onModelChanged: (value) => onEmbeddingModelChanged(value as LLMModel?),
-            modelType: _ModelType.embedding,
-          ),
-        ] else ...[
-          // Non-BYOK Mode: Direct Model Selection (no Provider selection)
-          const SizedBox(height: AppTheme.spacing24),
-
-          // LLM Model Selection
-          _DirectModelSection(
-            title: context.l10n.agent_create_llm_model,
-            selectedModel: selectedLLMModel,
-            availableModels: availableLLMModels,
-            isLoadingModels: isLoadingLLMModels,
-            onModelChanged: (value) => onLLMModelChanged(value as LLMModel?),
-            modelType: _ModelType.llm,
-          ),
-
-          const SizedBox(height: AppTheme.spacing24),
-
-          // Embedding Model Selection
-          _DirectModelSection(
-            title: context.l10n.agent_create_embedding_model,
-            selectedModel: selectedEmbeddingModel,
-            availableModels: availableEmbeddingModels,
-            isLoadingModels: false,
-            onModelChanged: (value) => onEmbeddingModelChanged(value as LLMModel?),
-            modelType: _ModelType.embedding,
-          ),
-        ],
+        // Embedding Provider Section
+        _ProviderSection(
+          title: context.l10n.agent_create_embedding_provider,
+          selectedProvider: selectedEmbeddingProvider,
+          selectedModel: selectedEmbeddingModel,
+          availableProviders: availableProviders,
+          availableModels: availableEmbeddingModels,
+          isLoadingModels: isLoadingEmbeddingModels,
+          onProviderChanged: (value) => onEmbeddingProviderChanged(value as models.ProviderConfig?),
+          onModelChanged: (value) => onEmbeddingModelChanged(value as LLMModel?),
+          modelType: _ModelType.embedding,
+        ),
       ],
     );
   }
@@ -1077,81 +926,6 @@ class _ProviderSection extends StatelessWidget {
               : (value) {
                   onModelChanged(value);
                 },
-          validator: (value) {
-            if (value == null) {
-              return context.l10n.agent_create_please_select_model;
-            }
-            return null;
-          },
-        ),
-      ],
-    );
-  }
-}
-
-/// Direct model selection widget for non-BYOK mode
-class _DirectModelSection extends StatelessWidget {
-  final String title;
-  final LLMModel? selectedModel;
-  final List<LLMModel> availableModels;
-  final bool isLoadingModels;
-  final Function(LLMModel?) onModelChanged;
-  final _ModelType modelType;
-
-  const _DirectModelSection({
-    required this.title,
-    required this.selectedModel,
-    required this.availableModels,
-    required this.isLoadingModels,
-    required this.onModelChanged,
-    required this.modelType,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).extension<KluiCustomColors>()!;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: AppTheme.titleMedium,
-        ),
-        const SizedBox(height: AppTheme.spacing8),
-        DropdownButtonFormField<LLMModel>(
-          value: selectedModel,
-          decoration: InputDecoration(
-            labelText: context.l10n.agent_create_select_model,
-            border: OutlineInputBorder(
-              borderRadius: const BorderRadius.all(
-                Radius.circular(AppTheme.radiusSmall),
-              ),
-              borderSide: BorderSide(
-                color: colors.border,
-                width: 2,
-              ),
-            ),
-            filled: true,
-            fillColor: colors.surfaceVariant,
-          ),
-          hint: availableModels.isEmpty
-              ? Text(
-                  context.l10n.agent_create_no_models,
-                  style: TextStyle(
-                    color: colors.error,
-                    fontSize: 14,
-                  ),
-                )
-              : Text(context.l10n.agent_create_select_model),
-          items: availableModels.map((model) {
-            return DropdownMenuItem<LLMModel>(
-              value: model,
-              child: Text(model.handle), // Use handle to show provider/model format
-            );
-          }).toList(),
-          onChanged: (availableModels.isEmpty || isLoadingModels)
-              ? null
-              : onModelChanged,
           validator: (value) {
             if (value == null) {
               return context.l10n.agent_create_please_select_model;

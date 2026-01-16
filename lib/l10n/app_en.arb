@@ -159,7 +159,7 @@
   "provider_list_create_button": "Create Provider",
   "provider_list_details_coming_soon": "Provider details for {name} - Coming soon!",
 
-  "provider_card_label": "Provider card: {name}, type: {type}, category: {category}",
+  "provider_card_label": "Provider card: {name}, type: {type}",
   "provider_card_hint_view_details": "Double tap to view details",
   "provider_card_hint_with_delete": "Double tap to view details, has delete button",
   "provider_card_delete_provider": "Delete provider",

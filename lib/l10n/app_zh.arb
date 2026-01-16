@@ -159,7 +159,7 @@
   "provider_list_create_button": "创建Provider",
   "provider_list_details_coming_soon": "{name} 的Provider详情 - 即将推出！",
 
-  "provider_card_label": "Provider卡片：{name}，类型：{type}，类别：{category}",
+  "provider_card_label": "Provider卡片：{name}，类型：{type}",
   "provider_card_hint_view_details": "双击查看详情",
   "provider_card_hint_with_delete": "双击查看详情，有删除按钮",
   "provider_card_delete_provider": "删除Provider",

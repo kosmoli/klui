@@ -113,6 +113,7 @@ Future<models.ProviderConfig> provider(Ref ref, String id) async {
 }
 
 /// Provider for LLM Models List (all models)
+/// In Memos, all models come from user-created providers
 @riverpod
 Future<List<LLMModel>> llmModelList(Ref ref) async {
   final client = ref.watch(apiClientProvider);
@@ -191,76 +192,16 @@ Future<List<EmbeddingModel>> embeddingModelList(Ref ref) async {
   }
 }
 
-/// Provider for Base Category LLM Models (memory providers, non-BYOK)
-/// These are the default providers created from environment variables
-@riverpod
-Future<List<LLMModel>> baseLLMModelList(Ref ref) async {
-  final client = ref.watch(apiClientProvider);
-  final response = await client.get(
-    '/models/',
-    queryParameters: {'provider_category': 'base'},
-  );
-
-  if (response.statusCode == 200) {
-    final List<dynamic> jsonData = [];
-    try {
-      final dynamic decoded = jsonDecode(response.body);
-      if (decoded is List) {
-        jsonData.addAll(decoded);
-      }
-    } catch (e) {
-      return [];
-    }
-
-    return jsonData
-        .map((json) => LLMModel.fromJson(json as Map<String, dynamic>))
-        .toList();
-  } else {
-    throw Exception('Failed to load base LLM models: ${response.statusCode}');
-  }
-}
-
-/// Provider for BYOK Category LLM Models (database providers, user-created)
-/// These are custom providers created via API
-@riverpod
-Future<List<LLMModel>> byokLLMModelList(Ref ref) async {
-  final client = ref.watch(apiClientProvider);
-  final response = await client.get(
-    '/models/',
-    queryParameters: {'provider_category': 'byok'},
-  );
-
-  if (response.statusCode == 200) {
-    final List<dynamic> jsonData = [];
-    try {
-      final dynamic decoded = jsonDecode(response.body);
-      if (decoded is List) {
-        jsonData.addAll(decoded);
-      }
-    } catch (e) {
-      return [];
-    }
-
-    return jsonData
-        .map((json) => LLMModel.fromJson(json as Map<String, dynamic>))
-        .toList();
-  } else {
-    throw Exception('Failed to load BYOK LLM models: ${response.statusCode}');
-  }
-}
-
 /// Provider for creating an Agent
-/// Automatically uses simple format for non-BYOK mode
-/// and full config format for BYOK mode
+/// In Memos, always uses simple format (no BYOK distinction)
 @riverpod
 Future<Agent> createAgent(Ref ref, CreateAgentRequest request) async {
   final client = ref.watch(apiClientProvider);
 
-  // Convert request to JSON based on BYOK mode
+  // Convert request to JSON
   final requestBody = request.toJson();
 
   // Debug logging
-  print('[createAgent] BYOK mode: ${request.isBYOK}');
   print('[createAgent] Request body: ${jsonEncode(requestBody)}');
 
   final response = await client.post(

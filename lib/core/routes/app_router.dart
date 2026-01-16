@@ -9,6 +9,7 @@ import '../../features/providers/screens/provider_create_screen.dart';
 import '../../features/providers/screens/provider_detail_screen.dart';
 import '../../features/chat/screens/chat_screen.dart';
 import '../extensions/context_extensions.dart';
+import '../providers/chat_providers.dart';
 
 /// Application router configuration
 /// Chat is now the homepage - this is an AI assistant first, management tool second
@@ -21,10 +22,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/chat',
         name: 'chat',
         pageBuilder: (context, state) {
-          // Get agent ID from query parameter, default to first agent if not provided
-          final agentId = state.uri.queryParameters['agentId'] ?? '';
+          // ChatScreen will read agentId from selectedAgentIdProvider
+          // Query param can override it temporarily
+          final queryAgentId = state.uri.queryParameters['agentId'];
           return CustomTransitionPage(
-            child: ChatScreen(agentId: agentId),
+            child: ChatScreen(initialAgentId: queryAgentId),
             transitionDuration: Duration.zero,
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return child;

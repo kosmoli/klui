@@ -480,8 +480,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String provider_card_label(Object category, Object name, Object type) {
-    return 'Provider card: $name, type: $type, category: $category';
+  String provider_card_label(Object name, Object type) {
+    return 'Provider card: $name, type: $type';
   }
 
   @override

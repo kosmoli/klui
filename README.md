@@ -1,8 +1,8 @@
-# Klui - Ketta Frontend
+# Klui - Frontend for Memos
 
-> **Open-source AI Agent Platform** - No platform lock-in, total freedom
+> **Open-source AI Agent Platform** - Modern web UI for AI agents
 >
-> **Status**: Production-ready frontend for Ketta backend (fork of Letta)
+> **Status**: Production-ready frontend for Memos backend
 >
 > **Tech Stack**: Flutter 3.38.5 / Dart 3.10.4 / WebAssembly
 >
@@ -14,26 +14,21 @@
 
 ## 🎯 What is Klui?
 
-**Klui** is a modern, beautiful web UI for **Ketta** (an open-source fork of Letta AI Agent platform).
+**Klui** is a modern, beautiful web UI for **Memos** (a fork of Letta AI Agent platform with unified provider management).
 
 ### Key Philosophy
 
-- ✅ **100% Open Source** - No platform lock-in, no forced subscriptions
-- ✅ **Freedom** - Use any provider, any API, no restrictions
+- ✅ **100% Open Source** - Full control over your AI infrastructure
 - ✅ **Beautiful UI** - CRT retro terminal theme with modern UX
 - ✅ **Full-Featured** - Complete agent and provider management
 - ✅ **Easy Deployment** - Single Docker container, ready in minutes
 
-### Why Ketta?
+### Backend Compatibility
 
-We forked Letta because:
-- ❌ Letta hardcodes restrictions (e.g., `openai-proxy` requirement)
-- ❌ Provider deletion doesn't actually delete (soft delete issue)
-- ❌ Official platform prioritized over open-source community
-- ❌ No official frontend provided
-- ❌ $20/month subscription just to use your own API keys
-
-**Ketta = Letta - Restrictions + Freedom**
+Klui is designed to work with the **Memos** backend, which is a modified version of Letta with the following changes:
+- Unified provider system (all providers managed through API)
+- Custom provider names supported
+- Hard delete for providers
 
 ---
 
@@ -43,7 +38,7 @@ We forked Letta because:
 
 - **Agent List** - View all agents with pagination
 - **Agent Details** - Full configuration, tools, memory blocks
-- **Agent Creation** - 3-step wizard supporting both BYOK and Base modes
+- **Agent Creation** - Step-by-step creation wizard
 - **Agent Deletion** - Hard delete (truly removes from database)
 - **Model Selection** - Dynamic provider and model loading
 - **System Prompt** - Configure agent behavior
@@ -78,7 +73,6 @@ We forked Letta because:
 
 ### Technical Features ✅
 
-- **Automatic Handle Transformation** - Works around Letta's `openai-proxy` restriction
 - **State Management** - Riverpod with code generation
 - **Routing** - Deep linking support with go_router
 - **Type Safety** - Freezed for immutable models
@@ -128,14 +122,12 @@ The following features from CHAT_FEATURE_COMPARISON.md are **not yet implemented
 - [ ] **Analytics Dashboard** - Usage statistics and insights
 - [ ] **Multi-Modal** - Image support in conversations
 
-**Why not implemented?** These require backend support from Ketta (Letta fork) or are lower priority.
+**Why not implemented?** These require backend support from Memos or are lower priority.
 
-### Requires Ketta Backend Changes 🔵
+### Requires Memos Backend Changes 🔵
 
-These features require modifications to the Ketta backend:
+These features require modifications to the Memos backend:
 
-- [ ] **True Provider Name Support** - Remove `openai-proxy` hard-coding
-- [ ] **Hard Delete for Providers** - Fix soft delete issue
 - [ ] **Multiple Providers** - Use same provider type with different configs
 - [ ] **Provider Health Checks** - Monitor provider availability
 - [ ] **Load Balancing** - Distribute load across providers
@@ -163,8 +155,7 @@ These features require modifications to the Ketta backend:
 
 ### Backend
 
-**Current**: Compatible with Letta backend API (with workarounds)
-**Future**: Will switch to Ketta backend (fork of Letta without restrictions)
+**Current**: Designed for Memos backend (a fork of Letta with unified provider management)
 
 ---
 
@@ -174,7 +165,7 @@ These features require modifications to the Ketta backend:
 
 - Flutter SDK >= 3.38.5
 - Dart >= 3.10.4
-- Ketta/Letta backend running on `http://localhost:8283`
+- Memos backend running on `http://localhost:8283`
 
 ### Development
 
@@ -297,7 +288,7 @@ Klui uses a **CRT retro terminal aesthetic** inspired by vintage monitors:
 **Phase 5: Polish** (2026-01-12)
 - Context size warnings
 - Improved error messages
-- Handle transformation workaround
+- Agent selection persistence
 - Documentation completion
 
 ### In Progress 🚧
@@ -314,7 +305,7 @@ Klui uses a **CRT retro terminal aesthetic** inspired by vintage monitors:
 - File browser UI
 - Upload/download
 - Code execution
-- Integration with Ketta backend tools
+- Integration with Memos backend tools
 
 **Phase 8: Advanced Features**
 - Testing interface
@@ -373,7 +364,7 @@ We welcome contributions! Please see:
 ## 🌐 Links
 
 - **GitHub**: https://github.com/kosmoli/klui
-- **Ketta (Backend)**: https://github.com/kosmoli/ketta (coming soon)
+- **Memos (Backend)**: https://github.com/kosmoli/memos
 - **Letta (Upstream)**: https://github.com/letta-ai/letta
 - **Demo**: http://38.175.200.93:8080 (when deployed)
 
@@ -409,6 +400,6 @@ Special thanks to the open-source community for tools and libraries that make Kl
 
 ---
 
-**Last Updated**: 2026-01-12
+**Last Updated**: 2026-01-16
 **Version**: v1.0.0-beta
-**Status**: Production-ready for Ketta backend, compatible with Letta backend (with limitations)
+**Status**: Production-ready for Memos backend

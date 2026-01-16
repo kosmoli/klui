@@ -935,8 +935,8 @@ abstract class AppLocalizations {
   /// No description provided for @provider_card_label.
   ///
   /// In en, this message translates to:
-  /// **'Provider card: {name}, type: {type}, category: {category}'**
-  String provider_card_label(Object category, Object name, Object type);
+  /// **'Provider card: {name}, type: {type}'**
+  String provider_card_label(Object name, Object type);
 
   /// No description provided for @provider_card_hint_view_details.
   ///

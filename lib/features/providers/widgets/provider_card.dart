@@ -11,6 +11,8 @@ import '../../../core/theme/klui_theme_extension.dart';
 /// - Monospace font for technical details (ID, dates)
 /// - Provider type indicators with distinct colors
 /// - Hover effects and subtle animations
+///
+/// In Memos, all providers are user-created (no BYOK/base category distinction)
 class ProviderCard extends StatelessWidget {
   final ProviderConfig provider;
   final VoidCallback? onTap;
@@ -128,7 +130,7 @@ class ProviderCard extends StatelessWidget {
                         ],
                       ),
 
-                      // Footer: Type + Category + Updated Date
+                      // Footer: Type Badge only (no category in Memos)
                       const SizedBox(height: 12),
                       Row(
                         children: [
@@ -137,18 +139,6 @@ class ProviderCard extends StatelessWidget {
                             icon: Icons.cloud_outlined,
                             label: _formatProviderType(context),
                             color: colors.userBubble,
-                          ),
-                          const SizedBox(width: 8),
-
-                          // Provider Category Badge
-                          _InfoChip(
-                            icon: provider.providerCategory == 'base'
-                                ? Icons.memory_outlined
-                                : Icons.storage_outlined,
-                            label: provider.providerCategory.toUpperCase(),
-                            color: provider.providerCategory == 'base'
-                                ? colors.toolFile
-                                : colors.toolSearch,
                           ),
 
                           const Spacer(),
@@ -182,8 +172,7 @@ class ProviderCard extends StatelessWidget {
 
   String _getCardLabel(BuildContext context) {
     final type = _formatProviderType(context);
-    final category = provider.providerCategory.toUpperCase();
-    return context.l10n.provider_card_label(provider.name, type, category);
+    return context.l10n.provider_card_label(provider.name, type);
   }
 
   String _getCardHint(BuildContext context) {

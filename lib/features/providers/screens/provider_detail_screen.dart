@@ -160,14 +160,7 @@ class ProviderDetailScreen extends ConsumerWidget {
                   value: provider.providerType,
                   valueStyle: KluiTextStyles.bodyMedium,
                 ),
-                const SizedBox(height: 12),
-                _InfoRow(
-                  label: context.l10n.provider_detail_field_category,
-                  value: provider.providerCategory == 'base'
-                      ? context.l10n.provider_detail_category_base
-                      : context.l10n.provider_detail_category_byok,
-                  valueStyle: KluiTextStyles.bodyMedium,
-                ),
+                // In Memos, all providers are user-created (no BYOK/base category distinction)
                 if (provider.organizationId != null) ...[
                   const SizedBox(height: 12),
                   _InfoRow(

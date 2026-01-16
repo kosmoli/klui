@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ProviderConfig {
 
- String get id; String get name;@JsonKey(name: 'provider_type') String get providerType;@JsonKey(name: 'provider_category') String get providerCategory;@JsonKey(name: 'base_url') String? get baseUrl;@JsonKey(name: 'api_key') String? get apiKey;@JsonKey(name: 'access_key') String? get accessKey; String? get region;@JsonKey(name: 'updated_at') DateTime? get updatedAt;@JsonKey(name: 'organization_id') String? get organizationId;@JsonKey(name: 'api_key_enc') String? get apiKeyEnc;@JsonKey(name: 'access_key_enc') String? get accessKeyEnc;
+ String get id; String get name;@JsonKey(name: 'provider_type') String get providerType;@JsonKey(name: 'base_url') String? get baseUrl;@JsonKey(name: 'api_key') String? get apiKey;@JsonKey(name: 'access_key') String? get accessKey; String? get region;@JsonKey(name: 'api_version') String? get apiVersion;@JsonKey(name: 'updated_at') DateTime? get updatedAt;@JsonKey(name: 'organization_id') String? get organizationId;@JsonKey(name: 'api_key_enc') String? get apiKeyEnc;@JsonKey(name: 'access_key_enc') String? get accessKeyEnc;
 /// Create a copy of ProviderConfig
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $ProviderConfigCopyWith<ProviderConfig> get copyWith => _$ProviderConfigCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProviderConfig&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.providerType, providerType) || other.providerType == providerType)&&(identical(other.providerCategory, providerCategory) || other.providerCategory == providerCategory)&&(identical(other.baseUrl, baseUrl) || other.baseUrl == baseUrl)&&(identical(other.apiKey, apiKey) || other.apiKey == apiKey)&&(identical(other.accessKey, accessKey) || other.accessKey == accessKey)&&(identical(other.region, region) || other.region == region)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.apiKeyEnc, apiKeyEnc) || other.apiKeyEnc == apiKeyEnc)&&(identical(other.accessKeyEnc, accessKeyEnc) || other.accessKeyEnc == accessKeyEnc));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ProviderConfig&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.providerType, providerType) || other.providerType == providerType)&&(identical(other.baseUrl, baseUrl) || other.baseUrl == baseUrl)&&(identical(other.apiKey, apiKey) || other.apiKey == apiKey)&&(identical(other.accessKey, accessKey) || other.accessKey == accessKey)&&(identical(other.region, region) || other.region == region)&&(identical(other.apiVersion, apiVersion) || other.apiVersion == apiVersion)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.apiKeyEnc, apiKeyEnc) || other.apiKeyEnc == apiKeyEnc)&&(identical(other.accessKeyEnc, accessKeyEnc) || other.accessKeyEnc == accessKeyEnc));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,providerType,providerCategory,baseUrl,apiKey,accessKey,region,updatedAt,organizationId,apiKeyEnc,accessKeyEnc);
+int get hashCode => Object.hash(runtimeType,id,name,providerType,baseUrl,apiKey,accessKey,region,apiVersion,updatedAt,organizationId,apiKeyEnc,accessKeyEnc);
 
 @override
 String toString() {
-  return 'ProviderConfig(id: $id, name: $name, providerType: $providerType, providerCategory: $providerCategory, baseUrl: $baseUrl, apiKey: $apiKey, accessKey: $accessKey, region: $region, updatedAt: $updatedAt, organizationId: $organizationId, apiKeyEnc: $apiKeyEnc, accessKeyEnc: $accessKeyEnc)';
+  return 'ProviderConfig(id: $id, name: $name, providerType: $providerType, baseUrl: $baseUrl, apiKey: $apiKey, accessKey: $accessKey, region: $region, apiVersion: $apiVersion, updatedAt: $updatedAt, organizationId: $organizationId, apiKeyEnc: $apiKeyEnc, accessKeyEnc: $accessKeyEnc)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $ProviderConfigCopyWith<$Res>  {
   factory $ProviderConfigCopyWith(ProviderConfig value, $Res Function(ProviderConfig) _then) = _$ProviderConfigCopyWithImpl;
 @useResult
 $Res call({
- String id, String name,@JsonKey(name: 'provider_type') String providerType,@JsonKey(name: 'provider_category') String providerCategory,@JsonKey(name: 'base_url') String? baseUrl,@JsonKey(name: 'api_key') String? apiKey,@JsonKey(name: 'access_key') String? accessKey, String? region,@JsonKey(name: 'updated_at') DateTime? updatedAt,@JsonKey(name: 'organization_id') String? organizationId,@JsonKey(name: 'api_key_enc') String? apiKeyEnc,@JsonKey(name: 'access_key_enc') String? accessKeyEnc
+ String id, String name,@JsonKey(name: 'provider_type') String providerType,@JsonKey(name: 'base_url') String? baseUrl,@JsonKey(name: 'api_key') String? apiKey,@JsonKey(name: 'access_key') String? accessKey, String? region,@JsonKey(name: 'api_version') String? apiVersion,@JsonKey(name: 'updated_at') DateTime? updatedAt,@JsonKey(name: 'organization_id') String? organizationId,@JsonKey(name: 'api_key_enc') String? apiKeyEnc,@JsonKey(name: 'access_key_enc') String? accessKeyEnc
 });
 
 
@@ -65,16 +65,16 @@ class _$ProviderConfigCopyWithImpl<$Res>
 
 /// Create a copy of ProviderConfig
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? providerType = null,Object? providerCategory = null,Object? baseUrl = freezed,Object? apiKey = freezed,Object? accessKey = freezed,Object? region = freezed,Object? updatedAt = freezed,Object? organizationId = freezed,Object? apiKeyEnc = freezed,Object? accessKeyEnc = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? providerType = null,Object? baseUrl = freezed,Object? apiKey = freezed,Object? accessKey = freezed,Object? region = freezed,Object? apiVersion = freezed,Object? updatedAt = freezed,Object? organizationId = freezed,Object? apiKeyEnc = freezed,Object? accessKeyEnc = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,providerType: null == providerType ? _self.providerType : providerType // ignore: cast_nullable_to_non_nullable
-as String,providerCategory: null == providerCategory ? _self.providerCategory : providerCategory // ignore: cast_nullable_to_non_nullable
 as String,baseUrl: freezed == baseUrl ? _self.baseUrl : baseUrl // ignore: cast_nullable_to_non_nullable
 as String?,apiKey: freezed == apiKey ? _self.apiKey : apiKey // ignore: cast_nullable_to_non_nullable
 as String?,accessKey: freezed == accessKey ? _self.accessKey : accessKey // ignore: cast_nullable_to_non_nullable
 as String?,region: freezed == region ? _self.region : region // ignore: cast_nullable_to_non_nullable
+as String?,apiVersion: freezed == apiVersion ? _self.apiVersion : apiVersion // ignore: cast_nullable_to_non_nullable
 as String?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,organizationId: freezed == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
 as String?,apiKeyEnc: freezed == apiKeyEnc ? _self.apiKeyEnc : apiKeyEnc // ignore: cast_nullable_to_non_nullable
@@ -164,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(name: 'provider_type')  String providerType, @JsonKey(name: 'provider_category')  String providerCategory, @JsonKey(name: 'base_url')  String? baseUrl, @JsonKey(name: 'api_key')  String? apiKey, @JsonKey(name: 'access_key')  String? accessKey,  String? region, @JsonKey(name: 'updated_at')  DateTime? updatedAt, @JsonKey(name: 'organization_id')  String? organizationId, @JsonKey(name: 'api_key_enc')  String? apiKeyEnc, @JsonKey(name: 'access_key_enc')  String? accessKeyEnc)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(name: 'provider_type')  String providerType, @JsonKey(name: 'base_url')  String? baseUrl, @JsonKey(name: 'api_key')  String? apiKey, @JsonKey(name: 'access_key')  String? accessKey,  String? region, @JsonKey(name: 'api_version')  String? apiVersion, @JsonKey(name: 'updated_at')  DateTime? updatedAt, @JsonKey(name: 'organization_id')  String? organizationId, @JsonKey(name: 'api_key_enc')  String? apiKeyEnc, @JsonKey(name: 'access_key_enc')  String? accessKeyEnc)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProviderConfig() when $default != null:
-return $default(_that.id,_that.name,_that.providerType,_that.providerCategory,_that.baseUrl,_that.apiKey,_that.accessKey,_that.region,_that.updatedAt,_that.organizationId,_that.apiKeyEnc,_that.accessKeyEnc);case _:
+return $default(_that.id,_that.name,_that.providerType,_that.baseUrl,_that.apiKey,_that.accessKey,_that.region,_that.apiVersion,_that.updatedAt,_that.organizationId,_that.apiKeyEnc,_that.accessKeyEnc);case _:
   return orElse();
 
 }
@@ -185,10 +185,10 @@ return $default(_that.id,_that.name,_that.providerType,_that.providerCategory,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(name: 'provider_type')  String providerType, @JsonKey(name: 'provider_category')  String providerCategory, @JsonKey(name: 'base_url')  String? baseUrl, @JsonKey(name: 'api_key')  String? apiKey, @JsonKey(name: 'access_key')  String? accessKey,  String? region, @JsonKey(name: 'updated_at')  DateTime? updatedAt, @JsonKey(name: 'organization_id')  String? organizationId, @JsonKey(name: 'api_key_enc')  String? apiKeyEnc, @JsonKey(name: 'access_key_enc')  String? accessKeyEnc)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name, @JsonKey(name: 'provider_type')  String providerType, @JsonKey(name: 'base_url')  String? baseUrl, @JsonKey(name: 'api_key')  String? apiKey, @JsonKey(name: 'access_key')  String? accessKey,  String? region, @JsonKey(name: 'api_version')  String? apiVersion, @JsonKey(name: 'updated_at')  DateTime? updatedAt, @JsonKey(name: 'organization_id')  String? organizationId, @JsonKey(name: 'api_key_enc')  String? apiKeyEnc, @JsonKey(name: 'access_key_enc')  String? accessKeyEnc)  $default,) {final _that = this;
 switch (_that) {
 case _ProviderConfig():
-return $default(_that.id,_that.name,_that.providerType,_that.providerCategory,_that.baseUrl,_that.apiKey,_that.accessKey,_that.region,_that.updatedAt,_that.organizationId,_that.apiKeyEnc,_that.accessKeyEnc);case _:
+return $default(_that.id,_that.name,_that.providerType,_that.baseUrl,_that.apiKey,_that.accessKey,_that.region,_that.apiVersion,_that.updatedAt,_that.organizationId,_that.apiKeyEnc,_that.accessKeyEnc);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +205,10 @@ return $default(_that.id,_that.name,_that.providerType,_that.providerCategory,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name, @JsonKey(name: 'provider_type')  String providerType, @JsonKey(name: 'provider_category')  String providerCategory, @JsonKey(name: 'base_url')  String? baseUrl, @JsonKey(name: 'api_key')  String? apiKey, @JsonKey(name: 'access_key')  String? accessKey,  String? region, @JsonKey(name: 'updated_at')  DateTime? updatedAt, @JsonKey(name: 'organization_id')  String? organizationId, @JsonKey(name: 'api_key_enc')  String? apiKeyEnc, @JsonKey(name: 'access_key_enc')  String? accessKeyEnc)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name, @JsonKey(name: 'provider_type')  String providerType, @JsonKey(name: 'base_url')  String? baseUrl, @JsonKey(name: 'api_key')  String? apiKey, @JsonKey(name: 'access_key')  String? accessKey,  String? region, @JsonKey(name: 'api_version')  String? apiVersion, @JsonKey(name: 'updated_at')  DateTime? updatedAt, @JsonKey(name: 'organization_id')  String? organizationId, @JsonKey(name: 'api_key_enc')  String? apiKeyEnc, @JsonKey(name: 'access_key_enc')  String? accessKeyEnc)?  $default,) {final _that = this;
 switch (_that) {
 case _ProviderConfig() when $default != null:
-return $default(_that.id,_that.name,_that.providerType,_that.providerCategory,_that.baseUrl,_that.apiKey,_that.accessKey,_that.region,_that.updatedAt,_that.organizationId,_that.apiKeyEnc,_that.accessKeyEnc);case _:
+return $default(_that.id,_that.name,_that.providerType,_that.baseUrl,_that.apiKey,_that.accessKey,_that.region,_that.apiVersion,_that.updatedAt,_that.organizationId,_that.apiKeyEnc,_that.accessKeyEnc);case _:
   return null;
 
 }
@@ -220,17 +220,17 @@ return $default(_that.id,_that.name,_that.providerType,_that.providerCategory,_t
 @JsonSerializable()
 
 class _ProviderConfig extends ProviderConfig {
-  const _ProviderConfig({required this.id, required this.name, @JsonKey(name: 'provider_type') required this.providerType, @JsonKey(name: 'provider_category') required this.providerCategory, @JsonKey(name: 'base_url') this.baseUrl, @JsonKey(name: 'api_key') this.apiKey, @JsonKey(name: 'access_key') this.accessKey, this.region, @JsonKey(name: 'updated_at') this.updatedAt, @JsonKey(name: 'organization_id') this.organizationId, @JsonKey(name: 'api_key_enc') this.apiKeyEnc, @JsonKey(name: 'access_key_enc') this.accessKeyEnc}): super._();
+  const _ProviderConfig({required this.id, required this.name, @JsonKey(name: 'provider_type') required this.providerType, @JsonKey(name: 'base_url') this.baseUrl, @JsonKey(name: 'api_key') this.apiKey, @JsonKey(name: 'access_key') this.accessKey, this.region, @JsonKey(name: 'api_version') this.apiVersion, @JsonKey(name: 'updated_at') this.updatedAt, @JsonKey(name: 'organization_id') this.organizationId, @JsonKey(name: 'api_key_enc') this.apiKeyEnc, @JsonKey(name: 'access_key_enc') this.accessKeyEnc}): super._();
   factory _ProviderConfig.fromJson(Map<String, dynamic> json) => _$ProviderConfigFromJson(json);
 
 @override final  String id;
 @override final  String name;
 @override@JsonKey(name: 'provider_type') final  String providerType;
-@override@JsonKey(name: 'provider_category') final  String providerCategory;
 @override@JsonKey(name: 'base_url') final  String? baseUrl;
 @override@JsonKey(name: 'api_key') final  String? apiKey;
 @override@JsonKey(name: 'access_key') final  String? accessKey;
 @override final  String? region;
+@override@JsonKey(name: 'api_version') final  String? apiVersion;
 @override@JsonKey(name: 'updated_at') final  DateTime? updatedAt;
 @override@JsonKey(name: 'organization_id') final  String? organizationId;
 @override@JsonKey(name: 'api_key_enc') final  String? apiKeyEnc;
@@ -249,16 +249,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProviderConfig&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.providerType, providerType) || other.providerType == providerType)&&(identical(other.providerCategory, providerCategory) || other.providerCategory == providerCategory)&&(identical(other.baseUrl, baseUrl) || other.baseUrl == baseUrl)&&(identical(other.apiKey, apiKey) || other.apiKey == apiKey)&&(identical(other.accessKey, accessKey) || other.accessKey == accessKey)&&(identical(other.region, region) || other.region == region)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.apiKeyEnc, apiKeyEnc) || other.apiKeyEnc == apiKeyEnc)&&(identical(other.accessKeyEnc, accessKeyEnc) || other.accessKeyEnc == accessKeyEnc));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProviderConfig&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.providerType, providerType) || other.providerType == providerType)&&(identical(other.baseUrl, baseUrl) || other.baseUrl == baseUrl)&&(identical(other.apiKey, apiKey) || other.apiKey == apiKey)&&(identical(other.accessKey, accessKey) || other.accessKey == accessKey)&&(identical(other.region, region) || other.region == region)&&(identical(other.apiVersion, apiVersion) || other.apiVersion == apiVersion)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.apiKeyEnc, apiKeyEnc) || other.apiKeyEnc == apiKeyEnc)&&(identical(other.accessKeyEnc, accessKeyEnc) || other.accessKeyEnc == accessKeyEnc));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,providerType,providerCategory,baseUrl,apiKey,accessKey,region,updatedAt,organizationId,apiKeyEnc,accessKeyEnc);
+int get hashCode => Object.hash(runtimeType,id,name,providerType,baseUrl,apiKey,accessKey,region,apiVersion,updatedAt,organizationId,apiKeyEnc,accessKeyEnc);
 
 @override
 String toString() {
-  return 'ProviderConfig(id: $id, name: $name, providerType: $providerType, providerCategory: $providerCategory, baseUrl: $baseUrl, apiKey: $apiKey, accessKey: $accessKey, region: $region, updatedAt: $updatedAt, organizationId: $organizationId, apiKeyEnc: $apiKeyEnc, accessKeyEnc: $accessKeyEnc)';
+  return 'ProviderConfig(id: $id, name: $name, providerType: $providerType, baseUrl: $baseUrl, apiKey: $apiKey, accessKey: $accessKey, region: $region, apiVersion: $apiVersion, updatedAt: $updatedAt, organizationId: $organizationId, apiKeyEnc: $apiKeyEnc, accessKeyEnc: $accessKeyEnc)';
 }
 
 
@@ -269,7 +269,7 @@ abstract mixin class _$ProviderConfigCopyWith<$Res> implements $ProviderConfigCo
   factory _$ProviderConfigCopyWith(_ProviderConfig value, $Res Function(_ProviderConfig) _then) = __$ProviderConfigCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name,@JsonKey(name: 'provider_type') String providerType,@JsonKey(name: 'provider_category') String providerCategory,@JsonKey(name: 'base_url') String? baseUrl,@JsonKey(name: 'api_key') String? apiKey,@JsonKey(name: 'access_key') String? accessKey, String? region,@JsonKey(name: 'updated_at') DateTime? updatedAt,@JsonKey(name: 'organization_id') String? organizationId,@JsonKey(name: 'api_key_enc') String? apiKeyEnc,@JsonKey(name: 'access_key_enc') String? accessKeyEnc
+ String id, String name,@JsonKey(name: 'provider_type') String providerType,@JsonKey(name: 'base_url') String? baseUrl,@JsonKey(name: 'api_key') String? apiKey,@JsonKey(name: 'access_key') String? accessKey, String? region,@JsonKey(name: 'api_version') String? apiVersion,@JsonKey(name: 'updated_at') DateTime? updatedAt,@JsonKey(name: 'organization_id') String? organizationId,@JsonKey(name: 'api_key_enc') String? apiKeyEnc,@JsonKey(name: 'access_key_enc') String? accessKeyEnc
 });
 
 
@@ -286,16 +286,16 @@ class __$ProviderConfigCopyWithImpl<$Res>
 
 /// Create a copy of ProviderConfig
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? providerType = null,Object? providerCategory = null,Object? baseUrl = freezed,Object? apiKey = freezed,Object? accessKey = freezed,Object? region = freezed,Object? updatedAt = freezed,Object? organizationId = freezed,Object? apiKeyEnc = freezed,Object? accessKeyEnc = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? providerType = null,Object? baseUrl = freezed,Object? apiKey = freezed,Object? accessKey = freezed,Object? region = freezed,Object? apiVersion = freezed,Object? updatedAt = freezed,Object? organizationId = freezed,Object? apiKeyEnc = freezed,Object? accessKeyEnc = freezed,}) {
   return _then(_ProviderConfig(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,providerType: null == providerType ? _self.providerType : providerType // ignore: cast_nullable_to_non_nullable
-as String,providerCategory: null == providerCategory ? _self.providerCategory : providerCategory // ignore: cast_nullable_to_non_nullable
 as String,baseUrl: freezed == baseUrl ? _self.baseUrl : baseUrl // ignore: cast_nullable_to_non_nullable
 as String?,apiKey: freezed == apiKey ? _self.apiKey : apiKey // ignore: cast_nullable_to_non_nullable
 as String?,accessKey: freezed == accessKey ? _self.accessKey : accessKey // ignore: cast_nullable_to_non_nullable
 as String?,region: freezed == region ? _self.region : region // ignore: cast_nullable_to_non_nullable
+as String?,apiVersion: freezed == apiVersion ? _self.apiVersion : apiVersion // ignore: cast_nullable_to_non_nullable
 as String?,updatedAt: freezed == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,organizationId: freezed == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
 as String?,apiKeyEnc: freezed == apiKeyEnc ? _self.apiKeyEnc : apiKeyEnc // ignore: cast_nullable_to_non_nullable

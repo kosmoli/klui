@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'llm_model.freezed.dart';
 
 /// LLM Model configuration
+/// In Memos, all models are user-created via providers (no BYOK/base distinction)
 @freezed
 abstract class LLMModel with _$LLMModel {
   const LLMModel._();
@@ -16,7 +17,6 @@ abstract class LLMModel with _$LLMModel {
     required String model,
     @JsonKey(name: 'model_endpoint_type') required String modelEndpointType,
     @JsonKey(name: 'model_endpoint') required String modelEndpoint,
-    @JsonKey(name: 'provider_category') required String providerCategory,
     @JsonKey(name: 'model_type') required String modelType,
     @JsonKey(name: 'context_window') required int contextWindow,
     @JsonKey(name: 'put_inner_thoughts_in_kwargs')
@@ -27,9 +27,6 @@ abstract class LLMModel with _$LLMModel {
 
   /// Create LLMModel from JSON with custom fallback logic
   factory LLMModel.fromJson(Map<String, dynamic> json) {
-    // Embedding models from /v1/models/embedding don't have provider_category field
-    final providerCategory = json['provider_category'] as String? ?? 'base';
-
     return LLMModel(
       handle: json['handle'] as String,
       name: json['name'] as String,
@@ -45,7 +42,6 @@ abstract class LLMModel with _$LLMModel {
       modelEndpoint: json['model_endpoint'] as String? ??
           json['embedding_endpoint'] as String? ??
           '',
-      providerCategory: providerCategory,
       modelType: json['model_type'] as String? ??
           (json.containsKey('embedding_model') ? 'embedding' : 'llm'),
       contextWindow: json['context_window'] as int? ?? 30000,

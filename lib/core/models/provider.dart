@@ -4,6 +4,7 @@ part 'provider.freezed.dart';
 part 'provider.g.dart';
 
 /// Provider configuration model for LLM and Embedding providers
+/// In Memos, all providers are user-created (no BYOK/base distinction)
 @freezed
 abstract class ProviderConfig with _$ProviderConfig {
   const ProviderConfig._();
@@ -12,11 +13,11 @@ abstract class ProviderConfig with _$ProviderConfig {
     required String id,
     required String name,
     @JsonKey(name: 'provider_type') required String providerType,
-    @JsonKey(name: 'provider_category') required String providerCategory,
     @JsonKey(name: 'base_url') String? baseUrl,
     @JsonKey(name: 'api_key') String? apiKey,
     @JsonKey(name: 'access_key') String? accessKey,
     String? region,
+    @JsonKey(name: 'api_version') String? apiVersion,
     @JsonKey(name: 'updated_at') DateTime? updatedAt,
     @JsonKey(name: 'organization_id') String? organizationId,
     @JsonKey(name: 'api_key_enc') String? apiKeyEnc,

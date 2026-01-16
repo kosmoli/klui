@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$LLMModel {
 
- String get handle; String get name;@JsonKey(name: 'display_name') String get displayName;@JsonKey(name: 'provider_type') String get providerType;@JsonKey(name: 'provider_name') String get providerName; String get model;@JsonKey(name: 'model_endpoint_type') String get modelEndpointType;@JsonKey(name: 'model_endpoint') String get modelEndpoint;@JsonKey(name: 'provider_category') String get providerCategory;@JsonKey(name: 'model_type') String get modelType;@JsonKey(name: 'context_window') int get contextWindow;@JsonKey(name: 'put_inner_thoughts_in_kwargs') bool get putInnerThoughtsInKwargs; double get temperature;@JsonKey(name: 'max_tokens') int get maxTokens;
+ String get handle; String get name;@JsonKey(name: 'display_name') String get displayName;@JsonKey(name: 'provider_type') String get providerType;@JsonKey(name: 'provider_name') String get providerName; String get model;@JsonKey(name: 'model_endpoint_type') String get modelEndpointType;@JsonKey(name: 'model_endpoint') String get modelEndpoint;@JsonKey(name: 'model_type') String get modelType;@JsonKey(name: 'context_window') int get contextWindow;@JsonKey(name: 'put_inner_thoughts_in_kwargs') bool get putInnerThoughtsInKwargs; double get temperature;@JsonKey(name: 'max_tokens') int get maxTokens;
 /// Create a copy of LLMModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $LLMModelCopyWith<LLMModel> get copyWith => _$LLMModelCopyWithImpl<LLMModel>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LLMModel&&(identical(other.handle, handle) || other.handle == handle)&&(identical(other.name, name) || other.name == name)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.providerType, providerType) || other.providerType == providerType)&&(identical(other.providerName, providerName) || other.providerName == providerName)&&(identical(other.model, model) || other.model == model)&&(identical(other.modelEndpointType, modelEndpointType) || other.modelEndpointType == modelEndpointType)&&(identical(other.modelEndpoint, modelEndpoint) || other.modelEndpoint == modelEndpoint)&&(identical(other.providerCategory, providerCategory) || other.providerCategory == providerCategory)&&(identical(other.modelType, modelType) || other.modelType == modelType)&&(identical(other.contextWindow, contextWindow) || other.contextWindow == contextWindow)&&(identical(other.putInnerThoughtsInKwargs, putInnerThoughtsInKwargs) || other.putInnerThoughtsInKwargs == putInnerThoughtsInKwargs)&&(identical(other.temperature, temperature) || other.temperature == temperature)&&(identical(other.maxTokens, maxTokens) || other.maxTokens == maxTokens));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LLMModel&&(identical(other.handle, handle) || other.handle == handle)&&(identical(other.name, name) || other.name == name)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.providerType, providerType) || other.providerType == providerType)&&(identical(other.providerName, providerName) || other.providerName == providerName)&&(identical(other.model, model) || other.model == model)&&(identical(other.modelEndpointType, modelEndpointType) || other.modelEndpointType == modelEndpointType)&&(identical(other.modelEndpoint, modelEndpoint) || other.modelEndpoint == modelEndpoint)&&(identical(other.modelType, modelType) || other.modelType == modelType)&&(identical(other.contextWindow, contextWindow) || other.contextWindow == contextWindow)&&(identical(other.putInnerThoughtsInKwargs, putInnerThoughtsInKwargs) || other.putInnerThoughtsInKwargs == putInnerThoughtsInKwargs)&&(identical(other.temperature, temperature) || other.temperature == temperature)&&(identical(other.maxTokens, maxTokens) || other.maxTokens == maxTokens));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,handle,name,displayName,providerType,providerName,model,modelEndpointType,modelEndpoint,providerCategory,modelType,contextWindow,putInnerThoughtsInKwargs,temperature,maxTokens);
+int get hashCode => Object.hash(runtimeType,handle,name,displayName,providerType,providerName,model,modelEndpointType,modelEndpoint,modelType,contextWindow,putInnerThoughtsInKwargs,temperature,maxTokens);
 
 @override
 String toString() {
-  return 'LLMModel(handle: $handle, name: $name, displayName: $displayName, providerType: $providerType, providerName: $providerName, model: $model, modelEndpointType: $modelEndpointType, modelEndpoint: $modelEndpoint, providerCategory: $providerCategory, modelType: $modelType, contextWindow: $contextWindow, putInnerThoughtsInKwargs: $putInnerThoughtsInKwargs, temperature: $temperature, maxTokens: $maxTokens)';
+  return 'LLMModel(handle: $handle, name: $name, displayName: $displayName, providerType: $providerType, providerName: $providerName, model: $model, modelEndpointType: $modelEndpointType, modelEndpoint: $modelEndpoint, modelType: $modelType, contextWindow: $contextWindow, putInnerThoughtsInKwargs: $putInnerThoughtsInKwargs, temperature: $temperature, maxTokens: $maxTokens)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $LLMModelCopyWith<$Res>  {
   factory $LLMModelCopyWith(LLMModel value, $Res Function(LLMModel) _then) = _$LLMModelCopyWithImpl;
 @useResult
 $Res call({
- String handle, String name,@JsonKey(name: 'display_name') String displayName,@JsonKey(name: 'provider_type') String providerType,@JsonKey(name: 'provider_name') String providerName, String model,@JsonKey(name: 'model_endpoint_type') String modelEndpointType,@JsonKey(name: 'model_endpoint') String modelEndpoint,@JsonKey(name: 'provider_category') String providerCategory,@JsonKey(name: 'model_type') String modelType,@JsonKey(name: 'context_window') int contextWindow,@JsonKey(name: 'put_inner_thoughts_in_kwargs') bool putInnerThoughtsInKwargs, double temperature,@JsonKey(name: 'max_tokens') int maxTokens
+ String handle, String name,@JsonKey(name: 'display_name') String displayName,@JsonKey(name: 'provider_type') String providerType,@JsonKey(name: 'provider_name') String providerName, String model,@JsonKey(name: 'model_endpoint_type') String modelEndpointType,@JsonKey(name: 'model_endpoint') String modelEndpoint,@JsonKey(name: 'model_type') String modelType,@JsonKey(name: 'context_window') int contextWindow,@JsonKey(name: 'put_inner_thoughts_in_kwargs') bool putInnerThoughtsInKwargs, double temperature,@JsonKey(name: 'max_tokens') int maxTokens
 });
 
 
@@ -62,7 +62,7 @@ class _$LLMModelCopyWithImpl<$Res>
 
 /// Create a copy of LLMModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? handle = null,Object? name = null,Object? displayName = null,Object? providerType = null,Object? providerName = null,Object? model = null,Object? modelEndpointType = null,Object? modelEndpoint = null,Object? providerCategory = null,Object? modelType = null,Object? contextWindow = null,Object? putInnerThoughtsInKwargs = null,Object? temperature = null,Object? maxTokens = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? handle = null,Object? name = null,Object? displayName = null,Object? providerType = null,Object? providerName = null,Object? model = null,Object? modelEndpointType = null,Object? modelEndpoint = null,Object? modelType = null,Object? contextWindow = null,Object? putInnerThoughtsInKwargs = null,Object? temperature = null,Object? maxTokens = null,}) {
   return _then(_self.copyWith(
 handle: null == handle ? _self.handle : handle // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -72,7 +72,6 @@ as String,providerName: null == providerName ? _self.providerName : providerName
 as String,model: null == model ? _self.model : model // ignore: cast_nullable_to_non_nullable
 as String,modelEndpointType: null == modelEndpointType ? _self.modelEndpointType : modelEndpointType // ignore: cast_nullable_to_non_nullable
 as String,modelEndpoint: null == modelEndpoint ? _self.modelEndpoint : modelEndpoint // ignore: cast_nullable_to_non_nullable
-as String,providerCategory: null == providerCategory ? _self.providerCategory : providerCategory // ignore: cast_nullable_to_non_nullable
 as String,modelType: null == modelType ? _self.modelType : modelType // ignore: cast_nullable_to_non_nullable
 as String,contextWindow: null == contextWindow ? _self.contextWindow : contextWindow // ignore: cast_nullable_to_non_nullable
 as int,putInnerThoughtsInKwargs: null == putInnerThoughtsInKwargs ? _self.putInnerThoughtsInKwargs : putInnerThoughtsInKwargs // ignore: cast_nullable_to_non_nullable
@@ -163,10 +162,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String handle,  String name, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'provider_type')  String providerType, @JsonKey(name: 'provider_name')  String providerName,  String model, @JsonKey(name: 'model_endpoint_type')  String modelEndpointType, @JsonKey(name: 'model_endpoint')  String modelEndpoint, @JsonKey(name: 'provider_category')  String providerCategory, @JsonKey(name: 'model_type')  String modelType, @JsonKey(name: 'context_window')  int contextWindow, @JsonKey(name: 'put_inner_thoughts_in_kwargs')  bool putInnerThoughtsInKwargs,  double temperature, @JsonKey(name: 'max_tokens')  int maxTokens)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String handle,  String name, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'provider_type')  String providerType, @JsonKey(name: 'provider_name')  String providerName,  String model, @JsonKey(name: 'model_endpoint_type')  String modelEndpointType, @JsonKey(name: 'model_endpoint')  String modelEndpoint, @JsonKey(name: 'model_type')  String modelType, @JsonKey(name: 'context_window')  int contextWindow, @JsonKey(name: 'put_inner_thoughts_in_kwargs')  bool putInnerThoughtsInKwargs,  double temperature, @JsonKey(name: 'max_tokens')  int maxTokens)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LLMModel() when $default != null:
-return $default(_that.handle,_that.name,_that.displayName,_that.providerType,_that.providerName,_that.model,_that.modelEndpointType,_that.modelEndpoint,_that.providerCategory,_that.modelType,_that.contextWindow,_that.putInnerThoughtsInKwargs,_that.temperature,_that.maxTokens);case _:
+return $default(_that.handle,_that.name,_that.displayName,_that.providerType,_that.providerName,_that.model,_that.modelEndpointType,_that.modelEndpoint,_that.modelType,_that.contextWindow,_that.putInnerThoughtsInKwargs,_that.temperature,_that.maxTokens);case _:
   return orElse();
 
 }
@@ -184,10 +183,10 @@ return $default(_that.handle,_that.name,_that.displayName,_that.providerType,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String handle,  String name, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'provider_type')  String providerType, @JsonKey(name: 'provider_name')  String providerName,  String model, @JsonKey(name: 'model_endpoint_type')  String modelEndpointType, @JsonKey(name: 'model_endpoint')  String modelEndpoint, @JsonKey(name: 'provider_category')  String providerCategory, @JsonKey(name: 'model_type')  String modelType, @JsonKey(name: 'context_window')  int contextWindow, @JsonKey(name: 'put_inner_thoughts_in_kwargs')  bool putInnerThoughtsInKwargs,  double temperature, @JsonKey(name: 'max_tokens')  int maxTokens)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String handle,  String name, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'provider_type')  String providerType, @JsonKey(name: 'provider_name')  String providerName,  String model, @JsonKey(name: 'model_endpoint_type')  String modelEndpointType, @JsonKey(name: 'model_endpoint')  String modelEndpoint, @JsonKey(name: 'model_type')  String modelType, @JsonKey(name: 'context_window')  int contextWindow, @JsonKey(name: 'put_inner_thoughts_in_kwargs')  bool putInnerThoughtsInKwargs,  double temperature, @JsonKey(name: 'max_tokens')  int maxTokens)  $default,) {final _that = this;
 switch (_that) {
 case _LLMModel():
-return $default(_that.handle,_that.name,_that.displayName,_that.providerType,_that.providerName,_that.model,_that.modelEndpointType,_that.modelEndpoint,_that.providerCategory,_that.modelType,_that.contextWindow,_that.putInnerThoughtsInKwargs,_that.temperature,_that.maxTokens);case _:
+return $default(_that.handle,_that.name,_that.displayName,_that.providerType,_that.providerName,_that.model,_that.modelEndpointType,_that.modelEndpoint,_that.modelType,_that.contextWindow,_that.putInnerThoughtsInKwargs,_that.temperature,_that.maxTokens);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -204,10 +203,10 @@ return $default(_that.handle,_that.name,_that.displayName,_that.providerType,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String handle,  String name, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'provider_type')  String providerType, @JsonKey(name: 'provider_name')  String providerName,  String model, @JsonKey(name: 'model_endpoint_type')  String modelEndpointType, @JsonKey(name: 'model_endpoint')  String modelEndpoint, @JsonKey(name: 'provider_category')  String providerCategory, @JsonKey(name: 'model_type')  String modelType, @JsonKey(name: 'context_window')  int contextWindow, @JsonKey(name: 'put_inner_thoughts_in_kwargs')  bool putInnerThoughtsInKwargs,  double temperature, @JsonKey(name: 'max_tokens')  int maxTokens)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String handle,  String name, @JsonKey(name: 'display_name')  String displayName, @JsonKey(name: 'provider_type')  String providerType, @JsonKey(name: 'provider_name')  String providerName,  String model, @JsonKey(name: 'model_endpoint_type')  String modelEndpointType, @JsonKey(name: 'model_endpoint')  String modelEndpoint, @JsonKey(name: 'model_type')  String modelType, @JsonKey(name: 'context_window')  int contextWindow, @JsonKey(name: 'put_inner_thoughts_in_kwargs')  bool putInnerThoughtsInKwargs,  double temperature, @JsonKey(name: 'max_tokens')  int maxTokens)?  $default,) {final _that = this;
 switch (_that) {
 case _LLMModel() when $default != null:
-return $default(_that.handle,_that.name,_that.displayName,_that.providerType,_that.providerName,_that.model,_that.modelEndpointType,_that.modelEndpoint,_that.providerCategory,_that.modelType,_that.contextWindow,_that.putInnerThoughtsInKwargs,_that.temperature,_that.maxTokens);case _:
+return $default(_that.handle,_that.name,_that.displayName,_that.providerType,_that.providerName,_that.model,_that.modelEndpointType,_that.modelEndpoint,_that.modelType,_that.contextWindow,_that.putInnerThoughtsInKwargs,_that.temperature,_that.maxTokens);case _:
   return null;
 
 }
@@ -219,7 +218,7 @@ return $default(_that.handle,_that.name,_that.displayName,_that.providerType,_th
 
 
 class _LLMModel extends LLMModel {
-  const _LLMModel({required this.handle, required this.name, @JsonKey(name: 'display_name') required this.displayName, @JsonKey(name: 'provider_type') required this.providerType, @JsonKey(name: 'provider_name') required this.providerName, required this.model, @JsonKey(name: 'model_endpoint_type') required this.modelEndpointType, @JsonKey(name: 'model_endpoint') required this.modelEndpoint, @JsonKey(name: 'provider_category') required this.providerCategory, @JsonKey(name: 'model_type') required this.modelType, @JsonKey(name: 'context_window') required this.contextWindow, @JsonKey(name: 'put_inner_thoughts_in_kwargs') required this.putInnerThoughtsInKwargs, required this.temperature, @JsonKey(name: 'max_tokens') required this.maxTokens}): super._();
+  const _LLMModel({required this.handle, required this.name, @JsonKey(name: 'display_name') required this.displayName, @JsonKey(name: 'provider_type') required this.providerType, @JsonKey(name: 'provider_name') required this.providerName, required this.model, @JsonKey(name: 'model_endpoint_type') required this.modelEndpointType, @JsonKey(name: 'model_endpoint') required this.modelEndpoint, @JsonKey(name: 'model_type') required this.modelType, @JsonKey(name: 'context_window') required this.contextWindow, @JsonKey(name: 'put_inner_thoughts_in_kwargs') required this.putInnerThoughtsInKwargs, required this.temperature, @JsonKey(name: 'max_tokens') required this.maxTokens}): super._();
   
 
 @override final  String handle;
@@ -230,7 +229,6 @@ class _LLMModel extends LLMModel {
 @override final  String model;
 @override@JsonKey(name: 'model_endpoint_type') final  String modelEndpointType;
 @override@JsonKey(name: 'model_endpoint') final  String modelEndpoint;
-@override@JsonKey(name: 'provider_category') final  String providerCategory;
 @override@JsonKey(name: 'model_type') final  String modelType;
 @override@JsonKey(name: 'context_window') final  int contextWindow;
 @override@JsonKey(name: 'put_inner_thoughts_in_kwargs') final  bool putInnerThoughtsInKwargs;
@@ -247,16 +245,16 @@ _$LLMModelCopyWith<_LLMModel> get copyWith => __$LLMModelCopyWithImpl<_LLMModel>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LLMModel&&(identical(other.handle, handle) || other.handle == handle)&&(identical(other.name, name) || other.name == name)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.providerType, providerType) || other.providerType == providerType)&&(identical(other.providerName, providerName) || other.providerName == providerName)&&(identical(other.model, model) || other.model == model)&&(identical(other.modelEndpointType, modelEndpointType) || other.modelEndpointType == modelEndpointType)&&(identical(other.modelEndpoint, modelEndpoint) || other.modelEndpoint == modelEndpoint)&&(identical(other.providerCategory, providerCategory) || other.providerCategory == providerCategory)&&(identical(other.modelType, modelType) || other.modelType == modelType)&&(identical(other.contextWindow, contextWindow) || other.contextWindow == contextWindow)&&(identical(other.putInnerThoughtsInKwargs, putInnerThoughtsInKwargs) || other.putInnerThoughtsInKwargs == putInnerThoughtsInKwargs)&&(identical(other.temperature, temperature) || other.temperature == temperature)&&(identical(other.maxTokens, maxTokens) || other.maxTokens == maxTokens));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LLMModel&&(identical(other.handle, handle) || other.handle == handle)&&(identical(other.name, name) || other.name == name)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&(identical(other.providerType, providerType) || other.providerType == providerType)&&(identical(other.providerName, providerName) || other.providerName == providerName)&&(identical(other.model, model) || other.model == model)&&(identical(other.modelEndpointType, modelEndpointType) || other.modelEndpointType == modelEndpointType)&&(identical(other.modelEndpoint, modelEndpoint) || other.modelEndpoint == modelEndpoint)&&(identical(other.modelType, modelType) || other.modelType == modelType)&&(identical(other.contextWindow, contextWindow) || other.contextWindow == contextWindow)&&(identical(other.putInnerThoughtsInKwargs, putInnerThoughtsInKwargs) || other.putInnerThoughtsInKwargs == putInnerThoughtsInKwargs)&&(identical(other.temperature, temperature) || other.temperature == temperature)&&(identical(other.maxTokens, maxTokens) || other.maxTokens == maxTokens));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,handle,name,displayName,providerType,providerName,model,modelEndpointType,modelEndpoint,providerCategory,modelType,contextWindow,putInnerThoughtsInKwargs,temperature,maxTokens);
+int get hashCode => Object.hash(runtimeType,handle,name,displayName,providerType,providerName,model,modelEndpointType,modelEndpoint,modelType,contextWindow,putInnerThoughtsInKwargs,temperature,maxTokens);
 
 @override
 String toString() {
-  return 'LLMModel(handle: $handle, name: $name, displayName: $displayName, providerType: $providerType, providerName: $providerName, model: $model, modelEndpointType: $modelEndpointType, modelEndpoint: $modelEndpoint, providerCategory: $providerCategory, modelType: $modelType, contextWindow: $contextWindow, putInnerThoughtsInKwargs: $putInnerThoughtsInKwargs, temperature: $temperature, maxTokens: $maxTokens)';
+  return 'LLMModel(handle: $handle, name: $name, displayName: $displayName, providerType: $providerType, providerName: $providerName, model: $model, modelEndpointType: $modelEndpointType, modelEndpoint: $modelEndpoint, modelType: $modelType, contextWindow: $contextWindow, putInnerThoughtsInKwargs: $putInnerThoughtsInKwargs, temperature: $temperature, maxTokens: $maxTokens)';
 }
 
 
@@ -267,7 +265,7 @@ abstract mixin class _$LLMModelCopyWith<$Res> implements $LLMModelCopyWith<$Res>
   factory _$LLMModelCopyWith(_LLMModel value, $Res Function(_LLMModel) _then) = __$LLMModelCopyWithImpl;
 @override @useResult
 $Res call({
- String handle, String name,@JsonKey(name: 'display_name') String displayName,@JsonKey(name: 'provider_type') String providerType,@JsonKey(name: 'provider_name') String providerName, String model,@JsonKey(name: 'model_endpoint_type') String modelEndpointType,@JsonKey(name: 'model_endpoint') String modelEndpoint,@JsonKey(name: 'provider_category') String providerCategory,@JsonKey(name: 'model_type') String modelType,@JsonKey(name: 'context_window') int contextWindow,@JsonKey(name: 'put_inner_thoughts_in_kwargs') bool putInnerThoughtsInKwargs, double temperature,@JsonKey(name: 'max_tokens') int maxTokens
+ String handle, String name,@JsonKey(name: 'display_name') String displayName,@JsonKey(name: 'provider_type') String providerType,@JsonKey(name: 'provider_name') String providerName, String model,@JsonKey(name: 'model_endpoint_type') String modelEndpointType,@JsonKey(name: 'model_endpoint') String modelEndpoint,@JsonKey(name: 'model_type') String modelType,@JsonKey(name: 'context_window') int contextWindow,@JsonKey(name: 'put_inner_thoughts_in_kwargs') bool putInnerThoughtsInKwargs, double temperature,@JsonKey(name: 'max_tokens') int maxTokens
 });
 
 
@@ -284,7 +282,7 @@ class __$LLMModelCopyWithImpl<$Res>
 
 /// Create a copy of LLMModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? handle = null,Object? name = null,Object? displayName = null,Object? providerType = null,Object? providerName = null,Object? model = null,Object? modelEndpointType = null,Object? modelEndpoint = null,Object? providerCategory = null,Object? modelType = null,Object? contextWindow = null,Object? putInnerThoughtsInKwargs = null,Object? temperature = null,Object? maxTokens = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? handle = null,Object? name = null,Object? displayName = null,Object? providerType = null,Object? providerName = null,Object? model = null,Object? modelEndpointType = null,Object? modelEndpoint = null,Object? modelType = null,Object? contextWindow = null,Object? putInnerThoughtsInKwargs = null,Object? temperature = null,Object? maxTokens = null,}) {
   return _then(_LLMModel(
 handle: null == handle ? _self.handle : handle // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -294,7 +292,6 @@ as String,providerName: null == providerName ? _self.providerName : providerName
 as String,model: null == model ? _self.model : model // ignore: cast_nullable_to_non_nullable
 as String,modelEndpointType: null == modelEndpointType ? _self.modelEndpointType : modelEndpointType // ignore: cast_nullable_to_non_nullable
 as String,modelEndpoint: null == modelEndpoint ? _self.modelEndpoint : modelEndpoint // ignore: cast_nullable_to_non_nullable
-as String,providerCategory: null == providerCategory ? _self.providerCategory : providerCategory // ignore: cast_nullable_to_non_nullable
 as String,modelType: null == modelType ? _self.modelType : modelType // ignore: cast_nullable_to_non_nullable
 as String,contextWindow: null == contextWindow ? _self.contextWindow : contextWindow // ignore: cast_nullable_to_non_nullable
 as int,putInnerThoughtsInKwargs: null == putInnerThoughtsInKwargs ? _self.putInnerThoughtsInKwargs : putInnerThoughtsInKwargs // ignore: cast_nullable_to_non_nullable

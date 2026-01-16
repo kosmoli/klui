@@ -1,7 +1,7 @@
 import 'llm_model.dart';
 
 /// Request model for creating an Agent
-/// Supports two modes: BYOK (full config) and non-BYOK (simple format)
+/// In Memos, models have their handles in the correct format already
 class CreateAgentRequest {
   final String name;
   final String? description;
@@ -19,108 +19,29 @@ class CreateAgentRequest {
     this.systemPrompt,
   });
 
-  /// Check if this is a BYOK mode request
-  bool get isBYOK => llmModel.providerCategory == 'byok';
-
-  /// Get the correct handle for LLM model based on provider type and base URL
+  /// Convert to simple format
+  /// Example: {"name": "...", "model": "provider-name/model-name", "embedding": "provider-name/embedding-model", "system": "..."}
   ///
-  /// Letta backend has special handling for OpenAI-compatible APIs:
-  /// - If provider_type is "openai" and base_url is NOT "https://api.openai.com/v1"
-  ///   → Must use "openai-proxy" as handle prefix
-  /// - Otherwise, use the provider's normal handle
-  ///
-  /// See: /root/work/letta/letta/schemas/providers/openai.py:153-157
-  String _getCorrectLLMHandle() {
-    // OpenAI-compatible API with custom base URL
-    if (llmModel.providerType == 'openai' &&
-        llmModel.modelEndpoint != 'https://api.openai.com/v1') {
-      // Extract model name from handle (format: "provider-name/model-name")
-      final modelName = llmModel.handle.contains('/')
-          ? llmModel.handle.split('/').last
-          : llmModel.model;
-      return 'openai-proxy/$modelName';
-    }
-
-    // For all other cases, use the original handle
-    return llmModel.handle;
-  }
-
-  /// Get the correct handle for embedding model based on provider type and base URL
-  String _getCorrectEmbeddingHandle() {
-    // OpenAI-compatible API with custom base URL
-    if (embeddingModel.providerType == 'openai' &&
-        embeddingModel.modelEndpoint != 'https://api.openai.com/v1') {
-      // Extract model name from handle
-      final modelName = embeddingModel.handle.contains('/')
-          ? embeddingModel.handle.split('/').last
-          : embeddingModel.model;
-      return 'openai-proxy/$modelName';
-    }
-
-    // For all other cases, use the original handle
-    return embeddingModel.handle;
-  }
-
-  /// Convert to simple format (non-BYOK mode)
-  /// Example: {"name": "...", "model": "openai-proxy/claude-sonnet-4-5-20250929", "embedding": "openai-proxy/text-embedding-3-small", "system": "..."}
-  Map<String, dynamic> toSimpleJson() {
-    final json = <String, dynamic>{
-      'name': name,
-      'model': _getCorrectLLMHandle(),  // Use transformed handle for OpenAI-compatible APIs
-      'embedding': _getCorrectEmbeddingHandle(),  // Use transformed handle for OpenAI-compatible APIs
-    };
-
-    if (description != null) {
-      json['description'] = description;
-    }
-    if (tools != null && tools!.isNotEmpty) {
-      json['tools'] = tools;
-    }
-    if (systemPrompt != null) {
-      json['system'] = systemPrompt;
-    }
-
-    return json;
-  }
-
-  /// Convert to full config format (BYOK mode)
-  /// Example: {"llm_config": {...}, "embedding_config": {...}}
-  /// Note: llm_config and embedding_config are flat structures, not nested under 'config'
-  Map<String, dynamic> toBYOKJson() {
-    final json = <String, dynamic>{
-      'name': name,
-      'llm_config': {
-        'model': llmModel.model,
-        'provider_name': llmModel.providerName,
-        'provider_category': llmModel.providerCategory,
-        'model_endpoint_type': llmModel.modelEndpointType,
-        'context_window': llmModel.contextWindow,
-      },
-      'embedding_config': {
-        'provider_name': embeddingModel.providerName,
-        'provider_category': embeddingModel.providerCategory,
-        'embedding_endpoint_type': embeddingModel.modelEndpointType,
-        'embedding_model': embeddingModel.model,
-        'embedding_dim': 1536, // Default embedding dimension
-      },
-    };
-
-    if (description != null) {
-      json['description'] = description;
-    }
-    if (tools != null && tools!.isNotEmpty) {
-      json['tools'] = tools;
-    }
-    if (systemPrompt != null) {
-      json['system'] = systemPrompt;
-    }
-
-    return json;
-  }
-
-  /// Convert to JSON based on mode
+  /// In Memos, the model handle is already in the correct format (e.g., "test-openai/gpt-4o")
+  /// No need for special handling like "openai-proxy" prefix
   Map<String, dynamic> toJson() {
-    return isBYOK ? toBYOKJson() : toSimpleJson();
+    final json = <String, dynamic>{
+      'name': name,
+      'model': llmModel.handle,
+      'embedding': embeddingModel.handle,
+    };
+
+    if (description != null) {
+      json['description'] = description;
+    }
+    if (tools != null && tools!.isNotEmpty) {
+      json['tools'] = tools;
+    }
+    if (systemPrompt != null) {
+      json['system'] = systemPrompt;
+    }
+
+    return json;
   }
 
   /// Copy with method

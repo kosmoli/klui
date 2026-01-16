@@ -8,6 +8,69 @@ part of 'chat_providers.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// Global provider to persist the currently selected agent ID
+/// This survives navigation between screens
+
+@ProviderFor(SelectedAgentId)
+const selectedAgentIdProvider = SelectedAgentIdProvider._();
+
+/// Global provider to persist the currently selected agent ID
+/// This survives navigation between screens
+final class SelectedAgentIdProvider
+    extends $NotifierProvider<SelectedAgentId, String> {
+  /// Global provider to persist the currently selected agent ID
+  /// This survives navigation between screens
+  const SelectedAgentIdProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'selectedAgentIdProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$selectedAgentIdHash();
+
+  @$internal
+  @override
+  SelectedAgentId create() => SelectedAgentId();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(String value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<String>(value),
+    );
+  }
+}
+
+String _$selectedAgentIdHash() => r'5871f644e7afcdb99a8d465cd54c69ff91989afd';
+
+/// Global provider to persist the currently selected agent ID
+/// This survives navigation between screens
+
+abstract class _$SelectedAgentId extends $Notifier<String> {
+  String build();
+  @$mustCallSuper
+  @override
+  void runBuild() {
+    final created = build();
+    final ref = this.ref as $Ref<String, String>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<String, String>,
+              String,
+              Object?,
+              Object?
+            >;
+    element.handleValue(ref, created);
+  }
+}
+
 /// Chat state holder using Notifier for Riverpod 3.x
 
 @ProviderFor(ChatStateHolder)
@@ -61,7 +124,7 @@ final class ChatStateHolderProvider
   }
 }
 
-String _$chatStateHolderHash() => r'298db433f6c249e30a02c73cb703106cc9276a42';
+String _$chatStateHolderHash() => r'580b2518a6738399ca23ec49f024e4153a7d12dc';
 
 /// Chat state holder using Notifier for Riverpod 3.x
 

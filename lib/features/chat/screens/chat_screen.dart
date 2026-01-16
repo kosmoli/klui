@@ -20,11 +20,13 @@ import '../widgets/context_size_indicator.dart';
 
 /// Chat Screen - Real-time chat with Agent
 class ChatScreen extends ConsumerStatefulWidget {
-  final String agentId;
+  /// Optional initial agent ID from URL query parameter
+  /// If provided, will override the saved selection
+  final String? initialAgentId;
 
   const ChatScreen({
     super.key,
-    required this.agentId,
+    this.initialAgentId,
   });
 
   @override
@@ -36,6 +38,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
   final FocusNode _keyboardFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    // If an initial agent ID was provided via query param, save it
+    if (widget.initialAgentId != null && widget.initialAgentId!.isNotEmpty) {
+      ref.read(selectedAgentIdProvider.notifier).setSelectedAgentId(widget.initialAgentId!);
+    }
+  }
 
   @override
   void dispose() {
@@ -60,16 +71,16 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 
-  void _abortMessage() {
-    ref.read(chatStateHolderProvider(widget.agentId).notifier).abortMessage();
+  void _abortMessage(String agentId) {
+    ref.read(chatStateHolderProvider(agentId).notifier).abortMessage();
   }
 
-  void _sendMessage() {
+  void _sendMessage(String agentId) {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
 
     // Check if agent is selected
-    if (widget.agentId.isEmpty) {
+    if (agentId.isEmpty) {
       final colors = Theme.of(context).extension<KluiCustomColors>()!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -81,7 +92,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       return;
     }
 
-    ref.read(chatStateHolderProvider(widget.agentId).notifier).sendMessage(text);
+    ref.read(chatStateHolderProvider(agentId).notifier).sendMessage(text);
     _controller.clear();
     _focusNode.unfocus();
     _scrollToBottom();
@@ -89,8 +100,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Read agent ID from provider - this will update when provider changes
+    final agentId = ref.watch(selectedAgentIdProvider);
     final colors = Theme.of(context).extension<KluiCustomColors>()!;
-    final chatState = ref.watch(chatStateHolderProvider(widget.agentId));
+    final chatState = ref.watch(chatStateHolderProvider(agentId));
     final messages = chatState.messages;
     final isStreaming = chatState.isStreaming;
     final canAbort = chatState.canAbort;
@@ -109,7 +122,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         if (event is KeyDownEvent &&
             event.logicalKey == LogicalKeyboardKey.escape &&
             canAbort) {
-          _abortMessage();
+          _abortMessage(agentId);
         }
       },
       child: Scaffold(
@@ -147,8 +160,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             // Agent Selector
             _AgentSelector(
               agentsAsync: agentsAsync,
-            currentAgentId: widget.agentId,
-          ),
+              currentAgentId: agentId,
+            ),
           // Context Size Indicator
           if (chatState.usage != null)
             Padding(
@@ -166,7 +179,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               button: true,
               hint: context.l10n.chat_abort_button_hint,
               child: IconButton(
-                onPressed: _abortMessage,
+                onPressed: () => _abortMessage(agentId),
                 icon: const Icon(Icons.stop),
                 tooltip: context.l10n.chat_abort_button,
                 style: IconButton.styleFrom(
@@ -177,7 +190,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
           IconButton(
             onPressed: () {
-              ref.read(chatStateHolderProvider(widget.agentId).notifier).clearMessages();
+              ref.read(chatStateHolderProvider(agentId).notifier).clearMessages();
             },
             icon: const Icon(Icons.clear_all),
             tooltip: context.l10n.chat_clear_button_tooltip,
@@ -209,8 +222,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             controller: _controller,
             focusNode: _focusNode,
             isStreaming: isStreaming,
-            agentId: widget.agentId,
-            onSend: _sendMessage,
+            agentId: agentId,
+            onSend: () => _sendMessage(agentId),
           ),
         ],
       ),
@@ -432,7 +445,7 @@ class _AgentSelector extends ConsumerWidget {
             child: InkWell(
               onTap: agents.isEmpty
                   ? null
-                  : () => _showAgentMenu(context, agents),
+                  : () => _showAgentMenu(context, ref, agents),
               borderRadius: BorderRadius.circular(8),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -489,6 +502,7 @@ class _AgentSelector extends ConsumerWidget {
 
   void _showAgentMenu(
     BuildContext context,
+    WidgetRef ref,
     List<Agent> agents,
   ) {
     final colors = Theme.of(context).extension<KluiCustomColors>()!;
@@ -544,7 +558,9 @@ class _AgentSelector extends ConsumerWidget {
       }).toList(),
     ).then((value) {
       if (value != null) {
-        context.go('/chat?agentId=$value');
+        // Update the selected agent ID provider
+        // This will trigger ChatScreen to rebuild with the new agent
+        ref.read(selectedAgentIdProvider.notifier).setSelectedAgentId(value);
       }
     });
   }

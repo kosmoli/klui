@@ -464,8 +464,8 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String provider_card_label(Object category, Object name, Object type) {
-    return 'Provider卡片：$name，类型：$type，类别：$category';
+  String provider_card_label(Object name, Object type) {
+    return 'Provider卡片：$name，类型：$type';
   }
 
   @override

@@ -44,12 +44,8 @@ class _ProviderListScreenState extends ConsumerState<ProviderListScreen> {
       ),
       body: providersAsync.when(
         data: (providers) {
-          // Filter out base providers, only show BYOK providers (user-created)
-          final byokProviders = providers
-              .where((p) => p.providerCategory == 'byok')
-              .toList();
-
-          if (byokProviders.isEmpty) {
+          // In Memos, all providers are user-created (no BYOK/base distinction)
+          if (providers.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -96,9 +92,9 @@ class _ProviderListScreenState extends ConsumerState<ProviderListScreen> {
               top: AppTheme.spacing16,
               bottom: AppTheme.spacing80,
             ),
-            itemCount: byokProviders.length,
+            itemCount: providers.length,
             itemBuilder: (context, index) {
-              final provider = byokProviders[index];
+              final provider = providers[index];
               return ProviderCard(
                 provider: provider,
                 onTap: () {

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:html' as html;
 
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../utils/api_client.dart';
@@ -11,6 +12,70 @@ import 'api_providers.dart';
 part 'chat_providers.g.dart';
 
 final _log = KluiLogger('ChatController');
+
+/// Simple in-memory storage for selected agent ID
+/// This survives navigation between screens while the app is running
+String _selectedAgentId = '';
+
+/// Get the current selected agent ID
+String getSelectedAgentId() => _selectedAgentId;
+
+/// Set the selected agent ID (called from main.dart on init)
+void setSelectedAgentId(String agentId) {
+  _selectedAgentId = agentId;
+  _log.info('Set selected agent ID: $agentId');
+}
+
+/// Initialize selected agent ID from localStorage
+/// Returns the saved agent ID, or empty string if none saved
+String initSelectedAgentId() {
+  try {
+    final savedId = html.window.localStorage['selected_agent_id'];
+    if (savedId != null && savedId.isNotEmpty) {
+      _selectedAgentId = savedId;
+      _log.info('Loaded selected agent ID from localStorage: $savedId');
+      return savedId;
+    }
+  } catch (e) {
+    _log.warning('Failed to load selected agent ID from localStorage: $e');
+  }
+  return '';
+}
+
+/// Global provider to persist the currently selected agent ID
+/// This survives navigation between screens
+@riverpod
+class SelectedAgentId extends _$SelectedAgentId {
+  @override
+  String build() {
+    return _selectedAgentId;
+  }
+
+  void setSelectedAgentId(String agentId) {
+    _selectedAgentId = agentId;
+    state = agentId;
+    _log.info('Selected agent ID: $agentId');
+
+    // Also save to localStorage for persistence across sessions
+    try {
+      html.window.localStorage['selected_agent_id'] = agentId;
+    } catch (e) {
+      _log.warning('Failed to save to localStorage: $e');
+    }
+  }
+
+  void clearSelectedAgentId() {
+    _selectedAgentId = '';
+    state = '';
+    _log.info('Cleared selected agent ID');
+
+    try {
+      html.window.localStorage.remove('selected_agent_id');
+    } catch (e) {
+      _log.warning('Failed to clear from localStorage: $e');
+    }
+  }
+}
 
 /// Chat state for a specific agent
 class ChatState {

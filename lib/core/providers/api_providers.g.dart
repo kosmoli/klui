@@ -386,11 +386,13 @@ final class ProviderFamily extends $Family
 }
 
 /// Provider for LLM Models List (all models)
+/// In Memos, all models come from user-created providers
 
 @ProviderFor(llmModelList)
 const llmModelListProvider = LlmModelListProvider._();
 
 /// Provider for LLM Models List (all models)
+/// In Memos, all models come from user-created providers
 
 final class LlmModelListProvider
     extends
@@ -401,6 +403,7 @@ final class LlmModelListProvider
         >
     with $FutureModifier<List<LLMModel>>, $FutureProvider<List<LLMModel>> {
   /// Provider for LLM Models List (all models)
+  /// In Memos, all models come from user-created providers
   const LlmModelListProvider._()
     : super(
         from: null,
@@ -567,117 +570,20 @@ final class EmbeddingModelListProvider
 String _$embeddingModelListHash() =>
     r'15beba45029166b0f263358263b488f869df224e';
 
-/// Provider for Base Category LLM Models (memory providers, non-BYOK)
-/// These are the default providers created from environment variables
-
-@ProviderFor(baseLLMModelList)
-const baseLLMModelListProvider = BaseLLMModelListProvider._();
-
-/// Provider for Base Category LLM Models (memory providers, non-BYOK)
-/// These are the default providers created from environment variables
-
-final class BaseLLMModelListProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<List<LLMModel>>,
-          List<LLMModel>,
-          FutureOr<List<LLMModel>>
-        >
-    with $FutureModifier<List<LLMModel>>, $FutureProvider<List<LLMModel>> {
-  /// Provider for Base Category LLM Models (memory providers, non-BYOK)
-  /// These are the default providers created from environment variables
-  const BaseLLMModelListProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'baseLLMModelListProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$baseLLMModelListHash();
-
-  @$internal
-  @override
-  $FutureProviderElement<List<LLMModel>> $createElement(
-    $ProviderPointer pointer,
-  ) => $FutureProviderElement(pointer);
-
-  @override
-  FutureOr<List<LLMModel>> create(Ref ref) {
-    return baseLLMModelList(ref);
-  }
-}
-
-String _$baseLLMModelListHash() => r'983596dfef059c24af05bdfec340a919774b1b95';
-
-/// Provider for BYOK Category LLM Models (database providers, user-created)
-/// These are custom providers created via API
-
-@ProviderFor(byokLLMModelList)
-const byokLLMModelListProvider = ByokLLMModelListProvider._();
-
-/// Provider for BYOK Category LLM Models (database providers, user-created)
-/// These are custom providers created via API
-
-final class ByokLLMModelListProvider
-    extends
-        $FunctionalProvider<
-          AsyncValue<List<LLMModel>>,
-          List<LLMModel>,
-          FutureOr<List<LLMModel>>
-        >
-    with $FutureModifier<List<LLMModel>>, $FutureProvider<List<LLMModel>> {
-  /// Provider for BYOK Category LLM Models (database providers, user-created)
-  /// These are custom providers created via API
-  const ByokLLMModelListProvider._()
-    : super(
-        from: null,
-        argument: null,
-        retry: null,
-        name: r'byokLLMModelListProvider',
-        isAutoDispose: true,
-        dependencies: null,
-        $allTransitiveDependencies: null,
-      );
-
-  @override
-  String debugGetCreateSourceHash() => _$byokLLMModelListHash();
-
-  @$internal
-  @override
-  $FutureProviderElement<List<LLMModel>> $createElement(
-    $ProviderPointer pointer,
-  ) => $FutureProviderElement(pointer);
-
-  @override
-  FutureOr<List<LLMModel>> create(Ref ref) {
-    return byokLLMModelList(ref);
-  }
-}
-
-String _$byokLLMModelListHash() => r'36f5ca56e5579c157a1920c016d3d390c58c23d0';
-
 /// Provider for creating an Agent
-/// Automatically uses simple format for non-BYOK mode
-/// and full config format for BYOK mode
+/// In Memos, always uses simple format (no BYOK distinction)
 
 @ProviderFor(createAgent)
 const createAgentProvider = CreateAgentFamily._();
 
 /// Provider for creating an Agent
-/// Automatically uses simple format for non-BYOK mode
-/// and full config format for BYOK mode
+/// In Memos, always uses simple format (no BYOK distinction)
 
 final class CreateAgentProvider
     extends $FunctionalProvider<AsyncValue<Agent>, Agent, FutureOr<Agent>>
     with $FutureModifier<Agent>, $FutureProvider<Agent> {
   /// Provider for creating an Agent
-  /// Automatically uses simple format for non-BYOK mode
-  /// and full config format for BYOK mode
+  /// In Memos, always uses simple format (no BYOK distinction)
   const CreateAgentProvider._({
     required CreateAgentFamily super.from,
     required CreateAgentRequest super.argument,
@@ -721,11 +627,10 @@ final class CreateAgentProvider
   }
 }
 
-String _$createAgentHash() => r'71667e4df10b1b7578165a45f2b3d4df7422f634';
+String _$createAgentHash() => r'b6307c845aca9f0fcfcd16cd0863e6c71e76a2bd';
 
 /// Provider for creating an Agent
-/// Automatically uses simple format for non-BYOK mode
-/// and full config format for BYOK mode
+/// In Memos, always uses simple format (no BYOK distinction)
 
 final class CreateAgentFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<Agent>, CreateAgentRequest> {
@@ -739,8 +644,7 @@ final class CreateAgentFamily extends $Family
       );
 
   /// Provider for creating an Agent
-  /// Automatically uses simple format for non-BYOK mode
-  /// and full config format for BYOK mode
+  /// In Memos, always uses simple format (no BYOK distinction)
 
   CreateAgentProvider call(CreateAgentRequest request) =>
       CreateAgentProvider._(argument: request, from: this);

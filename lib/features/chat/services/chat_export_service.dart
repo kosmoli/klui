@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:klui/core/models/chat_message.dart';
 import 'package:klui/core/models/agent.dart';
@@ -18,7 +19,7 @@ class ChatExportService {
     // Header
     buffer.writeln('# $title\n');
     buffer.writeln('**Agent:** ${agent.name ?? "Unknown"}');
-    buffer.writeln('**Model:** ${agent.model?.model ?? "Unknown"}');
+    buffer.writeln('**Model:** ${agent.model ?? "Unknown"}');
     buffer.writeln('**Exported:** $timestamp\n');
     buffer.writeln('---\n');
 
@@ -31,11 +32,8 @@ class ChatExportService {
       }
 
       final role = _getRoleName(message.type);
-      final timestampMsg = message.createdAt != null
-          ? _formatTimestamp(message.createdAt!)
-          : '';
 
-      buffer.writeln('### $role ${timestampMsg.isNotEmpty ? "• $timestampMsg" : ""}\n');
+      buffer.writeln('### $role\n');
 
       // Handle different message types
       switch (message.type) {
@@ -85,7 +83,7 @@ class ChatExportService {
       'agent': {
         'id': agent.id,
         'name': agent.name,
-        'model': agent.model?.model,
+        'model': agent.model,
         'description': agent.description,
       },
       'messages': messages
@@ -96,9 +94,6 @@ class ChatExportService {
                 'content': m.content,
                 'toolName': m.toolName,
                 'toolInput': m.toolInput,
-                'createdAt': m.createdAt,
-                'isEdited': m.isEdited ?? false,
-                'editedAt': m.editedAt,
               })
           .toList(),
     };
@@ -113,7 +108,7 @@ class ChatExportService {
     required String mimeType,
   }) {
     // For Web, use anchor download
-    final blob = html.Blob([content], 'type': mimeType);
+    final blob = html.Blob([content], mimeType);
     final url = html.Url.createObjectUrl(blob);
     final anchor = html.AnchorElement()
       ..href = url
@@ -145,14 +140,6 @@ class ChatExportService {
     }
   }
 
-  /// Format timestamp for display
-  static String _formatTimestamp(int milliseconds) {
-    final date = DateTime.fromMillisecondsSinceEpoch(milliseconds);
-    return '${date.hour.toString().padLeft(2, '0')}:'
-        '${date.minute.toString().padLeft(2, '0')}:'
-        '${date.second.toString().padLeft(2, '0')}';
-  }
-
   /// Generate filename for export
   static String generateFilename({
     required String agentName,
@@ -166,6 +153,3 @@ class ChatExportService {
     return '${sanitizedName}_$dateStr$extension';
   }
 }
-
-// HTML imports for Web functionality
-import 'dart:html' as html;

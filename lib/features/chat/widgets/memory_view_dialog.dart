@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:klui/core/extensions/context_extensions.dart';
@@ -334,7 +335,7 @@ class _MemoryBlockCardState extends State<_MemoryBlockCard> {
                   children: [
                     Text(
                       widget.block.label,
-                      style: KluiTextStyles.labelLarge.copyWith(
+                      style: KluiTextStyles.labelMedium.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -463,5 +464,3 @@ class _MemoryBlockCardState extends State<_MemoryBlockCard> {
     });
   }
 }
-
-import 'dart:convert';

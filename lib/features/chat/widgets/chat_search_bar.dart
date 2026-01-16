@@ -4,15 +4,20 @@ import 'package:klui/core/theme/klui_text_styles.dart';
 import 'package:klui/core/theme/klui_theme_extension.dart';
 import 'package:klui/core/models/chat_message.dart';
 
-/// Search bar for filtering chat messages
+/// Search result callback
+typedef OnResultSelected = void Function(int index);
+
+/// Search bar for searching and navigating through chat messages
 class ChatSearchBar extends StatefulWidget {
   final List<ChatMessage> allMessages;
-  final ValueChanged<List<ChatMessage>> onResultsChanged;
+  final ValueChanged<String> onSearchChanged;
+  final OnResultSelected? onResultSelected;
 
   const ChatSearchBar({
     super.key,
     required this.allMessages,
-    required this.onResultsChanged,
+    required this.onSearchChanged,
+    this.onResultSelected,
   });
 
   @override
@@ -22,7 +27,8 @@ class ChatSearchBar extends StatefulWidget {
 class _ChatSearchBarState extends State<ChatSearchBar> {
   final TextEditingController _controller = TextEditingController();
   bool _isExpanded = false;
-  int _resultCount = 0;
+  int _currentIndex = -1;
+  List<int> _matchedIndices = [];
 
   @override
   void dispose() {
@@ -31,31 +37,59 @@ class _ChatSearchBarState extends State<ChatSearchBar> {
   }
 
   void _performSearch(String query) {
-    if (query.trim().isEmpty) {
+    final lowerQuery = query.toLowerCase();
+    final matches = <int>[];
+
+    if (lowerQuery.isEmpty) {
       setState(() {
-        _resultCount = widget.allMessages.length;
+        _matchedIndices = [];
+        _currentIndex = -1;
       });
-      widget.onResultsChanged(widget.allMessages);
+      widget.onSearchChanged('');
       return;
     }
 
-    final lowerQuery = query.toLowerCase();
-    final results = widget.allMessages.where((message) {
+    for (int i = 0; i < widget.allMessages.length; i++) {
+      final message = widget.allMessages[i];
       // Search in message content
       if (message.content.toLowerCase().contains(lowerQuery)) {
-        return true;
+        matches.add(i);
+        continue;
       }
       // Search in tool names
       if (message.toolName?.toLowerCase().contains(lowerQuery) ?? false) {
-        return true;
+        matches.add(i);
+        continue;
       }
-      return false;
-    }).toList();
+    }
 
     setState(() {
-      _resultCount = results.length;
+      _matchedIndices = matches;
+      _currentIndex = matches.isNotEmpty ? 0 : -1;
     });
-    widget.onResultsChanged(results);
+
+    widget.onSearchChanged(query);
+
+    // Auto-select first match
+    if (matches.isNotEmpty) {
+      widget.onResultSelected?.call(matches[0]);
+    }
+  }
+
+  void _goToPrev() {
+    if (_matchedIndices.isEmpty) return;
+    setState(() {
+      _currentIndex = (_currentIndex - 1 + _matchedIndices.length) % _matchedIndices.length;
+    });
+    widget.onResultSelected?.call(_matchedIndices[_currentIndex]);
+  }
+
+  void _goToNext() {
+    if (_matchedIndices.isEmpty) return;
+    setState(() {
+      _currentIndex = (_currentIndex + 1) % _matchedIndices.length;
+    });
+    widget.onResultSelected?.call(_matchedIndices[_currentIndex]);
   }
 
   @override
@@ -92,6 +126,11 @@ class _ChatSearchBarState extends State<ChatSearchBar> {
   }
 
   Widget _buildExpandedSearch(KluiCustomColors colors) {
+    final hasResults = _matchedIndices.isNotEmpty;
+    final resultText = hasResults
+        ? '${_currentIndex + 1}/${_matchedIndices.length}'
+        : context.l10n.chat_search_no_results;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -117,28 +156,55 @@ class _ChatSearchBarState extends State<ChatSearchBar> {
             ),
           ),
           if (_controller.text.isNotEmpty) ...[
-            Text(
-              context.l10n.chat_search_results(_resultCount),
-              style: KluiTextStyles.bodySmall.copyWith(
-                color: colors.textSecondary,
+            // Navigation buttons
+            if (hasResults) ...[
+              IconButton(
+                onPressed: _goToPrev,
+                icon: const Icon(Icons.keyboard_arrow_up, size: 18),
+                tooltip: 'Previous match',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(
+                  minWidth: 28,
+                  minHeight: 28,
+                ),
+              ),
+              IconButton(
+                onPressed: _goToNext,
+                icon: const Icon(Icons.keyboard_arrow_down, size: 18),
+                tooltip: 'Next match',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(
+                  minWidth: 28,
+                  minHeight: 28,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Text(
+                  resultText,
+                  style: KluiTextStyles.bodySmall.copyWith(
+                    color: colors.userBubble,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 4),
+            ],
+            IconButton(
+              onPressed: () {
+                _controller.clear();
+                _performSearch('');
+                setState(() => _isExpanded = false);
+              },
+              icon: const Icon(Icons.close, size: 18),
+              tooltip: 'Close',
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(
+                minWidth: 32,
+                minHeight: 32,
               ),
             ),
-            const SizedBox(width: 8),
           ],
-          IconButton(
-            onPressed: () {
-              _controller.clear();
-              _performSearch('');
-              setState(() => _isExpanded = false);
-            },
-            icon: const Icon(Icons.close, size: 18),
-            tooltip: 'Close',
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(
-              minWidth: 32,
-              minHeight: 32,
-            ),
-          ),
         ],
       ),
     );

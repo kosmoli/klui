@@ -913,4 +913,68 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String get chat_context_size_critical =>
       'Context window nearly full, consider clearing history';
+
+  @override
+  String get chat_export_button_tooltip => 'Export chat';
+
+  @override
+  String get chat_export_title => 'Export Chat';
+
+  @override
+  String get chat_export_format_markdown => 'Markdown (.md)';
+
+  @override
+  String get chat_export_format_json => 'JSON (.json)';
+
+  @override
+  String get chat_export_success => 'Chat exported successfully';
+
+  @override
+  String get chat_export_failed => 'Failed to export chat';
+
+  @override
+  String get chat_export_no_messages => 'No messages to export';
+
+  @override
+  String get memory_view_title => 'Agent Memory';
+
+  @override
+  String get memory_view_tooltip => 'View and edit agent memory';
+
+  @override
+  String get memory_section_core => 'Core Memory';
+
+  @override
+  String get memory_section_archival => 'Archival Memory';
+
+  @override
+  String get memory_empty => 'No memory entries';
+
+  @override
+  String get memory_edit_success => 'Memory updated successfully';
+
+  @override
+  String get memory_edit_failed => 'Failed to update memory';
+
+  @override
+  String get memory_label => 'Label';
+
+  @override
+  String get memory_value => 'Content';
+
+  @override
+  String memory_count(Object count) {
+    return '$count items';
+  }
+
+  @override
+  String get chat_search_placeholder => 'Search messages...';
+
+  @override
+  String get chat_search_no_results => 'No messages found';
+
+  @override
+  String chat_search_results(Object count) {
+    return '$count result(s)';
+  }
 }

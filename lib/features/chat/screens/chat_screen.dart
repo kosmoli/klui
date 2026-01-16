@@ -43,20 +43,50 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final FocusNode _keyboardFocusNode = FocusNode();
 
   // Search state
-  List<ChatMessage> _filteredMessages = [];
   String _searchQuery = '';
+  int? _highlightedIndex;
 
-  void _onSearchResultsChanged(List<ChatMessage> results) {
+  void _onSearchChanged(String query) {
     setState(() {
-      _filteredMessages = results;
+      _searchQuery = query;
+      _highlightedIndex = null;
     });
   }
 
-  List<ChatMessage> _getDisplayMessages(List<ChatMessage> allMessages) {
-    if (_searchQuery.isEmpty) {
-      return allMessages;
-    }
-    return _filteredMessages;
+  void _onResultSelected(int index) {
+    setState(() {
+      _highlightedIndex = index;
+    });
+    _scrollToIndex(index);
+  }
+
+  void _scrollToIndex(int index) {
+    if (!_scrollController.hasClients) return;
+
+    // Calculate position for the item at index (reverse list)
+    final messages = ref.read(chatStateHolderProvider(ref.read(selectedAgentIdProvider))).messages;
+    if (index >= messages.length) return;
+
+    // In reverse ListView, item index in display = messages.length - 1 - actual index
+    final displayIndex = messages.length - 1 - index;
+    final itemPosition = displayIndex * 80.0; // Approximate item height
+
+    Future.delayed(const Duration(milliseconds: 50), () {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          itemPosition,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  bool _isMessageMatched(ChatMessage message) {
+    if (_searchQuery.isEmpty) return false;
+    final lowerQuery = _searchQuery.toLowerCase();
+    return message.content.toLowerCase().contains(lowerQuery) ||
+        (message.toolName?.toLowerCase().contains(lowerQuery) ?? false);
   }
 
   @override
@@ -255,9 +285,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final isStreaming = chatState.isStreaming;
     final canAbort = chatState.canAbort;
 
-    // Get display messages (filtered or all)
-    final displayMessages = _getDisplayMessages(messages);
-
     // Auto-scroll when new messages arrive (only if not searching)
     if (messages.isNotEmpty && _searchQuery.isEmpty) {
       _scrollToBottom();
@@ -373,22 +400,31 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: ChatSearchBar(
                 allMessages: messages,
-                onResultsChanged: _onSearchResultsChanged,
+                onSearchChanged: _onSearchChanged,
+                onResultSelected: _onResultSelected,
               ),
             ),
 
           // Message List
           Expanded(
-            child: displayMessages.isEmpty
-                ? _buildEmptyState(context, colors, _searchQuery.isNotEmpty)
+            child: messages.isEmpty
+                ? _buildEmptyState(context, colors, false)
                 : ListView.builder(
                     controller: _scrollController,
                     reverse: true,
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    itemCount: displayMessages.length,
+                    itemCount: messages.length,
                     itemBuilder: (context, index) {
-                      final message = displayMessages[displayMessages.length - 1 - index];
-                      return _MessageTile(message: message);
+                      final messageIndex = messages.length - 1 - index;
+                      final message = messages[messageIndex];
+                      final isHighlighted = _highlightedIndex == messageIndex;
+                      final isMatched = _isMessageMatched(message);
+                      return _MessageTile(
+                        key: ValueKey(message.id),
+                        message: message,
+                        isHighlighted: isHighlighted,
+                        isMatched: isMatched && _searchQuery.isNotEmpty,
+                      );
                     },
                   ),
           ),
@@ -407,26 +443,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 
   Widget _buildEmptyState(BuildContext context, KluiCustomColors colors, bool isSearchResult) {
-    if (isSearchResult) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: colors.textSecondary,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              context.l10n.chat_search_no_results,
-              style: KluiTextStyles.headlineSmall,
-            ),
-          ],
-        ),
-      );
-    }
-
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -468,12 +484,39 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
 /// Message Tile - Routes to appropriate widget based on type
 class _MessageTile extends StatelessWidget {
-  const _MessageTile({required this.message});
+  const _MessageTile({
+    required this.message,
+    this.isHighlighted = false,
+    this.isMatched = false,
+    super.key,
+  });
 
   final ChatMessage message;
+  final bool isHighlighted;
+  final bool isMatched;
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
+    return Container(
+      decoration: isHighlighted
+          ? BoxDecoration(
+              color: colors.userBubble.withOpacity(0.15),
+              border: Border(
+                left: BorderSide(color: colors.userBubble, width: 3),
+              ),
+            )
+          : isMatched
+              ? BoxDecoration(
+                  color: colors.surfaceVariant.withOpacity(0.3),
+                )
+              : null,
+      child: _buildMessageContent(context, colors),
+    );
+  }
+
+  Widget _buildMessageContent(BuildContext context, KluiCustomColors colors) {
     switch (message.type) {
       case MessageType.user:
         return Padding(

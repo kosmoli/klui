@@ -1738,6 +1738,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Context window nearly full, consider clearing history'**
   String get chat_context_size_critical;
+
+  /// No description provided for @chat_export_button_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Export chat'**
+  String get chat_export_button_tooltip;
+
+  /// No description provided for @chat_export_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Chat'**
+  String get chat_export_title;
+
+  /// No description provided for @chat_export_format_markdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Markdown (.md)'**
+  String get chat_export_format_markdown;
+
+  /// No description provided for @chat_export_format_json.
+  ///
+  /// In en, this message translates to:
+  /// **'JSON (.json)'**
+  String get chat_export_format_json;
+
+  /// No description provided for @chat_export_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat exported successfully'**
+  String get chat_export_success;
+
+  /// No description provided for @chat_export_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to export chat'**
+  String get chat_export_failed;
+
+  /// No description provided for @chat_export_no_messages.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages to export'**
+  String get chat_export_no_messages;
+
+  /// No description provided for @memory_view_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent Memory'**
+  String get memory_view_title;
+
+  /// No description provided for @memory_view_tooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'View and edit agent memory'**
+  String get memory_view_tooltip;
+
+  /// No description provided for @memory_section_core.
+  ///
+  /// In en, this message translates to:
+  /// **'Core Memory'**
+  String get memory_section_core;
+
+  /// No description provided for @memory_section_archival.
+  ///
+  /// In en, this message translates to:
+  /// **'Archival Memory'**
+  String get memory_section_archival;
+
+  /// No description provided for @memory_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No memory entries'**
+  String get memory_empty;
+
+  /// No description provided for @memory_edit_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Memory updated successfully'**
+  String get memory_edit_success;
+
+  /// No description provided for @memory_edit_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update memory'**
+  String get memory_edit_failed;
+
+  /// No description provided for @memory_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Label'**
+  String get memory_label;
+
+  /// No description provided for @memory_value.
+  ///
+  /// In en, this message translates to:
+  /// **'Content'**
+  String get memory_value;
+
+  /// No description provided for @memory_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items'**
+  String memory_count(Object count);
+
+  /// No description provided for @chat_search_placeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Search messages...'**
+  String get chat_search_placeholder;
+
+  /// No description provided for @chat_search_no_results.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages found'**
+  String get chat_search_no_results;
+
+  /// No description provided for @chat_search_results.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} result(s)'**
+  String chat_search_results(Object count);
 }
 
 class _AppLocalizationsDelegate

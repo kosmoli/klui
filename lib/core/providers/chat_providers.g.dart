@@ -124,7 +124,7 @@ final class ChatStateHolderProvider
   }
 }
 
-String _$chatStateHolderHash() => r'237c3ab2d538138eb7fd72ac8e7e2a0e8daa4a8c';
+String _$chatStateHolderHash() => r'ad03fb88e9f4478e7f8602894e08ec36a93559ec';
 
 /// Chat state holder using Notifier for Riverpod 3.x
 

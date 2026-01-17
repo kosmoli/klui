@@ -15,6 +15,8 @@ enum ToolType {
   lettaClient,
   @JsonValue('python_function')
   pythonFunction,
+  @JsonValue('letta_sleeptime_core')
+  lettaSleeptimeCore,
 }
 
 /// Tool model

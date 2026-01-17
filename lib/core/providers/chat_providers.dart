@@ -499,31 +499,28 @@ class ChatStateHolder extends _$ChatStateHolder {
     }
   }
 
-  /// Edit a message at given index
-  void editMessage(int index, String newContent) {
-    final messages = [...state.messages];
-    if (index >= 0 && index < messages.length) {
-      final oldMessage = messages[index];
-      final updatedMessage = ChatMessage(
-        id: oldMessage.id,
-        type: oldMessage.type,
-        content: newContent,
-        metadata: oldMessage.metadata,
-        toolName: oldMessage.toolName,
-        toolInput: oldMessage.toolInput,
-        toolCallId: oldMessage.toolCallId,
-        isToolError: oldMessage.isToolError,
-      );
+  /// Edit a message at given index and trigger resend
+  Future<void> editAndResend(int index, String newContent) async {
+    if (index < 0 || index >= state.messages.length) return;
 
-      // Remove all messages after this message (including assistant response)
-      // and keep only messages up to and including the edited message
-      final truncatedMessages = messages.sublist(0, index + 1);
-      
-      state = state.copyWith(messages: truncatedMessages);
-      _saveMessages();
-      
-      _log.info('Edited message at index $index');
-    }
+    final oldMessage = state.messages[index];
+    if (oldMessage.type != MessageType.user) return;
+
+    // Remove this message and all messages after it
+    final truncatedMessages = state.messages.sublist(0, index);
+    
+    // Add updated user message
+    final updatedMessage = ChatMessage(
+      id: oldMessage.id,
+      type: MessageType.user,
+      content: newContent,
+    );
+
+    state = state.copyWith(messages: [...truncatedMessages, updatedMessage]);
+    await _saveMessages();
+
+    // Automatically resend the edited message
+    await sendMessage(newContent);
   }
 
   /// Load messages from localStorage

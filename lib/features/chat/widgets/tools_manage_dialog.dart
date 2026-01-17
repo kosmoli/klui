@@ -325,7 +325,6 @@ class _ToolCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).extension<KluiCustomColors>()!;
-    final typeLabel = _getToolTypeLabel(tool.toolType);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -375,7 +374,7 @@ class _ToolCard extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
-                if (typeLabel != null) ...[
+                if (_getToolTypeLabel(tool.toolType) != null) ...[
                   const SizedBox(height: 4),
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -387,7 +386,7 @@ class _ToolCard extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      typeLabel!,
+                      _getToolTypeLabel(tool.toolType)!,
                       style: KluiTextStyles.bodySmall.copyWith(
                         color: colors.textSecondary,
                         fontSize: 10,
@@ -498,7 +497,9 @@ class _ToolCard extends ConsumerWidget {
       case ToolType.mcp:
         return 'MCP';
       case ToolType.lettaClient:
-        return 'Letta Client';
+        return 'Letta';
+      case ToolType.lettaSleeptimeCore:
+        return 'Sleeptime';
       case ToolType.pythonFunction:
         return 'Python';
       case null:
@@ -516,6 +517,8 @@ class _ToolCard extends ConsumerWidget {
         return Icons.cloud;
       case ToolType.lettaClient:
         return Icons.hub;
+      case ToolType.lettaSleeptimeCore:
+        return Icons.bedtime;
       case ToolType.pythonFunction:
         return Icons.code;
       case null:

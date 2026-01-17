@@ -126,20 +126,11 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     ref.read(chatStateHolderProvider(agentId).notifier).abortMessage();
   }
 
-  void _onMessageEdit(String newContent) {
+  void _onMessageEdit(int messageIndex, String newContent) async {
     final agentId = ref.read(selectedAgentIdProvider);
     if (agentId.isEmpty) return;
     
-    final chatState = ref.read(chatStateHolderProvider(agentId));
-    final messages = chatState.messages;
-    
-    // Find the last user message and update it
-    for (int i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].type == MessageType.user) {
-        ref.read(chatStateHolderProvider(agentId).notifier).editMessage(i, newContent);
-        break;
-      }
-    }
+    await ref.read(chatStateHolderProvider(agentId).notifier).editAndResend(messageIndex, newContent);
   }
 
   void _sendMessage(String agentId) {
@@ -472,6 +463,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         isHighlighted: isHighlighted,
                         isMatched: isMatched && _searchQuery.isNotEmpty,
                         onEdit: message.type == MessageType.user ? _onMessageEdit : null,
+                        messageIndex: messageIndex,
                       );
                     },
                   ),
@@ -537,13 +529,15 @@ class _MessageTile extends StatelessWidget {
     this.isHighlighted = false,
     this.isMatched = false,
     this.onEdit,
+    this.messageIndex,
     super.key,
   });
 
   final ChatMessage message;
   final bool isHighlighted;
   final bool isMatched;
-  final Function(String)? onEdit;
+  final Function(int, String)? onEdit;
+  final int? messageIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -573,6 +567,7 @@ class _MessageTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: UserMessageBubble(
             message: message,
+            messageIndex: messageIndex,
             onEdit: message.type == MessageType.user ? onEdit : null,
           ),
         );

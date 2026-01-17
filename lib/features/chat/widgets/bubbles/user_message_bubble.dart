@@ -10,11 +10,13 @@ class UserMessageBubble extends ConsumerWidget {
   const UserMessageBubble({
     super.key,
     required this.message,
+    this.messageIndex,
     this.onEdit,
   });
 
   final ChatMessage message;
-  final Function(String)? onEdit;
+  final int? messageIndex;
+  final Function(int, String)? onEdit;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -46,7 +48,7 @@ class UserMessageBubble extends ConsumerWidget {
                 style: KluiTextStyles.userMessage,
               ),
             ),
-            if (onEdit != null) ...[
+            if (onEdit != null && messageIndex != null) ...[
               const SizedBox(width: 8),
               GestureDetector(
                 onTap: () => _showEditDialog(context),
@@ -99,8 +101,8 @@ class UserMessageBubble extends ConsumerWidget {
           ElevatedButton(
             onPressed: () {
               final newText = controller.text.trim();
-              if (newText.isNotEmpty && newText != message.content) {
-                onEdit?.call(newText);
+              if (newText.isNotEmpty && newText != message.content && messageIndex != null) {
+                onEdit?.call(messageIndex!, newText);
               }
               Navigator.of(context).pop();
             },
@@ -108,7 +110,7 @@ class UserMessageBubble extends ConsumerWidget {
               backgroundColor: colors.userBubble,
               foregroundColor: colors.userText,
             ),
-            child: const Text('Save'),
+            child: const Text('Save & Resend'),
           ),
         ],
       ),

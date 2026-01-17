@@ -40,4 +40,5 @@ const _$ToolTypeEnumMap = {
   ToolType.mcp: 'mcp',
   ToolType.lettaClient: 'letta_client',
   ToolType.pythonFunction: 'python_function',
+  ToolType.lettaSleeptimeCore: 'letta_sleeptime_core',
 };

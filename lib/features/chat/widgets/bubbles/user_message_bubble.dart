@@ -49,11 +49,11 @@ class UserMessageBubble extends ConsumerWidget {
             if (onEdit != null) ...[
               const SizedBox(width: 8),
               GestureDetector(
-                onTap: () => _showEditMenu(context),
+                onTap: () => _showEditDialog(context),
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   child: Icon(
-                    Icons.more_vert,
+                    Icons.edit_outlined,
                     size: 14,
                     color: colors.userText.withOpacity(0.7),
                   ),
@@ -64,31 +64,6 @@ class UserMessageBubble extends ConsumerWidget {
         ),
       ),
     );
-  }
-
-  void _showEditMenu(BuildContext context) {
-    final colors = Theme.of(context).extension<KluiCustomColors>()!;
-    
-    showMenu(
-      context: context,
-      position: const RelativeRect.fromLTRB(0, 40, 0, 0),
-      items: [
-        PopupMenuItem(
-          height: 36,
-          child: Row(
-            children: [
-              Icon(Icons.edit_outlined, size: 16, color: colors.textPrimary),
-              const SizedBox(width: 12),
-              Text('Edit', style: KluiTextStyles.bodyMedium),
-            ],
-          ),
-        ),
-      ],
-    ).then((_) {
-      if (onEdit != null) {
-        _showEditDialog(context);
-      }
-    });
   }
 
   void _showEditDialog(BuildContext context) {

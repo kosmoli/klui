@@ -137,7 +137,7 @@ class _AttachedToolsList extends ConsumerWidget {
           ),
         ),
       ),
-      error: (_, __) => Center(
+      error: (error, _) => Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
           child: Column(
@@ -148,6 +148,14 @@ class _AttachedToolsList extends ConsumerWidget {
               Text(
                 context.l10n.tools_error_loading,
                 style: KluiTextStyles.bodyMedium,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                error.toString(),
+                style: KluiTextStyles.bodySmall.copyWith(
+                  color: colors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
               ),
             ],
           ),
@@ -208,19 +216,54 @@ class _AvailableToolsList extends ConsumerWidget {
       loading: () => Center(
         child: Padding(
           padding: const EdgeInsets.all(32),
-          child: CircularProgressIndicator(),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              const SizedBox(height: 16),
+              Text(
+                context.l10n.tools_loading,
+                style: KluiTextStyles.bodyMedium.copyWith(
+                  color: colors.textSecondary,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-      error: (_, __) => Center(
+      error: (error, _) => Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text(context.l10n.tools_error_loading),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline, size: 48, color: colors.error),
+              const SizedBox(height: 16),
+              Text(
+                context.l10n.tools_error_loading,
+                style: KluiTextStyles.bodyMedium,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                error.toString(),
+                style: KluiTextStyles.bodySmall.copyWith(
+                  color: colors.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
       data: (allTools) {
         return attachedToolsAsync.when(
-          loading: () => const SizedBox(),
-          error: (_, __) => const SizedBox(),
+          loading: () => Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: CircularProgressIndicator(),
+            ),
+          ),
+          error: (_, __) => const SizedBox.shrink(),
           data: (attachedTools) {
             final attachedIds = attachedTools.map((t) => t.id).toSet();
             final availableTools = allTools

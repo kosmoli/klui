@@ -388,15 +388,18 @@ class ChatStateHolder extends _$ChatStateHolder {
       return;
     }
 
-    _log.debug('Tool call: ${toolCall['name']}, args: ${toolCall['arguments']}');
+    final toolName = toolCall['name'] as String?;
+    final toolCallId = toolCall['tool_call_id'] as String?;
+
+    _log.debug('Tool call: name=$toolName, id=$toolCallId, args: ${toolCall['arguments']}');
 
     final message = ChatMessage(
       id: json['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
       type: MessageType.toolCall,
       content: '',
-      toolName: toolCall['name'] as String?,
+      toolName: toolName,
       toolInput: toolCall['arguments'] as Map<String, dynamic>?,
-      toolCallId: toolCall['tool_call_id'] as String?,
+      toolCallId: toolCallId,
       metadata: {'phase': 'ready'},
     );
 
@@ -406,12 +409,18 @@ class ChatStateHolder extends _$ChatStateHolder {
   void _handleToolReturnMessage(Map<String, dynamic> json) {
     _log.debug('Tool return: status=${json['status']}, return=${json['tool_return']}');
 
+    // The tool_return_message has a 'name' field with the actual tool name
+    final toolName = json['name'] as String?;
+    final toolCallId = json['tool_call_id'] as String?;
+
+    _log.debug('Tool return: name=$toolName, tool_call_id=$toolCallId');
+
     final message = ChatMessage(
       id: json['id'] ?? DateTime.now().millisecondsSinceEpoch.toString(),
       type: MessageType.toolReturn,
       content: json['tool_return']?.toString() ?? '',
-      toolName: json['tool_call_id'] as String?, // This is the ID, not name - will be matched with tool_call message
-      toolCallId: json['tool_call_id'] as String?,
+      toolName: toolName,
+      toolCallId: toolCallId,
       metadata: {
         'phase': 'finished',
         'isOk': json['status'] == 'success',
@@ -499,7 +508,7 @@ class ChatStateHolder extends _$ChatStateHolder {
     }
   }
 
-  /// Edit a message at given index and trigger resend
+  /// Edit a message at given index and resend
   Future<void> editAndResend(int index, String newContent) async {
     if (index < 0 || index >= state.messages.length) return;
 
@@ -509,18 +518,12 @@ class ChatStateHolder extends _$ChatStateHolder {
     // Remove this message and all messages after it
     final truncatedMessages = state.messages.sublist(0, index);
     
-    // Add updated user message
-    final updatedMessage = ChatMessage(
-      id: oldMessage.id,
-      type: MessageType.user,
-      content: newContent,
-    );
-
-    state = state.copyWith(messages: [...truncatedMessages, updatedMessage]);
+    state = state.copyWith(messages: truncatedMessages);
     await _saveMessages();
 
-    // Automatically resend the edited message
-    await sendMessage(newContent);
+    // Use _sendMessageInternal to resend without adding duplicate user message
+    // directly call the streaming logic
+    await _sendMessageWithRetry(newContent, maxRetries: 3);
   }
 
   /// Load messages from localStorage

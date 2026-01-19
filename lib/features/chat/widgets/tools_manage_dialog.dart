@@ -499,7 +499,17 @@ class _ToolCard extends ConsumerWidget {
       case ToolType.lettaClient:
         return 'Letta';
       case ToolType.lettaSleeptimeCore:
+      case ToolType.lettaVoiceSleeptimeCore:
         return 'Sleeptime';
+      case ToolType.lettaBuiltin:
+      case ToolType.lettaCore:
+        return 'Letta Core';
+      case ToolType.lettaMemoryCore:
+        return 'Memory';
+      case ToolType.lettaFilesCore:
+        return 'Files';
+      case ToolType.lettaMultiAgentCore:
+        return 'Multi-Agent';
       case ToolType.pythonFunction:
         return 'Python';
       case null:
@@ -518,7 +528,17 @@ class _ToolCard extends ConsumerWidget {
       case ToolType.lettaClient:
         return Icons.hub;
       case ToolType.lettaSleeptimeCore:
+      case ToolType.lettaVoiceSleeptimeCore:
         return Icons.bedtime;
+      case ToolType.lettaBuiltin:
+      case ToolType.lettaCore:
+        return Icons.memory;
+      case ToolType.lettaMemoryCore:
+        return Icons.psychology;
+      case ToolType.lettaFilesCore:
+        return Icons.folder;
+      case ToolType.lettaMultiAgentCore:
+        return Icons.people;
       case ToolType.pythonFunction:
         return Icons.code;
       case null:

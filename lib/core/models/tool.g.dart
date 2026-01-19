@@ -41,4 +41,10 @@ const _$ToolTypeEnumMap = {
   ToolType.lettaClient: 'letta_client',
   ToolType.pythonFunction: 'python_function',
   ToolType.lettaSleeptimeCore: 'letta_sleeptime_core',
+  ToolType.lettaBuiltin: 'letta_builtin',
+  ToolType.lettaCore: 'letta_core',
+  ToolType.lettaFilesCore: 'letta_files_core',
+  ToolType.lettaMemoryCore: 'letta_memory_core',
+  ToolType.lettaMultiAgentCore: 'letta_multi_agent_core',
+  ToolType.lettaVoiceSleeptimeCore: 'letta_voice_sleeptime_core',
 };

@@ -17,6 +17,18 @@ enum ToolType {
   pythonFunction,
   @JsonValue('letta_sleeptime_core')
   lettaSleeptimeCore,
+  @JsonValue('letta_builtin')
+  lettaBuiltin,
+  @JsonValue('letta_core')
+  lettaCore,
+  @JsonValue('letta_files_core')
+  lettaFilesCore,
+  @JsonValue('letta_memory_core')
+  lettaMemoryCore,
+  @JsonValue('letta_multi_agent_core')
+  lettaMultiAgentCore,
+  @JsonValue('letta_voice_sleeptime_core')
+  lettaVoiceSleeptimeCore,
 }
 
 /// Tool model

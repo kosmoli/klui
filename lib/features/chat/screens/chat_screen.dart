@@ -156,154 +156,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     _scrollToBottom();
   }
 
-  void _showMemoryDialog(String agentId, AsyncValue<List<Agent>> agentsAsync) {
-    agentsAsync.when(
-      data: (agents) {
-        final agent = agents.firstWhere(
-          (a) => a.id == agentId,
-          orElse: () => Agent(id: agentId, name: 'Unknown'),
-        );
-        showDialog(
-          context: context,
-          builder: (context) => MemoryViewDialog(
-            agentId: agentId,
-            agentName: agent.name ?? 'Unknown',
-          ),
-        );
-      },
-      loading: () {},
-      error: (_, __) {},
-    );
-  }
-
-  void _showToolsDialog(String agentId, AsyncValue<List<Agent>> agentsAsync) {
-    agentsAsync.when(
-      data: (agents) {
-        final agent = agents.firstWhere(
-          (a) => a.id == agentId,
-          orElse: () => Agent(id: agentId, name: 'Unknown'),
-        );
-        showDialog(
-          context: context,
-          builder: (context) => ToolsManageDialog(
-            agentId: agentId,
-            agentName: agent.name ?? 'Unknown',
-          ),
-        );
-      },
-      loading: () {},
-      error: (_, __) {},
-    );
-  }
-
-
-  void _showExportMenu(String agentId, List<ChatMessage> messages) {
-    if (messages.isEmpty) {
-      final colors = Theme.of(context).extension<KluiCustomColors>()!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.chat_export_no_messages),
-          backgroundColor: colors.error,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-
-    final agentsAsync = ref.read(agentListProvider);
-    agentsAsync.when(
-      data: (agents) {
-        final agent = agents.firstWhere(
-          (a) => a.id == agentId,
-          orElse: () => Agent(id: agentId, name: 'Unknown'),
-        );
-
-        showMenu<String>(
-          context: context,
-          position: const RelativeRect.fromLTRB(100, 48, 0, 0),
-          items: [
-            PopupMenuItem<String>(
-              value: 'markdown',
-              child: Row(
-                children: [
-                  const Icon(Icons.description, size: 18),
-                  const SizedBox(width: 12),
-                  Text(context.l10n.chat_export_format_markdown),
-                ],
-              ),
-            ),
-            PopupMenuItem<String>(
-              value: 'json',
-              child: Row(
-                children: [
-                  const Icon(Icons.code, size: 18),
-                  const SizedBox(width: 12),
-                  Text(context.l10n.chat_export_format_json),
-                ],
-              ),
-            ),
-          ],
-        ).then((format) {
-          if (format != null) {
-            _exportChat(agent, messages, format);
-          }
-        });
-      },
-      loading: () {},
-      error: (_, __) {},
-    );
-  }
-
-  void _exportChat(Agent agent, List<ChatMessage> messages, String format) {
-    try {
-      final filename = ChatExportService.generateFilename(
-        agentName: agent.name ?? 'chat',
-        extension: format == 'markdown' ? '.md' : '.json',
-      );
-
-      String content;
-      String mimeType;
-
-      if (format == 'markdown') {
-        content = ChatExportService.toMarkdown(
-          messages: messages,
-          agent: agent,
-        );
-        mimeType = 'text/markdown';
-      } else {
-        content = ChatExportService.toJson(
-          messages: messages,
-          agent: agent,
-        );
-        mimeType = 'application/json';
-      }
-
-      ChatExportService.downloadFile(
-        content: content,
-        filename: filename,
-        mimeType: mimeType,
-      );
-
-      final colors = Theme.of(context).extension<KluiCustomColors>()!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.chat_export_success),
-          backgroundColor: colors.success,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } catch (e) {
-      final colors = Theme.of(context).extension<KluiCustomColors>()!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${context.l10n.chat_export_failed}: $e'),
-          backgroundColor: colors.error,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     // Read agent ID from provider - this will update when provider changes
@@ -338,20 +190,20 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           backgroundColor: colors.surface,
           elevation: 0,
           leading: const RetroMenuButton(),
+          titleSpacing: 0,
           title: Row(
             children: [
-              Text(
-                context.l10n.nav_chat,
-                style: KluiTextStyles.headlineSmall.copyWith(
-                  color: colors.textPrimary,
-                  fontWeight: FontWeight.w700,
-                ),
+              // Agent Selector - compact inline
+              _AgentSelector(
+                agentsAsync: agentsAsync,
+                currentAgentId: agentId,
               ),
+              // Streaming indicator - subtle
               if (isStreaming) ...[
                 const SizedBox(width: 12),
                 SizedBox(
-                  width: 16,
-                  height: 16,
+                  width: 14,
+                  height: 14,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation<Color>(colors.userBubble),
@@ -363,73 +215,35 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           toolbarHeight: 48,
           iconTheme: IconThemeData(color: colors.textPrimary),
           actions: [
-            // Agent Selector
-            _AgentSelector(
-              agentsAsync: agentsAsync,
-              currentAgentId: agentId,
-            ),
-          // Context Size Indicator
-          if (chatState.usage != null)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Tooltip(
-                message: context.l10n.chat_context_size_tooltip,
-                child: ContextSizeIndicator(
-                  usage: chatState.usage,
+            // Abort button - only show when streaming, replaces others
+            if (canAbort)
+              Semantics(
+                label: context.l10n.chat_abort_button,
+                button: true,
+                hint: context.l10n.chat_abort_button_hint,
+                child: IconButton(
+                  onPressed: () => _abortMessage(agentId),
+                  icon: const Icon(Icons.stop, size: 20),
+                  tooltip: context.l10n.chat_abort_button,
+                  style: IconButton.styleFrom(
+                    backgroundColor: colors.error.withOpacity(0.15),
+                    foregroundColor: colors.error,
+                    padding: const EdgeInsets.all(8),
+                  ),
                 ),
+              )
+            else
+              // More options menu - consolidated actions
+              _ChatActionsMenu(
+                agentId: agentId,
+                agentsAsync: agentsAsync,
+                messages: messages,
+                hasUsage: chatState.usage != null,
+                usage: chatState.usage,
               ),
-            ),
-          // Memory button
-          if (agentId.isNotEmpty)
-            IconButton(
-              onPressed: () => _showMemoryDialog(agentId, agentsAsync),
-              icon: const Icon(Icons.psychology_outlined),
-              tooltip: context.l10n.memory_view_tooltip,
-              color: colors.textPrimary,
-            ),
-          // Tools button
-          if (agentId.isNotEmpty)
-            IconButton(
-              onPressed: () => _showToolsDialog(agentId, agentsAsync),
-              icon: const Icon(Icons.build_outlined),
-              tooltip: context.l10n.tools_tooltip,
-              color: colors.textPrimary,
-            ),
-
-          // Export button
-          if (messages.isNotEmpty)
-            IconButton(
-              onPressed: () => _showExportMenu(agentId, messages),
-              icon: const Icon(Icons.download),
-              tooltip: context.l10n.chat_export_button_tooltip,
-              color: colors.textPrimary,
-            ),
-          if (canAbort)
-            Semantics(
-              label: context.l10n.chat_abort_button,
-              button: true,
-              hint: context.l10n.chat_abort_button_hint,
-              child: IconButton(
-                onPressed: () => _abortMessage(agentId),
-                icon: const Icon(Icons.stop),
-                tooltip: context.l10n.chat_abort_button,
-                style: IconButton.styleFrom(
-                  backgroundColor: colors.error.withOpacity(0.1),
-                  foregroundColor: colors.error,
-                ),
-              ),
-            ),
-          IconButton(
-            onPressed: () {
-              ref.read(chatStateHolderProvider(agentId).notifier).clearMessages();
-            },
-            icon: const Icon(Icons.clear_all),
-            tooltip: context.l10n.chat_clear_button_tooltip,
-            color: colors.textPrimary,
-          ),
-          const SizedBox(width: 8),
-        ],
-      ),
+            const SizedBox(width: 4),
+          ],
+        ),
       body: Column(
         children: [
           // Search bar (shown when there are messages)
@@ -697,7 +511,7 @@ class _ChatInputArea extends StatelessWidget {
   }
 }
 
-/// Agent Selector Widget - Shows current agent and allows switching
+/// Compact Agent Selector - Minimal design for AppBar
 class _AgentSelector extends ConsumerWidget {
   final AsyncValue<List<Agent>> agentsAsync;
   final String currentAgentId;
@@ -713,7 +527,6 @@ class _AgentSelector extends ConsumerWidget {
 
     return agentsAsync.when(
       data: (agents) {
-        // Find current agent in the list
         Agent? currentAgent;
         try {
           currentAgent = agents.firstWhere((a) => a.id == currentAgentId);
@@ -721,66 +534,65 @@ class _AgentSelector extends ConsumerWidget {
           currentAgent = null;
         }
 
-        final currentAgentName = currentAgent?.name ?? 'Select Agent';
+        final currentAgentName = currentAgent?.name ?? 'Select';
+        // Truncate name if too long
+        final displayName = currentAgentName.length > 15
+            ? '${currentAgentName.substring(0, 12)}...'
+            : currentAgentName;
 
-        return Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: Semantics(
-            label: context.l10n.agent_selector_label(currentAgentName),
-            button: true,
-            hint: context.l10n.agent_selector_hint,
-            child: InkWell(
-              onTap: agents.isEmpty
-                  ? null
-                  : () => _showAgentMenu(context, ref, agents),
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  border: Border.all(color: colors.border),
-                  borderRadius: BorderRadius.circular(8),
-                  color: colors.surfaceVariant.withOpacity(0.5),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+        return Semantics(
+          label: context.l10n.agent_selector_label(currentAgentName),
+          button: true,
+          hint: context.l10n.agent_selector_hint,
+          child: InkWell(
+            onTap: agents.isEmpty
+                ? null
+                : () => _showAgentMenu(context, ref, agents),
+            borderRadius: BorderRadius.circular(6),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                border: Border.all(color: colors.border, width: 1),
+                borderRadius: BorderRadius.circular(6),
+                color: colors.surfaceVariant.withOpacity(0.3),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.smart_toy_outlined,
+                    size: 16,
+                    color: colors.userBubble,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    displayName,
+                    style: KluiTextStyles.labelMedium.copyWith(
+                      color: colors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                  if (agents.isNotEmpty) ...[
+                    const SizedBox(width: 2),
                     Icon(
-                      Icons.smart_toy_outlined,
+                      Icons.arrow_drop_down,
                       size: 18,
-                      color: colors.userBubble,
+                      color: colors.textSecondary,
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      currentAgentName,
-                      style: KluiTextStyles.labelMedium.copyWith(
-                        color: colors.textPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (agents.isNotEmpty) ...[
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.arrow_drop_down,
-                        size: 20,
-                        color: colors.textSecondary,
-                      ),
-                    ],
                   ],
-                ),
+                ],
               ),
             ),
           ),
         );
       },
-      loading: () => Padding(
-        padding: const EdgeInsets.only(right: 8),
-        child: SizedBox(
-          width: 24,
-          height: 24,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(colors.userBubble),
-          ),
+      loading: () => SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          valueColor: AlwaysStoppedAnimation<Color>(colors.userBubble),
         ),
       ),
       error: (_, __) => const SizedBox.shrink(),
@@ -796,7 +608,7 @@ class _AgentSelector extends ConsumerWidget {
 
     showMenu<String>(
       context: context,
-      position: const RelativeRect.fromLTRB(80, 48, 0, 0),
+      position: const RelativeRect.fromLTRB(60, 48, 0, 0),
       items: agents.map((agent) {
         final isSelected = agent.id == currentAgentId;
         return PopupMenuItem<String>(
@@ -845,10 +657,265 @@ class _AgentSelector extends ConsumerWidget {
       }).toList(),
     ).then((value) {
       if (value != null) {
-        // Update the selected agent ID provider
-        // This will trigger ChatScreen to rebuild with the new agent
         ref.read(selectedAgentIdProvider.notifier).setSelectedAgentId(value);
       }
     });
+  }
+}
+
+/// Consolidated Chat Actions Menu
+class _ChatActionsMenu extends ConsumerWidget {
+  final String agentId;
+  final AsyncValue<List<Agent>> agentsAsync;
+  final List<ChatMessage> messages;
+  final bool hasUsage;
+  final Map<String, dynamic>? usage;
+
+  const _ChatActionsMenu({
+    required this.agentId,
+    required this.agentsAsync,
+    required this.messages,
+    required this.hasUsage,
+    required this.usage,
+  });
+
+  void _showMenu(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+    final l10n = context.l10n;
+
+    // Build menu items list
+    final items = <PopupMenuEntry<dynamic>>[
+      // Context size (if available)
+      if (hasUsage)
+        PopupMenuItem(
+          enabled: false,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Row(
+              children: [
+                const Icon(Icons.storage, size: 18, color: Colors.grey),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.chat_context_size_label,
+                        style: KluiTextStyles.bodySmall,
+                      ),
+                      const SizedBox(height: 2),
+                      ContextSizeIndicator(usage: usage),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      if (hasUsage) const PopupMenuDivider(height: 1),
+
+      // Memory
+      if (agentId.isNotEmpty)
+        PopupMenuItem(
+          onTap: () => _showMemoryDialog(context, ref),
+          child: Row(
+            children: [
+              const Icon(Icons.psychology_outlined, size: 18),
+              const SizedBox(width: 12),
+              Text(l10n.memory_view_title),
+            ],
+          ),
+        ),
+
+      // Tools
+      if (agentId.isNotEmpty)
+        PopupMenuItem(
+          onTap: () => _showToolsDialog(context, ref),
+          child: Row(
+            children: [
+              const Icon(Icons.build_outlined, size: 18),
+              const SizedBox(width: 12),
+              Text(l10n.tools_title),
+            ],
+          ),
+        ),
+
+      // Export
+      if (messages.isNotEmpty)
+        PopupMenuItem(
+          onTap: () => _showExportMenu(context, ref),
+          child: Row(
+            children: [
+              const Icon(Icons.download, size: 18),
+              const SizedBox(width: 12),
+              Text(l10n.chat_export_button_tooltip),
+            ],
+          ),
+        ),
+
+      const PopupMenuDivider(height: 1),
+
+      // Clear chat
+      PopupMenuItem(
+        onTap: () => _clearChat(context, ref),
+        child: Row(
+          children: [
+            Icon(Icons.clear_all, size: 18, color: colors.error),
+            const SizedBox(width: 12),
+            Text(l10n.chat_clear_button_tooltip, style: TextStyle(color: colors.error)),
+          ],
+        ),
+      ),
+    ];
+
+    showMenu(
+      context: context,
+      position: const RelativeRect.fromLTRB(200, 48, 0, 0),
+      items: items,
+    );
+  }
+
+  void _showMemoryDialog(BuildContext context, WidgetRef ref) {
+    agentsAsync.whenData((agents) {
+      final agent = agents.firstWhere(
+        (a) => a.id == agentId,
+        orElse: () => Agent(id: agentId, name: 'Unknown'),
+      );
+      Navigator.of(context).pop();
+      showDialog(
+        context: context,
+        builder: (context) => MemoryViewDialog(
+          agentId: agentId,
+          agentName: agent.name ?? 'Unknown',
+        ),
+      );
+    });
+  }
+
+  void _showToolsDialog(BuildContext context, WidgetRef ref) {
+    agentsAsync.whenData((agents) {
+      final agent = agents.firstWhere(
+        (a) => a.id == agentId,
+        orElse: () => Agent(id: agentId, name: 'Unknown'),
+      );
+      Navigator.of(context).pop();
+      showDialog(
+        context: context,
+        builder: (context) => ToolsManageDialog(
+          agentId: agentId,
+          agentName: agent.name ?? 'Unknown',
+        ),
+      );
+    });
+  }
+
+  void _showExportMenu(BuildContext context, WidgetRef ref) {
+    Navigator.of(context).pop();
+
+    agentsAsync.whenData((agents) {
+      final agent = agents.firstWhere(
+        (a) => a.id == agentId,
+        orElse: () => Agent(id: agentId, name: 'Unknown'),
+      );
+
+      showMenu<String>(
+        context: context,
+        position: const RelativeRect.fromLTRB(200, 48, 0, 0),
+        items: [
+          PopupMenuItem<String>(
+            value: 'markdown',
+            child: Row(
+              children: [
+                const Icon(Icons.description, size: 18),
+                const SizedBox(width: 12),
+                Text(context.l10n.chat_export_format_markdown),
+              ],
+            ),
+          ),
+          PopupMenuItem<String>(
+            value: 'json',
+            child: Row(
+              children: [
+                const Icon(Icons.code, size: 18),
+                const SizedBox(width: 12),
+                Text(context.l10n.chat_export_format_json),
+              ],
+            ),
+          ),
+        ],
+      ).then((format) {
+        if (format != null) {
+          _exportChat(context, agent, messages, format);
+        }
+      });
+    });
+  }
+
+  void _exportChat(BuildContext context, Agent agent, List<ChatMessage> messages, String format) {
+    try {
+      final filename = ChatExportService.generateFilename(
+        agentName: agent.name ?? 'chat',
+        extension: format == 'markdown' ? '.md' : '.json',
+      );
+
+      String content;
+      String mimeType;
+
+      if (format == 'markdown') {
+        content = ChatExportService.toMarkdown(
+          messages: messages,
+          agent: agent,
+        );
+        mimeType = 'text/markdown';
+      } else {
+        content = ChatExportService.toJson(
+          messages: messages,
+          agent: agent,
+        );
+        mimeType = 'application/json';
+      }
+
+      ChatExportService.downloadFile(
+        content: content,
+        filename: filename,
+        mimeType: mimeType,
+      );
+
+      final colors = Theme.of(context).extension<KluiCustomColors>()!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.chat_export_success),
+          backgroundColor: colors.success,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      final colors = Theme.of(context).extension<KluiCustomColors>()!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${context.l10n.chat_export_failed}: $e'),
+          backgroundColor: colors.error,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  void _clearChat(BuildContext context, WidgetRef ref) {
+    Navigator.of(context).pop();
+    ref.read(chatStateHolderProvider(agentId).notifier).clearMessages();
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
+    return IconButton(
+      onPressed: () => _showMenu(context, ref),
+      icon: const Icon(Icons.more_vert, size: 20),
+      tooltip: 'More options',
+      color: colors.textPrimary,
+      padding: const EdgeInsets.all(8),
+    );
   }
 }

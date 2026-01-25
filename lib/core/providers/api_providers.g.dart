@@ -820,3 +820,183 @@ final class DeleteProviderFamily extends $Family
   @override
   String toString() => r'deleteProviderProvider';
 }
+
+/// Provider for updating an Agent
+
+@ProviderFor(updateAgent)
+const updateAgentProvider = UpdateAgentFamily._();
+
+/// Provider for updating an Agent
+
+final class UpdateAgentProvider
+    extends $FunctionalProvider<AsyncValue<Agent>, Agent, FutureOr<Agent>>
+    with $FutureModifier<Agent>, $FutureProvider<Agent> {
+  /// Provider for updating an Agent
+  const UpdateAgentProvider._({
+    required UpdateAgentFamily super.from,
+    required ({String id, CreateAgentRequest request}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'updateAgentProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$updateAgentHash();
+
+  @override
+  String toString() {
+    return r'updateAgentProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<Agent> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<Agent> create(Ref ref) {
+    final argument = this.argument as ({String id, CreateAgentRequest request});
+    return updateAgent(ref, id: argument.id, request: argument.request);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is UpdateAgentProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$updateAgentHash() => r'bc2092061c07da976b709273878f45d5c0fa885f';
+
+/// Provider for updating an Agent
+
+final class UpdateAgentFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<Agent>,
+          ({String id, CreateAgentRequest request})
+        > {
+  const UpdateAgentFamily._()
+    : super(
+        retry: null,
+        name: r'updateAgentProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Provider for updating an Agent
+
+  UpdateAgentProvider call({
+    required String id,
+    required CreateAgentRequest request,
+  }) => UpdateAgentProvider._(argument: (id: id, request: request), from: this);
+
+  @override
+  String toString() => r'updateAgentProvider';
+}
+
+/// Provider for updating a Provider
+
+@ProviderFor(updateProvider)
+const updateProviderProvider = UpdateProviderFamily._();
+
+/// Provider for updating a Provider
+
+final class UpdateProviderProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<models.ProviderConfig>,
+          models.ProviderConfig,
+          FutureOr<models.ProviderConfig>
+        >
+    with
+        $FutureModifier<models.ProviderConfig>,
+        $FutureProvider<models.ProviderConfig> {
+  /// Provider for updating a Provider
+  const UpdateProviderProvider._({
+    required UpdateProviderFamily super.from,
+    required ({String id, CreateProviderRequest request}) super.argument,
+  }) : super(
+         retry: null,
+         name: r'updateProviderProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$updateProviderHash();
+
+  @override
+  String toString() {
+    return r'updateProviderProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<models.ProviderConfig> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<models.ProviderConfig> create(Ref ref) {
+    final argument =
+        this.argument as ({String id, CreateProviderRequest request});
+    return updateProvider(ref, id: argument.id, request: argument.request);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is UpdateProviderProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$updateProviderHash() => r'6b81b073b02ebaab31d360b961b9ad0a8b901678';
+
+/// Provider for updating a Provider
+
+final class UpdateProviderFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<models.ProviderConfig>,
+          ({String id, CreateProviderRequest request})
+        > {
+  const UpdateProviderFamily._()
+    : super(
+        retry: null,
+        name: r'updateProviderProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Provider for updating a Provider
+
+  UpdateProviderProvider call({
+    required String id,
+    required CreateProviderRequest request,
+  }) => UpdateProviderProvider._(
+    argument: (id: id, request: request),
+    from: this,
+  );
+
+  @override
+  String toString() => r'updateProviderProvider';
+}

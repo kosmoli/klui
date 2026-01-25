@@ -110,14 +110,7 @@ class ProviderDetailScreen extends ConsumerWidget {
             icon: const Icon(Icons.edit_outlined),
             color: colors.textPrimary,
             onPressed: () {
-              // TODO: Implement edit
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(context.l10n.provider_detail_edit_coming_soon),
-                  backgroundColor: colors.surfaceVariant,
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+              context.go('/providers/$providerId/edit');
             },
           ),
         ),

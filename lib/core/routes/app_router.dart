@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/agents/screens/agent_list_screen.dart';
 import '../../features/agents/screens/agent_detail_screen.dart';
 import '../../features/agents/screens/agent_create_screen.dart';
+import '../../features/agents/screens/agent_edit_screen.dart';
 import '../../features/providers/screens/provider_list_screen.dart';
 import '../../features/providers/screens/provider_create_screen.dart';
 import '../../features/providers/screens/provider_detail_screen.dart';
+import '../../features/providers/screens/provider_edit_screen.dart';
 import '../../features/chat/screens/chat_screen.dart';
 import '../extensions/context_extensions.dart';
 import '../providers/chat_providers.dart';
@@ -73,6 +75,22 @@ final routerProvider = Provider<GoRouter>((ref) {
                 },
               );
             },
+            routes: [
+              GoRoute(
+                path: 'edit',
+                name: 'agent-edit',
+                pageBuilder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return CustomTransitionPage(
+                    child: AgentEditScreen(agentId: id),
+                    transitionDuration: Duration.zero,
+                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                      return child;
+                    },
+                  );
+                },
+              ),
+            ],
           ),
         ],
       ),
@@ -115,6 +133,22 @@ final routerProvider = Provider<GoRouter>((ref) {
                 },
               );
             },
+            routes: [
+              GoRoute(
+                path: 'edit',
+                name: 'provider-edit',
+                pageBuilder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return CustomTransitionPage(
+                    child: ProviderEditScreen(providerId: id),
+                    transitionDuration: Duration.zero,
+                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                      return child;
+                    },
+                  );
+                },
+              ),
+            ],
           ),
         ],
       ),

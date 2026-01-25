@@ -109,6 +109,10 @@
   "agent_create_error_llm_models": "加载 LLM Model失败：{error}",
   "agent_create_error_embedding_models": "加载 Embedding Model失败：{error}",
 
+  "agent_edit_title": "编辑 Agent",
+  "agent_edit_button_update": "更新 Agent",
+  "agent_edit_success": "{name} 更新成功",
+
   "agent_detail_title": "Agent详情",
   "agent_detail_back_tooltip": "返回Agent列表",
   "agent_detail_tooltip_edit": "编辑",
@@ -178,6 +182,10 @@
   "provider_type_google_ai": "Google AI",
   "provider_type_google_vertex": "Google Vertex",
   "provider_type_letta": "Letta",
+
+  "provider_edit_title": "编辑 Provider",
+  "provider_edit_button_update": "更新 Provider",
+  "provider_edit_success": "Provider \"{name}\" 更新成功",
 
   "provider_create_title": "创建Provider",
   "provider_create_creating": "创建Provider中...",

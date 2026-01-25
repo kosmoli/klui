@@ -109,6 +109,10 @@
   "agent_create_error_llm_models": "Failed to load LLM models: {error}",
   "agent_create_error_embedding_models": "Failed to load embedding models: {error}",
 
+  "agent_edit_title": "Edit Agent",
+  "agent_edit_button_update": "Update Agent",
+  "agent_edit_success": "{name} updated successfully",
+
   "agent_detail_title": "Agent Details",
   "agent_detail_back_tooltip": "Back to Agents",
   "agent_detail_tooltip_edit": "Edit",
@@ -178,6 +182,10 @@
   "provider_type_google_ai": "Google AI",
   "provider_type_google_vertex": "Google Vertex",
   "provider_type_letta": "Letta",
+
+  "provider_edit_title": "Edit Provider",
+  "provider_edit_button_update": "Update Provider",
+  "provider_edit_success": "Provider \"{name}\" updated successfully",
 
   "provider_create_title": "Create Provider",
   "provider_create_creating": "Creating provider...",

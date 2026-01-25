@@ -14,14 +14,14 @@ class CreateProviderRequest {
   /// Factory constructor for OpenAI provider
   factory CreateProviderRequest.openai({
     required String name,
-    required String apiKey,
+    String? apiKey,
     String? baseUrl,
   }) {
     return CreateProviderRequest(
       name: name,
       providerType: 'openai',
       providerConfig: {
-        'api_key': apiKey,
+        if (apiKey != null) 'api_key': apiKey,
         if (baseUrl != null) 'base_url': baseUrl,
       },
     );
@@ -30,13 +30,13 @@ class CreateProviderRequest {
   /// Factory constructor for Anthropic provider
   factory CreateProviderRequest.anthropic({
     required String name,
-    required String apiKey,
+    String? apiKey,
   }) {
     return CreateProviderRequest(
       name: name,
       providerType: 'anthropic',
       providerConfig: {
-        'api_key': apiKey,
+        if (apiKey != null) 'api_key': apiKey,
       },
     );
   }
@@ -58,13 +58,13 @@ class CreateProviderRequest {
   /// Factory constructor for Google AI provider
   factory CreateProviderRequest.googleAi({
     required String name,
-    required String apiKey,
+    String? apiKey,
   }) {
     return CreateProviderRequest(
       name: name,
       providerType: 'google_ai',
       providerConfig: {
-        'api_key': apiKey,
+        if (apiKey != null) 'api_key': apiKey,
       },
     );
   }

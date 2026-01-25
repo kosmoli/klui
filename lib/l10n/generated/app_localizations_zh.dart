@@ -320,6 +320,17 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String get agent_edit_title => '编辑 Agent';
+
+  @override
+  String get agent_edit_button_update => '更新 Agent';
+
+  @override
+  String agent_edit_success(Object name) {
+    return '$name 更新成功';
+  }
+
+  @override
   String get agent_detail_title => 'Agent详情';
 
   @override
@@ -526,6 +537,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get provider_type_letta => 'Letta';
+
+  @override
+  String get provider_edit_title => '编辑 Provider';
+
+  @override
+  String get provider_edit_button_update => '更新 Provider';
+
+  @override
+  String provider_edit_success(Object name) {
+    return 'Provider \"$name\" 更新成功';
+  }
 
   @override
   String get provider_create_title => '创建Provider';

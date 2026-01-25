@@ -142,6 +142,17 @@ class _AgentDetailScreenState extends ConsumerState<AgentDetailScreen>
         ),
       ),
       actions: [
+        // Edit button
+        Semantics(
+          label: context.l10n.agent_detail_tooltip_edit,
+          button: true,
+          child: IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            color: colors.textPrimary,
+            onPressed: () => context.go('/agents/${widget.agentId}/edit'),
+            tooltip: context.l10n.agent_detail_tooltip_edit,
+          ),
+        ),
         // Start Chat button
         Semantics(
           label: context.l10n.agent_detail_start_chat,

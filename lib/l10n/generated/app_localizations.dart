@@ -656,6 +656,24 @@ abstract class AppLocalizations {
   /// **'Failed to load embedding models: {error}'**
   String agent_create_error_embedding_models(Object error);
 
+  /// No description provided for @agent_edit_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Agent'**
+  String get agent_edit_title;
+
+  /// No description provided for @agent_edit_button_update.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Agent'**
+  String get agent_edit_button_update;
+
+  /// No description provided for @agent_edit_success.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} updated successfully'**
+  String agent_edit_success(Object name);
+
   /// No description provided for @agent_detail_title.
   ///
   /// In en, this message translates to:
@@ -1039,6 +1057,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Letta'**
   String get provider_type_letta;
+
+  /// No description provided for @provider_edit_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Provider'**
+  String get provider_edit_title;
+
+  /// No description provided for @provider_edit_button_update.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Provider'**
+  String get provider_edit_button_update;
+
+  /// No description provided for @provider_edit_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Provider \"{name}\" updated successfully'**
+  String provider_edit_success(Object name);
 
   /// No description provided for @provider_create_title.
   ///

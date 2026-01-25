@@ -334,6 +334,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get agent_edit_title => 'Edit Agent';
+
+  @override
+  String get agent_edit_button_update => 'Update Agent';
+
+  @override
+  String agent_edit_success(Object name) {
+    return '$name updated successfully';
+  }
+
+  @override
   String get agent_detail_title => 'Agent Details';
 
   @override
@@ -543,6 +554,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get provider_type_letta => 'Letta';
+
+  @override
+  String get provider_edit_title => 'Edit Provider';
+
+  @override
+  String get provider_edit_button_update => 'Update Provider';
+
+  @override
+  String provider_edit_success(Object name) {
+    return 'Provider \"$name\" updated successfully';
+  }
 
   @override
   String get provider_create_title => 'Create Provider';

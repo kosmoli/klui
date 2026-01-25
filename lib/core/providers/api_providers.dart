@@ -288,3 +288,72 @@ Future<void> deleteProvider(Ref ref, String id) async {
     throw Exception(errorMessage);
   }
 }
+
+/// Provider for updating an Agent
+@riverpod
+Future<Agent> updateAgent(Ref ref, {required String id, required CreateAgentRequest request}) async {
+  final client = ref.watch(apiClientProvider);
+  final requestBody = request.toJson();
+
+  print('[updateAgent] Request body: ${jsonEncode(requestBody)}');
+
+  final response = await client.put(
+    '/agents/$id',
+    body: jsonEncode(requestBody),
+  );
+
+  print('[updateAgent] Response status: ${response.statusCode}');
+  print('[updateAgent] Response body: ${response.body}');
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    final dynamic decoded = jsonDecode(response.body);
+    return Agent.fromJson(decoded as Map<String, dynamic>);
+  } else {
+    String errorMessage = 'Failed to update agent: ${response.statusCode}';
+    try {
+      final errorData = jsonDecode(response.body);
+      if (errorData is Map && errorData.containsKey('detail')) {
+        errorMessage = 'Error: ${errorData['detail']}';
+      }
+    } catch (_) {
+      // If parsing fails, use default message
+    }
+    throw Exception(errorMessage);
+  }
+}
+
+/// Provider for updating a Provider
+@riverpod
+Future<models.ProviderConfig> updateProvider(
+  Ref ref,
+  {required String id, required CreateProviderRequest request}
+) async {
+  final client = ref.watch(apiClientProvider);
+  final requestBody = request.toJson();
+
+  print('[updateProvider] Request body: ${jsonEncode(requestBody)}');
+
+  final response = await client.put(
+    '/providers/$id',
+    body: jsonEncode(requestBody),
+  );
+
+  print('[updateProvider] Response status: ${response.statusCode}');
+  print('[updateProvider] Response body: ${response.body}');
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    final dynamic decoded = jsonDecode(response.body);
+    return models.ProviderConfig.fromJson(decoded as Map<String, dynamic>);
+  } else {
+    String errorMessage = 'Failed to update provider: ${response.statusCode}';
+    try {
+      final errorData = jsonDecode(response.body);
+      if (errorData is Map && errorData.containsKey('detail')) {
+        errorMessage = 'Error: ${errorData['detail']}';
+      }
+    } catch (_) {
+      // If parsing fails, use default message
+    }
+    throw Exception(errorMessage);
+  }
+}

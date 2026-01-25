@@ -382,6 +382,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agent_detail_section_config => '配置';
 
   @override
+  String get agent_detail_tab_info => '信息';
+
+  @override
   String get agent_detail_field_id => 'Agent ID';
 
   @override
@@ -851,6 +854,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get chat_input_disabled_no_agent => '选择一个 Agent 开始聊天';
 
   @override
+  String get chat_menu_agent_detail => 'Agent设置';
+
+  @override
   String agent_selector_label(Object name) {
     return '当前 Agent：$name';
   }
@@ -867,58 +873,56 @@ class AppLocalizationsZh extends AppLocalizations {
   String get agent_selector_select_hint => '双击选择此 Agent';
 
   @override
-  String get chat_abort_button => 'Stop';
+  String get chat_abort_button => '停止';
 
   @override
-  String get chat_abort_button_hint =>
-      'Double tap to stop the current operation';
+  String get chat_abort_button_hint => '双击停止当前操作';
 
   @override
-  String get chat_abort_esc_hint => 'Press ESC to stop';
+  String get chat_abort_esc_hint => '按 ESC 停止';
 
   @override
-  String get chat_aborted_message => 'Operation stopped by user';
+  String get chat_aborted_message => '用户停止了操作';
 
   @override
-  String get chat_abort_failed => 'Failed to stop operation';
+  String get chat_abort_failed => '停止操作失败';
 
   @override
-  String get chat_clear_button_tooltip => 'Clear chat history';
+  String get chat_clear_button_tooltip => '清空聊天记录';
 
   @override
-  String get chat_operation_stopped => 'Operation stopped';
+  String get chat_operation_stopped => '操作已停止';
 
   @override
   String chat_retrying_message(Object current, Object total) {
-    return 'Retrying... (Attempt $current/$total)';
+    return '重试中...（第 $current/$total 次）';
   }
 
   @override
-  String get chat_diff_no_changes => 'No changes detected';
+  String get chat_diff_no_changes => '未检测到更改';
 
   @override
   String chat_diff_file_path(Object path) {
-    return 'File: $path';
+    return '文件：$path';
   }
 
   @override
-  String get chat_context_size_label => 'Context';
+  String get chat_context_size_label => '上下文';
 
   @override
-  String get chat_context_size_tooltip => 'Tokens used in conversation context';
+  String get chat_context_size_tooltip => '对话上下文中使用的令牌数';
 
   @override
-  String get chat_context_size_warning => 'Context window almost full';
+  String get chat_context_size_warning => '上下文窗口即将用满';
 
   @override
-  String get chat_context_size_critical =>
-      'Context window nearly full, consider clearing history';
+  String get chat_context_size_critical => '上下文窗口几乎已满，考虑清空历史记录';
 
   @override
-  String get chat_export_button_tooltip => 'Export chat';
+  String get chat_export_button_tooltip => '导出聊天';
 
   @override
-  String get chat_export_title => 'Export Chat';
+  String get chat_export_title => '导出聊天';
 
   @override
   String get chat_export_format_markdown => 'Markdown (.md)';
@@ -927,102 +931,111 @@ class AppLocalizationsZh extends AppLocalizations {
   String get chat_export_format_json => 'JSON (.json)';
 
   @override
-  String get chat_export_success => 'Chat exported successfully';
+  String get chat_export_success => '聊天导出成功';
 
   @override
-  String get chat_export_failed => 'Failed to export chat';
+  String get chat_export_failed => '导出聊天失败';
 
   @override
-  String get chat_export_no_messages => 'No messages to export';
+  String get chat_export_no_messages => '没有消息可导出';
 
   @override
-  String get memory_view_title => 'Agent Memory';
+  String get memory_view_title => 'Agent记忆';
 
   @override
-  String get memory_view_tooltip => 'View and edit agent memory';
+  String get memory_view_tooltip => '查看和编辑Agent记忆';
 
   @override
-  String get memory_section_core => 'Core Memory';
+  String get memory_section_core => '核心记忆';
 
   @override
-  String get memory_section_archival => 'Archival Memory';
+  String get memory_section_archival => '归档记忆';
 
   @override
-  String get memory_empty => 'No memory entries';
+  String get memory_empty => '无记忆条目';
 
   @override
-  String get memory_edit_success => 'Memory updated successfully';
+  String get memory_edit_success => '记忆更新成功';
 
   @override
-  String get memory_edit_failed => 'Failed to update memory';
+  String get memory_edit_failed => '记忆更新失败';
 
   @override
-  String get memory_label => 'Label';
+  String get memory_label => '标签';
 
   @override
-  String get memory_value => 'Content';
+  String get memory_value => '内容';
 
   @override
   String memory_count(Object count) {
-    return '$count items';
+    return '$count 条';
   }
 
   @override
-  String get chat_search_placeholder => 'Search messages...';
+  String get memory_tab_description => '查看和编辑Agent的核心记忆块';
 
   @override
-  String get chat_search_no_results => 'No messages found';
+  String get chat_search_placeholder => '搜索消息...';
+
+  @override
+  String get chat_search_no_results => '未找到消息';
 
   @override
   String chat_search_results(Object count) {
-    return '$count result(s)';
+    return '$count 个结果';
   }
 
   @override
-  String get tools_title => 'Agent Tools';
+  String get tools_title => 'Agent工具';
 
   @override
-  String get tools_tooltip => 'Manage agent tools';
+  String get tools_tooltip => '管理Agent工具';
 
   @override
-  String get tools_empty => 'No tools attached';
+  String get tools_empty => '无附加工具';
 
   @override
-  String get tools_loading => 'Loading tools...';
+  String get tools_loading => '加载工具中...';
 
   @override
-  String get tools_error_loading => 'Failed to load tools';
+  String get tools_error_loading => '加载工具失败';
 
   @override
-  String get tools_available => 'Available Tools';
+  String get tools_available => '可用工具';
 
   @override
-  String get tools_attach => 'Attach';
+  String get tools_attached => '已附加工具';
 
   @override
-  String get tools_detach => 'Detach';
+  String get tools_attach => '附加';
 
   @override
-  String get tools_attach_success => 'Tool attached successfully';
+  String get tools_detach => '移除';
 
   @override
-  String get tools_attach_failed => 'Failed to attach tool';
+  String get tools_attach_success => '工具附加成功';
 
   @override
-  String get tools_detach_success => 'Tool detached successfully';
+  String get tools_attach_failed => '附加工具失败';
 
   @override
-  String get tools_detach_failed => 'Failed to detach tool';
+  String get tools_detach_success => '工具移除成功';
 
   @override
-  String get tools_no_available => 'No available tools';
+  String get tools_detach_failed => '移除工具失败';
 
   @override
-  String get tools_type_custom => 'Custom';
+  String get tools_no_available => '无可用工具';
 
   @override
-  String get tools_type_builtin => 'Built-in';
+  String get tools_type_custom => '自定义';
+
+  @override
+  String get tools_type_builtin => '内置';
 
   @override
   String get tools_type_mcp => 'MCP';
+
+  @override
+  String get tools_tab_description => '管理此Agent可用的工具';
 }

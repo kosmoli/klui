@@ -397,6 +397,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get agent_detail_section_config => 'Configuration';
 
   @override
+  String get agent_detail_tab_info => 'Info';
+
+  @override
   String get agent_detail_field_id => 'Agent ID';
 
   @override
@@ -878,6 +881,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Select an agent to start chatting';
 
   @override
+  String get chat_menu_agent_detail => 'Agent Settings';
+
+  @override
   String agent_selector_label(Object name) {
     return 'Current agent: $name';
   }
@@ -995,6 +1001,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get memory_tab_description =>
+      'View and edit the agent\'s core memory blocks';
+
+  @override
   String get chat_search_placeholder => 'Search messages...';
 
   @override
@@ -1022,6 +1032,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tools_available => 'Available Tools';
+
+  @override
+  String get tools_attached => 'Attached Tools';
 
   @override
   String get tools_attach => 'Attach';
@@ -1052,4 +1065,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tools_type_mcp => 'MCP';
+
+  @override
+  String get tools_tab_description => 'Manage tools available to this agent';
 }

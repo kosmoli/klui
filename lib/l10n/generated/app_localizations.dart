@@ -776,6 +776,12 @@ abstract class AppLocalizations {
   /// **'Configuration'**
   String get agent_detail_section_config;
 
+  /// No description provided for @agent_detail_tab_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get agent_detail_tab_info;
+
   /// No description provided for @agent_detail_field_id.
   ///
   /// In en, this message translates to:
@@ -1631,6 +1637,12 @@ abstract class AppLocalizations {
   /// **'Select an agent to start chatting'**
   String get chat_input_disabled_no_agent;
 
+  /// No description provided for @chat_menu_agent_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent Settings'**
+  String get chat_menu_agent_detail;
+
   /// No description provided for @agent_selector_label.
   ///
   /// In en, this message translates to:
@@ -1841,6 +1853,12 @@ abstract class AppLocalizations {
   /// **'{count} items'**
   String memory_count(Object count);
 
+  /// No description provided for @memory_tab_description.
+  ///
+  /// In en, this message translates to:
+  /// **'View and edit the agent\'s core memory blocks'**
+  String get memory_tab_description;
+
   /// No description provided for @chat_search_placeholder.
   ///
   /// In en, this message translates to:
@@ -1894,6 +1912,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Available Tools'**
   String get tools_available;
+
+  /// No description provided for @tools_attached.
+  ///
+  /// In en, this message translates to:
+  /// **'Attached Tools'**
+  String get tools_attached;
 
   /// No description provided for @tools_attach.
   ///
@@ -1954,6 +1978,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'MCP'**
   String get tools_type_mcp;
+
+  /// No description provided for @tools_tab_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage tools available to this agent'**
+  String get tools_tab_description;
 }
 
 class _AppLocalizationsDelegate

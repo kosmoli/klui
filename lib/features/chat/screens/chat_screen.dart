@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/extensions/context_extensions.dart';
 import '../../../../core/theme/klui_text_styles.dart';
 import '../../../../core/theme/klui_theme_extension.dart';
@@ -15,10 +16,8 @@ import '../widgets/bubbles/assistant_message_bubble.dart';
 import '../widgets/bubbles/error_bubble.dart';
 import '../widgets/bubbles/reasoning_bubble.dart';
 import '../widgets/tool_call_card.dart';
-import '../widgets/memory_view_dialog.dart';
 import '../widgets/chat_search_bar.dart';
 import '../services/chat_export_service.dart';
-import '../widgets/tools_manage_dialog.dart';
 
 /// Chat Screen - Real-time chat with Agent
 class ChatScreen extends ConsumerStatefulWidget {
@@ -652,41 +651,9 @@ class _AgentSelector extends ConsumerWidget {
   }
 }
 
-/// Consolidated Chat Actions Menu
+/// Chat Actions Menu - Simplified with Export, Clear, and Agent Detail link
 class _ChatActionsMenu extends ConsumerWidget {
   const _ChatActionsMenu();
-
-  void _showMemoryDialog(BuildContext context, WidgetRef ref, String agentId) {
-    final agentsAsync = ref.read(agentListProvider);
-    final agent = agentsAsync.value?.firstWhere(
-      (a) => a.id == agentId,
-      orElse: () => Agent(id: agentId, name: 'Unknown'),
-    ) ?? Agent(id: agentId, name: 'Unknown');
-
-    showDialog(
-      context: context,
-      builder: (context) => MemoryViewDialog(
-        agentId: agentId,
-        agentName: agent.name ?? 'Unknown',
-      ),
-    );
-  }
-
-  void _showToolsDialog(BuildContext context, WidgetRef ref, String agentId) {
-    final agentsAsync = ref.read(agentListProvider);
-    final agent = agentsAsync.value?.firstWhere(
-      (a) => a.id == agentId,
-      orElse: () => Agent(id: agentId, name: 'Unknown'),
-    ) ?? Agent(id: agentId, name: 'Unknown');
-
-    showDialog(
-      context: context,
-      builder: (context) => ToolsManageDialog(
-        agentId: agentId,
-        agentName: agent.name ?? 'Unknown',
-      ),
-    );
-  }
 
   void _showExportMenu(
     BuildContext context,
@@ -814,29 +781,15 @@ class _ChatActionsMenu extends ConsumerWidget {
     // Build menu items list
     final List<PopupMenuEntry<String>> items = [];
 
-    // Memory
+    // Agent Detail - only show when agent is selected
     if (latestAgentId.isNotEmpty) {
       items.add(PopupMenuItem<String>(
-        value: 'memory',
+        value: 'agent_detail',
         child: Row(
           children: [
-            const Icon(Icons.psychology_outlined, size: 18),
+            const Icon(Icons.smart_toy_outlined, size: 18),
             const SizedBox(width: 12),
-            Text(l10n.memory_view_title),
-          ],
-        ),
-      ));
-    }
-
-    // Tools
-    if (latestAgentId.isNotEmpty) {
-      items.add(PopupMenuItem<String>(
-        value: 'tools',
-        child: Row(
-          children: [
-            const Icon(Icons.build_outlined, size: 18),
-            const SizedBox(width: 12),
-            Text(l10n.tools_title),
+            Text(l10n.chat_menu_agent_detail),
           ],
         ),
       ));
@@ -884,11 +837,8 @@ class _ChatActionsMenu extends ConsumerWidget {
       if (value == null) return;
 
       switch (value) {
-        case 'memory':
-          _showMemoryDialog(context, ref, latestAgentId);
-          break;
-        case 'tools':
-          _showToolsDialog(context, ref, latestAgentId);
+        case 'agent_detail':
+          context.go('/agents/$latestAgentId');
           break;
         case 'export':
           _showExportMenu(context, ref, latestAgentId, latestMessages);

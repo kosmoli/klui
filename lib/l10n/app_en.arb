@@ -130,6 +130,7 @@
   "agent_detail_section_timestamps": "Timestamps",
   "agent_detail_section_system_prompt": "System Prompt",
   "agent_detail_section_config": "Configuration",
+  "agent_detail_tab_info": "Info",
 
   "agent_detail_field_id": "Agent ID",
   "agent_detail_field_name": "Name",
@@ -293,6 +294,7 @@
   "chat_send_tooltip": "Send message",
   "chat_error_no_agent": "Please select an agent first",
   "chat_input_disabled_no_agent": "Select an agent to start chatting",
+  "chat_menu_agent_detail": "Agent Settings",
 
   "agent_selector_label": "Current agent: {name}",
   "agent_selector_hint": "Double tap to select an agent",
@@ -332,6 +334,7 @@
   "memory_label": "Label",
   "memory_value": "Content",
   "memory_count": "{count} items",
+  "memory_tab_description": "View and edit the agent's core memory blocks",
 
   "chat_search_placeholder": "Search messages...",
   "chat_search_no_results": "No messages found",
@@ -343,6 +346,7 @@
   "tools_loading": "Loading tools...",
   "tools_error_loading": "Failed to load tools",
   "tools_available": "Available Tools",
+  "tools_attached": "Attached Tools",
   "tools_attach": "Attach",
   "tools_detach": "Detach",
   "tools_attach_success": "Tool attached successfully",
@@ -352,5 +356,6 @@
   "tools_no_available": "No available tools",
   "tools_type_custom": "Custom",
   "tools_type_builtin": "Built-in",
-  "tools_type_mcp": "MCP"
+  "tools_type_mcp": "MCP",
+  "tools_tab_description": "Manage tools available to this agent"
 }

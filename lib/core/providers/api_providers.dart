@@ -297,7 +297,7 @@ Future<Agent> updateAgent(Ref ref, {required String id, required CreateAgentRequ
 
   print('[updateAgent] Request body: ${jsonEncode(requestBody)}');
 
-  final response = await client.put(
+  final response = await client.patch(
     '/agents/$id',
     body: jsonEncode(requestBody),
   );
@@ -333,7 +333,7 @@ Future<models.ProviderConfig> updateProvider(
 
   print('[updateProvider] Request body: ${jsonEncode(requestBody)}');
 
-  final response = await client.put(
+  final response = await client.patch(
     '/providers/$id',
     body: jsonEncode(requestBody),
   );

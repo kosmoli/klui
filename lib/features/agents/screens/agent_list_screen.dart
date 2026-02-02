@@ -108,15 +108,6 @@ class _AgentListScreenState extends ConsumerState<AgentListScreen> {
               return AgentCard(
                 agent: agent,
                 onTap: () => context.go('/agents/${agent.id}'),
-                onEdit: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(context.l10n.agent_edit_coming_soon(agent.name)),
-                      backgroundColor: colors.surfaceVariant,
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
                 onDelete: () {
                   _showDeleteDialog(context, agent, ref);
                 },

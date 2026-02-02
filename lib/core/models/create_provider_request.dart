@@ -100,4 +100,17 @@ class CreateProviderRequest {
 
     return json;
   }
+
+  /// Convert to JSON for update API request
+  /// Only includes config fields, not name or provider_type (which are immutable)
+  Map<String, dynamic> toUpdateJson() {
+    final json = <String, dynamic>{};
+
+    // Flatten provider_config fields to top level
+    providerConfig.forEach((key, value) {
+      json[key] = value;
+    });
+
+    return json;
+  }
 }

@@ -141,6 +141,8 @@ class _ProviderFormState extends ConsumerState<ProviderForm> {
 
   @override
   Widget build(BuildContext context) {
+    final isEditMode = widget.initialData != null;
+
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Form(
@@ -148,73 +150,75 @@ class _ProviderFormState extends ConsumerState<ProviderForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Provider Type Selection (Dropdown)
-            MergeSemantics(
-              child: Semantics(
-                label: context.l10n.provider_create_field_provider_type_semantic,
-                hint: context.l10n.provider_create_field_provider_type_hint_semantic,
-                child: DropdownButtonFormField<ProviderTypeOption>(
-                  value: _selectedProviderType,
-                  decoration: InputDecoration(
-                    labelText: context.l10n.provider_create_field_provider_type,
-                    hintText: context.l10n.provider_create_field_provider_type_hint,
-                    border: const OutlineInputBorder(),
+            // Provider Type Selection (Dropdown) - only shown in create mode
+            if (!isEditMode)
+              MergeSemantics(
+                child: Semantics(
+                  label: context.l10n.provider_create_field_provider_type_semantic,
+                  hint: context.l10n.provider_create_field_provider_type_hint_semantic,
+                  child: DropdownButtonFormField<ProviderTypeOption>(
+                    value: _selectedProviderType,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.provider_create_field_provider_type,
+                      hintText: context.l10n.provider_create_field_provider_type_hint,
+                      border: const OutlineInputBorder(),
+                    ),
+                    items: getProviderTypes(context).map((providerType) {
+                      return DropdownMenuItem<ProviderTypeOption>(
+                        value: providerType,
+                        child: Row(
+                          children: [
+                            Icon(
+                              providerType.icon,
+                              color: providerType.color,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(providerType.displayName),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedProviderType = value;
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null) {
+                        return context.l10n.provider_create_validation_provider_type;
+                      }
+                      return null;
+                    },
                   ),
-                  items: getProviderTypes(context).map((providerType) {
-                    return DropdownMenuItem<ProviderTypeOption>(
-                      value: providerType,
-                      child: Row(
-                        children: [
-                          Icon(
-                            providerType.icon,
-                            color: providerType.color,
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Text(providerType.displayName),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedProviderType = value;
-                    });
-                  },
-                  validator: (value) {
-                    if (value == null) {
-                      return context.l10n.provider_create_validation_provider_type;
-                    }
-                    return null;
-                  },
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
+            if (!isEditMode) const SizedBox(height: 24),
 
             // Configuration fields (shown when type is selected)
             if (_selectedProviderType != null) ...[
-              // Provider Name
-              Semantics(
-                label: context.l10n.provider_create_field_name_semantic,
-                hint: context.l10n.provider_create_field_name_hint_semantic,
-                textField: true,
-                child: TextFormField(
-                  controller: _nameController,
-                  decoration: InputDecoration(
-                    labelText: context.l10n.provider_create_field_name,
-                    hintText: context.l10n.provider_create_field_name_hint,
-                    border: const OutlineInputBorder(),
+              // Provider Name - only shown in create mode (cannot be edited)
+              if (!isEditMode)
+                Semantics(
+                  label: context.l10n.provider_create_field_name_semantic,
+                  hint: context.l10n.provider_create_field_name_hint_semantic,
+                  textField: true,
+                  child: TextFormField(
+                    controller: _nameController,
+                    decoration: InputDecoration(
+                      labelText: context.l10n.provider_create_field_name,
+                      hintText: context.l10n.provider_create_field_name_hint,
+                      border: const OutlineInputBorder(),
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return context.l10n.provider_create_validation_name;
+                      }
+                      return null;
+                    },
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return context.l10n.provider_create_validation_name;
-                    }
-                    return null;
-                  },
                 ),
-              ),
-              const SizedBox(height: 16),
+              if (!isEditMode) const SizedBox(height: 16),
 
               // API Key (if required)
               if (_selectedProviderType!.requiresApiKey)

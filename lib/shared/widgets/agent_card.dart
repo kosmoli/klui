@@ -14,14 +14,12 @@ import '../../core/theme/klui_theme_extension.dart';
 class AgentCard extends StatelessWidget {
   final Agent agent;
   final VoidCallback? onTap;
-  final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
   const AgentCard({
     super.key,
     required this.agent,
     this.onTap,
-    this.onEdit,
     this.onDelete,
   });
 
@@ -113,25 +111,16 @@ class AgentCard extends StatelessWidget {
                           ),
 
                           // Action Buttons
-                          if (onEdit != null || onDelete != null) ...[
+                          if (onDelete != null) ...[
                             const SizedBox(width: 8),
-                            if (onEdit != null)
-                              _ActionButton(
-                                icon: Icons.edit_outlined,
-                                onPressed: onEdit,
-                                tooltip: context.l10n.agent_action_edit,
-                                semanticLabel: context.l10n.agent_action_edit,
-                                semanticHint: context.l10n.agent_action_edit_hint,
-                              ),
-                            if (onDelete != null)
-                              _ActionButton(
-                                icon: Icons.delete_outlined,
-                                onPressed: onDelete,
-                                tooltip: context.l10n.agent_action_delete,
-                                semanticLabel: context.l10n.agent_action_delete,
-                                semanticHint: context.l10n.agent_action_delete_hint,
-                                isDestructive: true,
-                              ),
+                            _ActionButton(
+                              icon: Icons.delete_outlined,
+                              onPressed: onDelete,
+                              tooltip: context.l10n.agent_action_delete,
+                              semanticLabel: context.l10n.agent_action_delete,
+                              semanticHint: context.l10n.agent_action_delete_hint,
+                              isDestructive: true,
+                            ),
                           ],
                         ],
                       ),
@@ -174,11 +163,7 @@ class AgentCard extends StatelessWidget {
   }
 
   String _getCardHint(BuildContext context) {
-    if (onEdit != null && onDelete != null) {
-      return context.l10n.agent_card_hint_with_actions;
-    } else if (onEdit != null) {
-      return context.l10n.agent_card_hint_with_edit;
-    } else if (onDelete != null) {
+    if (onDelete != null) {
       return context.l10n.agent_card_hint_with_delete;
     }
     return context.l10n.agent_card_hint_view_details;

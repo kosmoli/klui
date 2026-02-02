@@ -329,7 +329,7 @@ Future<models.ProviderConfig> updateProvider(
   {required String id, required CreateProviderRequest request}
 ) async {
   final client = ref.watch(apiClientProvider);
-  final requestBody = request.toJson();
+  final requestBody = request.toUpdateJson();
 
   print('[updateProvider] Request body: ${jsonEncode(requestBody)}');
 

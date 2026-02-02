@@ -1,4 +1,3 @@
-import 'dart:convert';
 import '../../../core/extensions/context_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -170,12 +169,14 @@ class _AgentEditScreenState extends ConsumerState<AgentEditScreen> {
   }
 
   /// Dynamically load Embedding models for a specific provider
+  /// Uses the same /v1/models/ endpoint with provider_name filter
   Future<void> _loadEmbeddingModelsForProvider(String providerName) async {
     setState(() => _isLoadingEmbeddingModels = true);
 
     try {
       final models = await ref.read(llmModelListByProviderProvider(providerName).future);
 
+      // No filtering - show exactly what the provider returns
       if (mounted) {
         setState(() {
           _availableEmbeddingModels = models;
@@ -185,6 +186,17 @@ class _AgentEditScreenState extends ConsumerState<AgentEditScreen> {
     } catch (e) {
       if (mounted) {
         setState(() => _isLoadingEmbeddingModels = false);
+        final colors = Theme.of(context).extension<KluiCustomColors>()!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              context.l10n.agent_create_error_embedding_models(e.toString()),
+              style: TextStyle(color: colors.userText),
+            ),
+            backgroundColor: colors.error,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
       }
     }
   }

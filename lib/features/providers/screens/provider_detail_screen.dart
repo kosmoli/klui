@@ -14,7 +14,7 @@ import '../../../../core/models/provider.dart';
 /// - Configuration (base URL, region, project)
 /// - Credentials (masked API key, access key)
 /// - Tags and metadata
-class ProviderDetailScreen extends ConsumerWidget {
+class ProviderDetailScreen extends ConsumerStatefulWidget {
   final String providerId;
 
   const ProviderDetailScreen({
@@ -23,8 +23,13 @@ class ProviderDetailScreen extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final providerAsync = ref.watch(providerProvider(providerId));
+  ConsumerState<ProviderDetailScreen> createState() => _ProviderDetailScreenState();
+}
+
+class _ProviderDetailScreenState extends ConsumerState<ProviderDetailScreen> {
+  @override
+  Widget build(BuildContext context) {
+    final providerAsync = ref.watch(providerProvider(widget.providerId));
     final colors = Theme.of(context).extension<KluiCustomColors>()!;
 
     return Scaffold(
@@ -86,6 +91,7 @@ class ProviderDetailScreen extends ConsumerWidget {
 
   PreferredSizeWidget _buildAppBar(BuildContext context, WidgetRef ref) {
     final colors = Theme.of(context).extension<KluiCustomColors>()!;
+    final providerAsync = ref.watch(providerProvider(widget.providerId));
 
     return AppBar(
       backgroundColor: colors.surface,
@@ -97,25 +103,117 @@ class ProviderDetailScreen extends ConsumerWidget {
         onPressed: () => context.go('/providers'),
         tooltip: context.l10n.provider_detail_back_tooltip,
       ),
-      title: Text(
-        context.l10n.provider_detail_title,
-        style: KluiTextStyles.headlineSmall.copyWith(
-          color: colors.textPrimary,
+      title: providerAsync.when(
+        data: (provider) => Text(
+          provider.name,
+          style: KluiTextStyles.headlineSmall.copyWith(
+            color: colors.textPrimary,
+          ),
+        ),
+        loading: () => Text(
+          context.l10n.provider_detail_title,
+          style: KluiTextStyles.headlineSmall.copyWith(
+            color: colors.textPrimary,
+          ),
+        ),
+        error: (_, __) => Text(
+          context.l10n.provider_detail_title,
+          style: KluiTextStyles.headlineSmall.copyWith(
+            color: colors.textPrimary,
+          ),
         ),
       ),
       actions: [
-        Tooltip(
-          message: context.l10n.provider_detail_tooltip_edit,
+        // Edit button
+        Semantics(
+          label: context.l10n.provider_detail_tooltip_edit,
+          button: true,
           child: IconButton(
             icon: const Icon(Icons.edit_outlined),
             color: colors.textPrimary,
             onPressed: () {
-              context.go('/providers/$providerId/edit');
+              context.go('/providers/${widget.providerId}/edit');
             },
+            tooltip: context.l10n.provider_detail_tooltip_edit,
           ),
+        ),
+        // Delete button
+        providerAsync.when(
+          data: (provider) => Semantics(
+            label: context.l10n.provider_detail_tooltip_delete,
+            button: true,
+            child: IconButton(
+              icon: const Icon(Icons.delete_outlined),
+              color: colors.error,
+              onPressed: () => _showDeleteDialog(context, provider),
+              tooltip: context.l10n.provider_detail_tooltip_delete,
+            ),
+          ),
+          loading: () => const SizedBox.shrink(),
+          error: (_, __) => const SizedBox.shrink(),
         ),
         const SizedBox(width: 8),
       ],
+    );
+  }
+
+  void _showDeleteDialog(BuildContext context, ProviderConfig provider) {
+    final colors = Theme.of(context).extension<KluiCustomColors>()!;
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(context.l10n.provider_delete_confirm_title(provider.name)),
+        content: Text(
+          context.l10n.provider_delete_confirm_message,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(context.l10n.provider_cancel_button),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(dialogContext).pop();
+
+              try {
+                await ref.read(deleteProviderProvider(provider.id).future);
+
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        context.l10n.provider_delete_success(provider.name),
+                        style: TextStyle(color: colors.userText),
+                      ),
+                      backgroundColor: colors.success,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                  context.go('/providers');
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        context.l10n.provider_delete_failed(provider.name, e.toString()),
+                        style: TextStyle(color: colors.userText),
+                      ),
+                      backgroundColor: colors.error,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: colors.error,
+            ),
+            child: Text(context.l10n.provider_delete_button),
+          ),
+        ],
+      ),
     );
   }
 
